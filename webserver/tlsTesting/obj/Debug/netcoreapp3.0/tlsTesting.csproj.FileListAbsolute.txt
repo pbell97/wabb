@@ -1,0 +1,13 @@
+/Users/patrickbell/Desktop/classes/infoAndCompSecurity/wabb/webserver/tlsTesting/obj/Debug/netcoreapp3.0/tlsTesting.csprojAssemblyReference.cache
+/Users/patrickbell/Desktop/classes/infoAndCompSecurity/wabb/webserver/tlsTesting/obj/Debug/netcoreapp3.0/tlsTesting.AssemblyInfoInputs.cache
+/Users/patrickbell/Desktop/classes/infoAndCompSecurity/wabb/webserver/tlsTesting/obj/Debug/netcoreapp3.0/tlsTesting.AssemblyInfo.cs
+/Users/patrickbell/Desktop/classes/infoAndCompSecurity/wabb/webserver/tlsTesting/bin/Debug/netcoreapp3.0/tlsTesting
+/Users/patrickbell/Desktop/classes/infoAndCompSecurity/wabb/webserver/tlsTesting/bin/Debug/netcoreapp3.0/tlsTesting.deps.json
+/Users/patrickbell/Desktop/classes/infoAndCompSecurity/wabb/webserver/tlsTesting/bin/Debug/netcoreapp3.0/tlsTesting.runtimeconfig.json
+/Users/patrickbell/Desktop/classes/infoAndCompSecurity/wabb/webserver/tlsTesting/bin/Debug/netcoreapp3.0/tlsTesting.runtimeconfig.dev.json
+/Users/patrickbell/Desktop/classes/infoAndCompSecurity/wabb/webserver/tlsTesting/bin/Debug/netcoreapp3.0/tlsTesting.dll
+/Users/patrickbell/Desktop/classes/infoAndCompSecurity/wabb/webserver/tlsTesting/bin/Debug/netcoreapp3.0/tlsTesting.pdb
+/Users/patrickbell/Desktop/classes/infoAndCompSecurity/wabb/webserver/tlsTesting/obj/Debug/netcoreapp3.0/tlsTesting.dll
+/Users/patrickbell/Desktop/classes/infoAndCompSecurity/wabb/webserver/tlsTesting/obj/Debug/netcoreapp3.0/tlsTesting.pdb
+/Users/patrickbell/Desktop/classes/infoAndCompSecurity/wabb/webserver/tlsTesting/bin/Debug/netcoreapp3.0/Newtonsoft.Json.dll
+/Users/patrickbell/Desktop/classes/infoAndCompSecurity/wabb/webserver/tlsTesting/obj/Debug/netcoreapp3.0/tlsTesting.csproj.CopyComplete
