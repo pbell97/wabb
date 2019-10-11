@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 
 using System.Net.Sockets;
+using System.Net.Security;
 using System.Threading.Tasks;
 using System.Threading;
 
@@ -18,6 +19,7 @@ namespace tlsTesting
     {
         TcpClient tcpClient = new TcpClient();
         NetworkStream serverStream = default(NetworkStream);
+        SslStream sslStream;
         List<string> unreadMessages = new List<string>();
         public event EventHandler OnMessageReceived;
         
@@ -29,14 +31,17 @@ namespace tlsTesting
 
         public void Connect() 
         {
-            this.tcpClient.Connect("127.0.0.1", 8000);
+            this.tcpClient.Connect("localhost", 8000);
             Console.WriteLine("Connected...");
-
-            this.serverStream = this.tcpClient.GetStream();
+            Thread.Sleep(3000);
+            this.sslStream = new SslStream(this.tcpClient.GetStream());
+            sslStream.AuthenticateAsClient("localhost");
+            // this.serverStream = this.tcpClient.GetStream();
+            Thread.Sleep(3000);
             this.WriteMessage("First message sent from C# Client");
+            Thread.Sleep(1000);
 
             // Read bytes
-            this.serverStream = this.tcpClient.GetStream();
             byte[] messageBytes = new byte[4096];
             int bytesRead;
             bytesRead = 0;
@@ -49,7 +54,7 @@ namespace tlsTesting
                 {
                     // Read up to 4096 bytes
                     Console.WriteLine("Getting bytesRead");
-                    bytesRead = this.serverStream.Read(messageBytes, 0, 4096);
+                    bytesRead = this.sslStream.Read(messageBytes, 0, 4096);
                     encoder = new ASCIIEncoding();
                     receivedMessage = encoder.GetString(messageBytes, 0, bytesRead);
                     this.unreadMessages.Add(receivedMessage);
@@ -76,8 +81,8 @@ namespace tlsTesting
 
         public void WriteMessage(string message){
             byte[] outStream = Encoding.ASCII.GetBytes(message);
-            this.serverStream.Write(outStream, 0, outStream.Length);
-            this.serverStream.Flush();
+            this.sslStream.Write(outStream, 0, outStream.Length);
+            this.sslStream.Flush();
         }
 
         public void DisplayMessage(object sender, EventArgs e){
