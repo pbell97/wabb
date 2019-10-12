@@ -3,10 +3,12 @@ tls = require('tls')
 fs = require('fs')
 
 const options = {
-    key: fs.readFileSync("/Users/patrickbell/Desktop/classes/infoAndCompSecurity/wabb/webserver/localhost-key.pem"),
-    cert: fs.readFileSync("/Users/patrickbell/Desktop/classes/infoAndCompSecurity/wabb/webserver/localhost.pem"),
+    key: fs.readFileSync("/etc/letsencrypt/live/patricksproj.codes/privkey.pem"),
+    cert: fs.readFileSync("/etc/letsencrypt/live/patricksproj.codes/fullchain.pem"),
+    ca: fs.readFileSync("/etc/letsencrypt/live/patricksproj.codes/chain.pem"),
     rejectUnauthorized: false
 };
+
 
 
 // Keep a pool of sockets ready for everyone
@@ -34,35 +36,16 @@ const server = tls.createServer(options, (socket) => {
         console.log("Client disconnected");
     });
 
+    socket.on('error', function(err) {
+        console.log("Got error: " + err);
+    });
+
+
   });
 
-server.listen(8000, () => {
+server.listen(443, () => {
 console.log('server bound');
 });
 
 
-
-
-// // Create a TCP socket listener
-// var s = net.Server(function (socket) {
-
-//     // Add the new client socket connection to the array of sockets
-//     sockets.push(socket);
-
-//     // 'data' is an event that means that a message was just sent by the client application
-//     socket.on('data', function (msg_sent) {
-//         console.log("Get message: " + msg_sent);
-//         socket.write("Thanks for the message: " + msg_sent);
-//     });
-
-//     // The 'end' event means tcp client has disconnected.
-//     socket.on('end', function () {
-//         var i = sockets.indexOf(socket);
-//         sockets.splice(i, 1);
-//     });
-
-
-// });
-
-// s.listen(8000);
-// console.log('System waiting at http://localhost:8000');
+// How to get keys on AWS: https://www.youtube.com/watch?v=uwYH83OFGTo

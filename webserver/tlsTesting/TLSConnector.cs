@@ -27,16 +27,13 @@ namespace tlsTesting
             this.OnMessageReceived += new EventHandler(DisplayMessage);
         }
 
-
-
         public void Connect() 
         {
-            this.tcpClient.Connect("localhost", 8000);
+            this.tcpClient.Connect("www.patricksproj.codes", 443);
             Console.WriteLine("Connected...");
             Thread.Sleep(3000);
-            this.sslStream = new SslStream(this.tcpClient.GetStream());
-            sslStream.AuthenticateAsClient("localhost");
-            // this.serverStream = this.tcpClient.GetStream();
+            this.sslStream = new SslStream(this.tcpClient.GetStream(), false, null);
+            sslStream.AuthenticateAsClient("www.patricksproj.codes");
             Thread.Sleep(3000);
             this.WriteMessage("First message sent from C# Client");
             Thread.Sleep(1000);
