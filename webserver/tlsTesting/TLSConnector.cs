@@ -35,7 +35,11 @@ namespace tlsTesting
             this.sslStream = new SslStream(this.tcpClient.GetStream(), false, null);
             sslStream.AuthenticateAsClient("www.patricksproj.codes");
             Thread.Sleep(3000);
-            this.WriteMessage("First message sent from C# Client");
+            
+            string t = "{'access_id': 'a', 'chatId': 'Yep', 'messageContent': 'Content', 'user_id': 'TestUserID'}";
+            Message myMessage = new Message(t);
+
+            this.WriteMessage("message", myMessage.createJSONString());
             Thread.Sleep(1000);
 
             // Read bytes
@@ -63,11 +67,11 @@ namespace tlsTesting
                 }
 
                 // Send response
-                this.WriteMessage("Thanks for message: " + receivedMessage);
+                this.WriteMessage("other", "stuff");
 
                 // Thread.Sleep(1000);
 
-                if (this.unreadMessages.Count >= 10){
+                if (this.unreadMessages.Count >= 3){
                     Console.WriteLine("\n\nReceived 10+ messages...");
                     this.unreadMessages.ForEach(Console.WriteLine);
                     this.tcpClient.Close();
@@ -76,8 +80,12 @@ namespace tlsTesting
             }
         }
 
-        public void WriteMessage(string message){
-            byte[] outStream = Encoding.ASCII.GetBytes(message);
+        public void WriteMessage(string messageType, string message){
+            if (message[0] != '"' && message[0] != '[' && message[0] != '{'){
+                message = "\"" + message + "\"";
+            }
+            string outMessage = "{" +$"\"type\": \"{messageType}\" , \"content\": {message}" + "}";
+            byte[] outStream = Encoding.ASCII.GetBytes(outMessage);
             this.sslStream.Write(outStream, 0, outStream.Length);
             this.sslStream.Flush();
         }
