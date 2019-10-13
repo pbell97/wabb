@@ -27,6 +27,14 @@ const server = tls.createServer(options, (socket) => {
         console.log("Got: " + msg_sent);
         try{
             socket.write("Thanks for the message: " + msg_sent);
+            var received = JSON.parse(msg_sent);
+            console.log("Type: " + received.type);
+            if (received.type == "message"){
+                var message = received.content;
+                console.log("Message: " + message);
+                console.log("MessageContent: " + message.messageContent);
+            }
+            
         } catch (error) {
             console.error(error);
         }
@@ -44,8 +52,13 @@ const server = tls.createServer(options, (socket) => {
   });
 
 server.listen(443, () => {
-console.log('server bound');
+console.log('Server Started');
 });
 
 
 // How to get keys on AWS: https://www.youtube.com/watch?v=uwYH83OFGTo
+
+// MUST Stop apache
+//      sudo /opt/bitnami/ctlscript.sh stop
+//      sudo /opt/bitnami/ctlscript.sh status       - To make sure it has stopped
+//      Then make sure your server is running on port 443
