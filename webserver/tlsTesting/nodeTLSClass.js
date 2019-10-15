@@ -16,6 +16,7 @@ class TLSConnection {
         this.sockets = [];
         this.messageCallbacks = [];
         this.disconnectCallbacks = [];
+        this.usersAndSockets = {};          // Add to this with a sign in event
         this.server;
     }
 
@@ -63,6 +64,10 @@ class TLSConnection {
 }
 
 module.exports = TLSConnection;
+
+
+// Need to find some way of connecting sockets to usernames/ids
+
 
 // ----------------- EXAMPLE USUAGE -----------------
 // function printReceivedMessage(socket, messageJSON){
