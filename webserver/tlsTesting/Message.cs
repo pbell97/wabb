@@ -24,6 +24,7 @@ namespace tlsTesting
         public string chatId;
         public string messageContent;
         public string user_id;
+        public int messageId;
 
         public Message(){
 
@@ -35,10 +36,11 @@ namespace tlsTesting
             this.chatId = newMessage["chatId"].ToString();
             this.messageContent = newMessage["messageContent"].ToString();
             this.user_id = newMessage["user_id"].ToString();
+            this.messageId = Int32.Parse(newMessage["messageId"].ToString());
         }
 
         public string createJSONString(){
-            return "{" + $"\"access_id\": \"{this.access_id}\", \"chatId\": \"{this.chatId}\", \"messageContent\": \"{this.messageContent}\"" + "}";
+            return "{" + $"\"access_id\": \"{this.access_id}\", \"chatId\": \"{this.chatId}\", \"messageContent\": \"{this.messageContent}\", \"user_id\": \"" + this.user_id + "\", \"messageId\": \"" + this.messageId + "\"}";
         }
 
 
