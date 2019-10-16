@@ -3,13 +3,16 @@ const https = require('https');
 var fs = require('fs');
 var express = require('express');
 var TLSConnection = require('./tlsTesting/nodeTLSClass.js');
-const {OAuth2Client} = require('google-auth-library');
 const googleAudienceID = '154600092899-9tdri4c4k80lg38ak4bd9s6aro95s9nt.apps.googleusercontent.com';
 var tokenCache = {};
+
+var serverConnection = new TLSConnection();
+
 
 // Caches users
 var cachedUsers = {};
 
+// Connection to SQL DB
 var con = mysql.createConnection({
     host: "localhost",
     user: "testUser",
@@ -17,185 +20,263 @@ var con = mysql.createConnection({
     database: "infoSec"
 });
 
+// Acutally connects to SQL
 con.connect(function(err) {
     if (err) throw err;
     console.log("Connected to MySQL Server");
 });
 
+// Interprets all messages from socket
+function interpretMessage(socket, message){
+    switch (message.type){
+        case "messagePost":
+            messagePost(socket, message.content);
+            break;
+        case "messageGet":
+            messageGet(socket, message.content)
+            break;
+        case "createUser":
+            createUserPost(socket, message.content);
+            break;
+        case "joinChat":
+            joinChatGet(socket, message.content);
+            break;
+        case "listChats":
+            listChatsGet(socket, message.content);
+            break;
+        case "createChat":
+            createChat(socket, message.content)
+            break;
+        case "signIn":
+            signIn(socket, message.content);
+            break;
+        case "allowUserToJoinChat":
+            allowUserToJoinChat(socket, message.content);
+            break;
+        default:
+            socket.write(JSON.stringify({"response": "Invalid Request"}));
+            break;
+    }
+}
 
-// IMPLEMENT CONNECTION CLASS HERE
-
-// CREATE FUNCTIONS FOR MESSAGES, ADD USERS, ETC HERE --- THEN ADD THEM TO CALLBACKS OF CONNECTION CLASS
-
-
-
-
-
-
-const options = {
-    key: fs.readFileSync("/Users/patrickbell/Desktop/classes/infoAndCompSecurity/mainProject/webserver/localhost-key.pem"),
-    cert: fs.readFileSync("/Users/patrickbell/Desktop/classes/infoAndCompSecurity/mainProject/webserver/localhost.pem")
-};
-
-const app = express();
-
-app.use((req, res) => {
-
-    if (req.method == "GET"){
-
-        if (req.path == "/auth"){
-            res.status(200);
-            res.end("Auth endpoint hit");
-        } 
-        
-        // Returns all messages for a user's chat
-        if (req.path == "/messages"){
-            // Add a way to check if user is in chat
-            var access_id = req.headers.authorization.substring(7);
-            verifyTokenManually(access_id, (accepted, data) => {
-                if (accepted){
-                    var id = data.user_id;
-                    var chatId = req.query.chatId;
-                    var messageId = (req.query.messageId) ? req.query.messageId : 0;
-                    executeSQLQuery(`SELECT id, messageId, messageContent FROM messages WHERE chatid = "${chatId}" AND messageId > ${messageId};`, (error, results) =>{
-                        if (error) throw error;
-                        res.status(200);
-                        res.json(results);
-                    });
-                } else {
-                    res.status(401);
-                    res.end();
-                }
-            });
-        }
-
-        // User trying to join a chat
-        if (req.path == "/joinChat"){
-            var chatId = req.query.chatId;
-            var pubKey = req.query.pubKey;
-            var access_id = req.headers.authorization.substring(7);
-            verifyTokenManually(access_id, (accepted, data) => {
-                if (accepted){
-                    // Check if chat exists
-                    // TODO, combine with next SQL query for users, just get founderId and users
-                    executeSQLQuery(`SELECT founderId FROM chats WHERE chatId ="${chatId}";`, (error, results) => {
-                        if (error) throw error;
-                        // TODO add error checking if chat doesn't exist
-                        var joinerId = data.user_id;
-                        var founderId = results[0].founderId;
-                        // TODO ---Send request to user to join, including the pubKye and user name---
-                        var tempSymKey = 'abcdefgSYMETRICKEYabcdefg';
-                        var canJoin = true;
-                        if (canJoin){
-                            var returnData = {
-                                symKey: tempSymKey,
-                                chatId: chatId              //Maybe add a list of active users?
-                            }
-                            res.status(200);
-                            res.json(returnData);
-                            executeSQLQuery(`SELECT users FROM chats WHERE chatId = "${chatId}";`, (error, results) => {
-                                if (error) throw error;
-                                var users = results[0].users + "," + joinerId;
-                                executeSQLQuery(`UPDATE chats SET users = "${users}" WHERE chatId = "${chatId}";`, (error, results) => {
-                                    if (error) throw error;
-                                })
-
-                            })
-                        } else {
-                            res.status(200);
-                            res.end("Nope, cant join");
-                        }
-                    });
-                } else {
-                    res.status(401);
-                    res.end();
-                }
-            });
-
-        }
-        
-    } else if (req.method == "POST"){
-
-        if (req.path == "/createUser"){
-            var access_id = req.headers.authorization.substring(7);
-            verifyTokenManually(access_id, (accepted, data) => {
-                if (accepted){
-                    // Check if user already exists
-                    userExists(data.user_id, (exists) => {
-                        if (exists){
-                            res.status(400);
-                            res.end("User " + data.user_id + " already exists");
-                            return;
-                        }
-                        // Add user
-                        var username = data.email;
-                        if (req.query.username){
-                            username = req.query.username;
-                        }
-                        var result = executeSQLQuery("INSERT INTO users (username, email, id) VALUES (\"" + username + "\",\"" + data.email + "\",\"" + data.user_id + "\");");
-                        res.status(201);
-                        res.end("Created user: " + data.user_id);
-                    });
-                } else {
-                    res.status(400);
-                    res.end("User not created");
-                }
-            })
-        }
-
-        // Posts a user's messages
-        if (req.path == "/messages"){
-            var access_id = req.headers.authorization.substring(7);
-            verifyTokenManually(access_id, (accepted, data) => {
-                if (accepted){
-                    // messages (id char(32), chatId varchar(32), messageId int, messageContent varchar(250));
-                    let chatId = req.query.chatId;
-                    let id = data.user_id;
-                    let messageContent = req.query.messageContent;
+// Posts a message
+function messagePost(socket, message){
+    var access_id = message.access_id;
+    verifyTokenManually(access_id, (accepted, data) => {
+        if (accepted){
+            // messages (id char(32), chatId varchar(32), messageId int, messageContent varchar(250));
+            let chatId = message.chatId;
+            let id = data.user_id;
+            let messageContent = message.messageContent;
+            userIsInChat(chatId, id, (isInChat) => {
+                if (isInChat){
                     executeSQLQuery(`SELECT MAX(messageID) FROM messages WHERE chatId = "${chatId}";`, function(error, results) {
                         // TODO add error check if doesn't exist
                         if (error) throw error;
-                        let messageId = (results == null) ? 1 : parseInt(results[0]["MAX(messageID)"]) + 1;
+                        var messageId = (results[0]["MAX(messageID)"] == null) ? 1 : parseInt(results[0]["MAX(messageID)"]) + 1;
                         executeSQLQuery(`INSERT INTO messages (id, chatid, messageid, messageContent) VALUES ("${id}", "${chatId}", ${messageId}, "${messageContent}");`, (error, result) => {
-                            // TODO check if error adding
-                            // TODO Alert to send message via TCP stream
-                            console.log("Should be sending message now...");
-                            res.status(201);
-                            res.end("Message sent placeholder");
+                            if (error) throw error;
+                            // Should alert all sockets listening for this type of message
+                            socket.write(JSON.stringify({"response": "Message posted successfully"}));
+                            sendMessageToRecipients(id, messageContent, chatId, messageId);
                         });
                     });
                 } else {
-                    res.status(401);
-                    res.end('Invalid Token');
+                    socket.write(JSON.stringify({"response": "User is not in chat"}));
                 }
             });
+        } else {
+            socket.write(JSON.stringify({"error": "Invalid Token"}));
         }
-        
-    }
+    });
 
-});
+}
 
-app.listen(8000);       
-https.createServer(options, app).listen(8080, function(){
-    console.log("Server is listening on port 8080...");
-});
+// Return all messages for a user's chat
+function messageGet(socket, message){
+    // Add a way to check if user is in chat
+    var access_id = message.access_id;
+    verifyTokenManually(access_id, (accepted, data) => {
+        if (accepted){
+            var id = data.user_id;
+            var chatId = message.chatId;
+            var messageId = (message.messageId) ? message.messageId : 0;
+            userIsInChat(chatId, id, (isInChat) => {
+                if (isInChat){
+                    executeSQLQuery(`SELECT id, messageId, messageContent FROM messages WHERE chatid = "${chatId}" AND messageId > ${messageId};`, (error, results) =>{
+                        if (error) throw error;
+                        for (var i = 0; i < results.length; i++){
+                            var response = {
+                                "receivedMessage": {
+                                    "user_id": results[i].id,
+                                    "chatId": chatId,
+                                    "messageId": results[i].messageId,
+                                    "messageContent": results[i].messageContent
+                                }
+                            }
+                            socket.write(JSON.stringify(response));
+                        }
+                    });
+                } else {
+                    socket.write(JSON.stringify({"response": "User is not in chat"}));
+                }
+            });
+        } else {
+            socket.write(JSON.stringify({"error": "Invalid Token"}));
+        }
+    });
+}
+
+// Creates a user from the access token if they are signed in and don't have an account registered
+function createUserPost(socket, message){
+    var access_id = message.access_id;
+    var username = (message.username) ? message.username : data.email;
+    verifyTokenManually(access_id, (accepted, data) => {
+        if (accepted){
+            // Check if user already exists
+            userExists(data.user_id, (exists) => {
+                if (exists){
+                    socket.write(JSON.stringify({"response": "User " + data.user_id + " already exists"}));
+                    return;
+                }
+                // Add user
+                var result = executeSQLQuery("INSERT INTO users (username, email, id) VALUES (\"" + username + "\",\"" + data.email + "\",\"" + data.user_id + "\");");
+                var response = {"userCreated": {"access_id": access_id, "username": username, "user_id": data.user_id}};
+                socket.write(JSON.stringify(JSON.stringify(response)));
+            });
+        } else {
+            socket.write(JSON.stringify({"error": "Invalid Token"}));
+        }
+    });
+}
+
+// User attempts to join a chat
+function joinChatGet(socket, message){
+    var chatId = message.chatId;
+    var pubKey = message.pubKey;
+    var access_id = message.access_id;
+    verifyTokenManually(access_id, (accepted, data) => {
+        if (accepted){
+            // Check if chat exists
+            // TODO, combine with next SQL query for users, just get founderId and users
+            executeSQLQuery(`SELECT founderId FROM chats WHERE chatId ="${chatId}";`, (error, results) => {
+                if (error) throw error;
+                // TODO add error checking if chat doesn't exist
+                var joinerId = data.user_id;
+                var founderId = results[0].founderId;
+                // TODO ---Send request to user to join, including the pubKye and user name---
+                var response = {"requestToJoinChat": {"joinerId": joinerId, "pubKey": pubKey, "chatId": chatId}};
+                var address = serverConnection.usersAndAddressPort[founderId];
+                serverConnection.addressPortAndSocket[address].write(JSON.stringify(response));
+                console.log("Sending message : " + JSON.stringify(response) + "   to " + address);
+            });
+        } else {
+            socket.write(JSON.stringify({"error": "Invalid Token"}));
+        }
+    });
+
+}
+
+function allowUserToJoinChat(socket, message){
+    var chatId = message.chatId;
+    var symKey = message.symKey;
+    var access_id = message.access_id;
+    var joinerId = message.joinerId;
+    verifyTokenManually(access_id, (accepted, data) => {
+        if (accepted){
+            var accepterId = data.user_id;
+            var query = "SELECT founderId FROM chats WHERE chatId = \"" + chatId + "\";";
+            executeSQLQuery(query, (error, result)=>{
+                if (result[0]['founderId'] == accepterId){
+                    // Add joinerId to DB
+                    executeSQLQuery(`SELECT users FROM chats WHERE chatId = "${chatId}";`, (error, results) => {
+                        if (error) throw error;
+                        var users = results[0].users + "," + joinerId;
+                        executeSQLQuery(`UPDATE chats SET users = "${users}" WHERE chatId = "${chatId}";`, (error, results) => {
+                            if (error) throw error;
+                            // Message joinerId w/ symkey
+                            var response = {"acceptedToChat": {"symKey": symKey, "chatId": chatId}};
+                            var address = serverConnection.usersAndAddressPort[joinerId];
+                            serverConnection.addressPortAndSocket[address].write(JSON.stringify(response));
+                        })
+                    })
+                }else {
+                    socket.write(JSON.stringify({"error": "You are not the owner"}));
+                }
+            });
+        } else {
+            socket.write(JSON.stringify({"error": "Invalid Token"}));
+        }
+    });
+
+}
+
+function listChatsGet(socket, message){
+    var access_id = message.access_id;
+    verifyTokenManually(access_id, (accepted, data) => {
+        if (accepted){
+            var query = "SELECT * FROM chats;"
+            executeSQLQuery(query, (error, results) => {
+                if (error) throw error;
+                var response = {"chats": results}
+                socket.write(JSON.stringify(JSON.stringify(response)));
+                console.log(JSON.stringify(response));
+            })
+        } else {
+            socket.write(JSON.stringify({"error": "Invalid Token"}));
+        }
+    });
+}
+
+function createChat(socket, message){
+    var chatName = message.chatName;
+    var access_id = message.access_id;
+    verifyTokenManually(access_id, (accepted, data) => {
+        if (accepted){
+            var user_id = data.user_id;
+            var chatId = hashCode(chatName);
+            var querry = "INSERT INTO chats (chatId, chatName, founderId, users) VALUES (\"" + chatId + "\", \"" + chatName + "\", \"" + user_id + "\", \"" + user_id + "\");";
+            executeSQLQuery(querry, (error, results) => {
+                if (error) throw error;
+                var response = {"chatCreated": {"chatId": chatId, "chatName": chatName}};
+                socket.write(JSON.stringify(response));
+            });
+        }else {
+            socket.write(JSON.stringify({"error": "Invalid Token"}));
+        }
+    });
+}
+
+function signIn(socket, message){
+    var access_id = message.access_id;
+    verifyTokenManually(access_id, (accepted, data) => {
+        if (accepted){
+            var userId = data.user_id;
+            serverConnection.addUser(socket, userId);
+        } else {
+            socket.write(JSON.stringify({"error": "Invalid Token"}));
+        }
+    });
+}
 
 
-function verifyTokenManually(id, callback){
+
+
+function verifyTokenManually(access_id, callback){
     // Checks if token is cached instead of querying Google
-    if (Object.keys(tokenCache).includes(id)){
-        if (tokenCache[id].expireTime > new Date().getTime()){
-            callback(true, tokenCache[id]);
+    if (Object.keys(tokenCache).includes(access_id)){
+        if (tokenCache[access_id].expireTime > new Date().getTime()){
+            callback(true, tokenCache[access_id]);
             return;
         } else {
-            delete tokenCache[id];
+            delete tokenCache[access_id];
             callback(false, null);
             return;
         }
     }
 
     // Queries Google to see if token is valid
-    var url = "https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=" + id;
+    var url = "https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=" + access_id;
     https.get(url, (response, otherPossibleParam) => {
         var data = '';
         response.on('data', (chunk) => {
@@ -207,7 +288,7 @@ function verifyTokenManually(id, callback){
             // Add check for if in cache or table (function that checks memory, if not in mem then in SQL) ***
             if (data.audience == googleAudienceID && parseInt(data.expires_in) > 0){
                 data.expireTime = new Date().getTime() + data.expires_in*1000;
-                tokenCache[id] = data;
+                tokenCache[access_id] = data;
                 callback(true, data);
             } else {
                 callback(false, data);
@@ -221,7 +302,6 @@ function executeSQLQuery(query, callback){
     con.query(query, callback);
 }
 
-// Returns bool -> Checks if a user is cached, else query the DB and cache if found
 function userExists(id, callback){
     if (cachedUsers[id]){
         return callback(true);
@@ -239,10 +319,67 @@ function userExists(id, callback){
     }
 }
 
+function userIsInChat(chatId, user_id, callback){
+    var query = "SELECT users FROM chats WHERE chatId = \"" + chatId + "\";"; 
+    executeSQLQuery(query, (error, results)=>{
+        if (error) throw error;
+        var users = results[0]["users"].split(',');
+        callback(users.includes(user_id));
+    });
+}
+
+function sendMessageToRecipients(senderId, message, chatId, messageId){
+    var query = "SELECT users FROM chats WHERE chatid = \"" + chatId + "\";";
+    executeSQLQuery(query, (error, result)=>{
+        var users = result[0]['users'].split(',');
+        var response = {
+            "receivedMessage":{
+                "user_id": senderId,
+                "chatId": chatId,
+                "messageId": messageId,
+                "messageContent": message
+            }
+        }
+        console.log(serverConnection.usersAndAddressPort);
+        for (var i = 0; i < users.length; i++){
+            if (users[i] == senderId) continue;
+            var addressPort = serverConnection.usersAndAddressPort[users[i]];
+            if (addressPort == undefined) continue;
+            console.log("Sending message to " + addressPort);
+            serverConnection.addressPortAndSocket[addressPort].write(JSON.stringify(response));
+        }
+    });
+}
+
+
+
+
+
+serverConnection.messageCallbacks.push(interpretMessage);
+serverConnection.listen();
+
+
+
+
+
+function hashCode(s) {
+    var h = 0, l = s.length, i = 0;
+    if ( l > 0 )
+      while (i < l)
+        h = (h << 5) - h + s.charCodeAt(i++) | 0;
+    return h;
+  };
+
+// Maybe should add some kind of 'type' on response as well???
 
 // A 'user_id' is given in the token. Maybe use that as the ID in the database?
-
-// Need to fix async nature of userExits...
 // Need to do some kind of checking of if message sender belongs to group/is friends with recipient
 // How to store if user is in a chat or not??? Fix for get/post messages
 // Need to cache users so that a non existant user can't be sending messages, need to check and cache w/ each request
+
+
+
+// MUST Stop apache
+//      sudo /opt/bitnami/ctlscript.sh stop
+//      sudo /opt/bitnami/ctlscript.sh status       - To make sure it has stopped
+//      Then make sure your server is running on port 443
