@@ -16,7 +16,9 @@ class TLSConnection {
         this.sockets = [];
         this.messageCallbacks = [];
         this.disconnectCallbacks = [];
-        this.usersAndSockets = {};          // Add to this with a sign in event
+        this.usersAndAddressPort = {};          // Add to this with a sign in event
+        this.addressPortAndSocket = {};
+        this.addressPortAndUser = {};
         this.server;
     }
 
@@ -26,7 +28,7 @@ class TLSConnection {
             console.log('Server connected to client: ',
                         socket.authorized ? 'authorized' : 'unauthorized');
             socket.setEncoding('utf8');
-            thisClass.sockets.push(socket);
+            // thisClass.sockets.push(socket);
         
             socket.on('data', function(msgReceived){
                 try{
@@ -40,11 +42,22 @@ class TLSConnection {
                 }
             });
         
-            socket.on('end', function () {
+            socket.on('end', function (something) {
                 for (var i = 0; i < thisClass.disconnectCallbacks.length; i++){
-                    thisClass.disconnectCallbacks[i]();
+                    thisClass.disconnectCallbacks[i](socket);
                 }
-                thisClass.sockets.splice(thisClass.sockets.indexOf(socket), 1);
+                try {
+                    // Delete socket from both tracking lists
+                    var addressAndPort = socket.remoteAddress + socket.remotePort
+                    var userId = thisClass.addressPortAndUser[addressAndPort];
+                    delete thisClass.addressPortAndSocket[addressAndPort];
+                    delete thisClass.addressPortAndUser[addressAndPort];
+                    delete thisClass.usersAndAddressPort[userId];
+                } catch (error){
+                    console.log(error);
+                }
+
+                // thisClass.sockets.splice(thisClass.sockets.indexOf(socket), 1);
             });
         
             socket.on('error', function(err) {
@@ -59,7 +72,13 @@ class TLSConnection {
         });
     }
 
-    
+    // Adds socket and userId to tracking lists - Must be called outside this class
+    addUser(socket, userId){
+        var addressAndPort = socket.remoteAddress + socket.remotePort
+        this.usersAndAddressPort[userId] = addressAndPort;
+        this.addressPortAndSocket[addressAndPort] = socket;
+        this.addressPortAndUser[addressAndPort] = userId;
+    }
 
 }
 

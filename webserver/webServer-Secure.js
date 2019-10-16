@@ -6,6 +6,9 @@ var TLSConnection = require('./tlsTesting/nodeTLSClass.js');
 const googleAudienceID = '154600092899-9tdri4c4k80lg38ak4bd9s6aro95s9nt.apps.googleusercontent.com';
 var tokenCache = {};
 
+var serverConnection = new TLSConnection();
+
+
 // Caches users
 var cachedUsers = {};
 
@@ -44,6 +47,12 @@ function interpretMessage(socket, message){
         case "createChat":
             createChat(socket, message.content)
             break;
+        case "signIn":
+            signIn(socket, message.content);
+            break;
+        case "allowUserToJoinChat":
+            allowUserToJoinChat(socket, message.content);
+            break;
         default:
             socket.write(JSON.stringify({"response": "Invalid Request"}));
             break;
@@ -69,6 +78,7 @@ function messagePost(socket, message){
                             if (error) throw error;
                             // Should alert all sockets listening for this type of message
                             socket.write(JSON.stringify({"response": "Message posted successfully"}));
+                            sendMessageToRecipients(id, messageContent, chatId, messageId);
                         });
                     });
                 } else {
@@ -95,8 +105,17 @@ function messageGet(socket, message){
                 if (isInChat){
                     executeSQLQuery(`SELECT id, messageId, messageContent FROM messages WHERE chatid = "${chatId}" AND messageId > ${messageId};`, (error, results) =>{
                         if (error) throw error;
-                        socket.write(JSON.stringify({"response": results}));
-
+                        for (var i = 0; i < results.length; i++){
+                            var response = {
+                                "receivedMessage": {
+                                    "user_id": results[i].id,
+                                    "chatId": chatId,
+                                    "messageId": results[i].messageId,
+                                    "messageContent": results[i].messageContent
+                                }
+                            }
+                            socket.write(JSON.stringify(response));
+                        }
                     });
                 } else {
                     socket.write(JSON.stringify({"response": "User is not in chat"}));
@@ -122,7 +141,7 @@ function createUserPost(socket, message){
                 }
                 // Add user
                 var result = executeSQLQuery("INSERT INTO users (username, email, id) VALUES (\"" + username + "\",\"" + data.email + "\",\"" + data.user_id + "\");");
-                var response = {"response": {"access_id": access_id, "username": username, "user_id": data.user_id}};
+                var response = {"userCreated": {"access_id": access_id, "username": username, "user_id": data.user_id}};
                 socket.write(JSON.stringify(JSON.stringify(response)));
             });
         } else {
@@ -146,24 +165,43 @@ function joinChatGet(socket, message){
                 var joinerId = data.user_id;
                 var founderId = results[0].founderId;
                 // TODO ---Send request to user to join, including the pubKye and user name---
-                var tempSymKey = 'abcdefgSYMETRICKEYabcdefg';
-                var canJoin = true;
-                if (canJoin){
-                    var returnData = {
-                        symKey: tempSymKey,
-                        chatId: chatId              //Maybe add a list of active users?
-                    }
-                    socket.write(JSON.stringify({"response": returnData}));
+                var response = {"requestToJoinChat": {"joinerId": joinerId, "pubKey": pubKey, "chatId": chatId}};
+                var address = serverConnection.usersAndAddressPort[founderId];
+                serverConnection.addressPortAndSocket[address].write(JSON.stringify(response));
+                console.log("Sending message : " + JSON.stringify(response) + "   to " + address);
+            });
+        } else {
+            socket.write(JSON.stringify({"error": "Invalid Token"}));
+        }
+    });
+
+}
+
+function allowUserToJoinChat(socket, message){
+    var chatId = message.chatId;
+    var symKey = message.symKey;
+    var access_id = message.access_id;
+    var joinerId = message.joinerId;
+    verifyTokenManually(access_id, (accepted, data) => {
+        if (accepted){
+            var accepterId = data.user_id;
+            var query = "SELECT founderId FROM chats WHERE chatId = \"" + chatId + "\";";
+            executeSQLQuery(query, (error, result)=>{
+                if (result[0]['founderId'] == accepterId){
+                    // Add joinerId to DB
                     executeSQLQuery(`SELECT users FROM chats WHERE chatId = "${chatId}";`, (error, results) => {
                         if (error) throw error;
                         var users = results[0].users + "," + joinerId;
                         executeSQLQuery(`UPDATE chats SET users = "${users}" WHERE chatId = "${chatId}";`, (error, results) => {
                             if (error) throw error;
+                            // Message joinerId w/ symkey
+                            var response = {"acceptedToChat": {"symKey": symKey, "chatId": chatId}};
+                            var address = serverConnection.usersAndAddressPort[joinerId];
+                            serverConnection.addressPortAndSocket[address].write(JSON.stringify(response));
                         })
-
                     })
-                } else {
-                    socket.write(JSON.stringify({"response": "Cannot Join"}));
+                }else {
+                    socket.write(JSON.stringify({"error": "You are not the owner"}));
                 }
             });
         } else {
@@ -180,7 +218,7 @@ function listChatsGet(socket, message){
             var query = "SELECT * FROM chats;"
             executeSQLQuery(query, (error, results) => {
                 if (error) throw error;
-                var response = {"response": results}
+                var response = {"chats": results}
                 socket.write(JSON.stringify(JSON.stringify(response)));
                 console.log(JSON.stringify(response));
             })
@@ -200,7 +238,7 @@ function createChat(socket, message){
             var querry = "INSERT INTO chats (chatId, chatName, founderId, users) VALUES (\"" + chatId + "\", \"" + chatName + "\", \"" + user_id + "\", \"" + user_id + "\");";
             executeSQLQuery(querry, (error, results) => {
                 if (error) throw error;
-                var response = {"chatCreated": chatId};
+                var response = {"chatCreated": {"chatId": chatId, "chatName": chatName}};
                 socket.write(JSON.stringify(response));
             });
         }else {
@@ -209,24 +247,36 @@ function createChat(socket, message){
     });
 }
 
+function signIn(socket, message){
+    var access_id = message.access_id;
+    verifyTokenManually(access_id, (accepted, data) => {
+        if (accepted){
+            var userId = data.user_id;
+            serverConnection.addUser(socket, userId);
+        } else {
+            socket.write(JSON.stringify({"error": "Invalid Token"}));
+        }
+    });
+}
 
 
 
-function verifyTokenManually(id, callback){
+
+function verifyTokenManually(access_id, callback){
     // Checks if token is cached instead of querying Google
-    if (Object.keys(tokenCache).includes(id)){
-        if (tokenCache[id].expireTime > new Date().getTime()){
-            callback(true, tokenCache[id]);
+    if (Object.keys(tokenCache).includes(access_id)){
+        if (tokenCache[access_id].expireTime > new Date().getTime()){
+            callback(true, tokenCache[access_id]);
             return;
         } else {
-            delete tokenCache[id];
+            delete tokenCache[access_id];
             callback(false, null);
             return;
         }
     }
 
     // Queries Google to see if token is valid
-    var url = "https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=" + id;
+    var url = "https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=" + access_id;
     https.get(url, (response, otherPossibleParam) => {
         var data = '';
         response.on('data', (chunk) => {
@@ -238,7 +288,7 @@ function verifyTokenManually(id, callback){
             // Add check for if in cache or table (function that checks memory, if not in mem then in SQL) ***
             if (data.audience == googleAudienceID && parseInt(data.expires_in) > 0){
                 data.expireTime = new Date().getTime() + data.expires_in*1000;
-                tokenCache[id] = data;
+                tokenCache[access_id] = data;
                 callback(true, data);
             } else {
                 callback(false, data);
@@ -278,10 +328,39 @@ function userIsInChat(chatId, user_id, callback){
     });
 }
 
+function sendMessageToRecipients(senderId, message, chatId, messageId){
+    var query = "SELECT users FROM chats WHERE chatid = \"" + chatId + "\";";
+    executeSQLQuery(query, (error, result)=>{
+        var users = result[0]['users'].split(',');
+        var response = {
+            "receivedMessage":{
+                "user_id": senderId,
+                "chatId": chatId,
+                "messageId": messageId,
+                "messageContent": message
+            }
+        }
+        console.log(serverConnection.usersAndAddressPort);
+        for (var i = 0; i < users.length; i++){
+            if (users[i] == senderId) continue;
+            var addressPort = serverConnection.usersAndAddressPort[users[i]];
+            if (addressPort == undefined) continue;
+            console.log("Sending message to " + addressPort);
+            serverConnection.addressPortAndSocket[addressPort].write(JSON.stringify(response));
+        }
+    });
+}
 
-var serverConnection = new TLSConnection();
+
+
+
+
 serverConnection.messageCallbacks.push(interpretMessage);
 serverConnection.listen();
+
+
+
+
 
 function hashCode(s) {
     var h = 0, l = s.length, i = 0;
@@ -297,3 +376,10 @@ function hashCode(s) {
 // Need to do some kind of checking of if message sender belongs to group/is friends with recipient
 // How to store if user is in a chat or not??? Fix for get/post messages
 // Need to cache users so that a non existant user can't be sending messages, need to check and cache w/ each request
+
+
+
+// MUST Stop apache
+//      sudo /opt/bitnami/ctlscript.sh stop
+//      sudo /opt/bitnami/ctlscript.sh status       - To make sure it has stopped
+//      Then make sure your server is running on port 443
