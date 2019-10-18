@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using Android.App;
 using Android.OS;
 using Android.Runtime;
@@ -6,6 +7,7 @@ using Android.Support.Design.Widget;
 using Android.Support.V7.App;
 using Android.Views;
 using Android.Widget;
+using Javax.Crypto;
 
 namespace wabb
 {
@@ -17,13 +19,52 @@ namespace wabb
         {
             base.OnCreate(savedInstanceState);
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
-            SetContentView(Resource.Layout.activity_main);
+            SetContentView(Resource.Layout.list_item);
 
-            Android.Support.V7.Widget.Toolbar toolbar = FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
-            SetSupportActionBar(toolbar);
+            //var listview = FindViewById<ListView>(Resource.Id.listView);
+            //listview.AddView(FindViewById(Resource.Layout.list_item));
+            var button = FindViewById<Button>(Resource.Id.createButton);
+            button.Click += (o, e) => {
+                var aliasView = FindViewById<EditText>(Resource.Id.keyAlias);
+                var messageView = FindViewById<EditText>(Resource.Id.inputText);
+                CreateKey(aliasView.Text, messageView.Text); };
+        }
 
-            FloatingActionButton fab = FindViewById<FloatingActionButton>(Resource.Id.fab);
-            fab.Click += FabOnClick;
+        public void CreateKey(string alias, string message)
+        {
+            var helper = new PlatformEncryptionKeyHelper(Application.Context, alias);
+            helper.CreateKeyPair();
+
+            var encryptedData = EncryptMessage(helper, message);
+            DecryptMessage(helper, encryptedData);
+        }
+
+        public byte[] EncryptMessage(PlatformEncryptionKeyHelper helper, string message)
+        {
+            var transformation = "RSA/ECB/PKCS1Padding";
+            var cipher = Cipher.GetInstance(transformation);
+            cipher.Init(CipherMode.EncryptMode, helper.GetPublicKey());
+
+            var encryptedData = cipher.DoFinal(Encoding.UTF8.GetBytes(message));
+            var textbox = FindViewById<TextView>(Resource.Id.encrypted);
+            textbox.Text = Encoding.UTF8.GetString(encryptedData);
+            return encryptedData;
+        }
+
+        public void DecryptMessage(PlatformEncryptionKeyHelper helper, byte[] encryptedData)
+        {
+            var transformation = "RSA/ECB/PKCS1Padding";
+            var cipher = Cipher.GetInstance(transformation);
+            cipher.Init(CipherMode.DecryptMode, helper.GetPrivateKey());
+
+            //var encryptedMessageView = FindViewById<TextView>(Resource.Id.encrypted);
+            //var encryptedMessage = Encoding.UTF8.GetBytes(encryptedMessageView.Text);
+            
+            var decryptedBytes = cipher.DoFinal(encryptedData);
+            var decryptedMessage = Encoding.UTF8.GetString(decryptedBytes);
+
+            var textbox = FindViewById<TextView>(Resource.Id.decrypted);
+            textbox.Text = decryptedMessage;
         }
 
         public override bool OnCreateOptionsMenu(IMenu menu)
@@ -43,12 +84,6 @@ namespace wabb
             return base.OnOptionsItemSelected(item);
         }
 
-        private void FabOnClick(object sender, EventArgs eventArgs)
-        {
-            View view = (View)sender;
-            Snackbar.Make(view, "Replace with your own action", Snackbar.LengthLong)
-                .SetAction("Action", (Android.Views.View.IOnClickListener)null).Show();
-        }
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {
             Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
