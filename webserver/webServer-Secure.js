@@ -53,6 +53,9 @@ function interpretMessage(socket, message){
         case "allowUserToJoinChat":
             allowUserToJoinChat(socket, message.content);
             break;
+        case "getUsers":
+            getUsers(socket, message.content);
+            break;
         default:
             socket.write(JSON.stringify({"response": "Invalid Request"}));
             break;
@@ -131,6 +134,7 @@ function messageGet(socket, message){
 function createUserPost(socket, message){
     var access_id = message.access_id;
     var username = (message.username) ? message.username : data.email;
+    var pubKey = message.pubKey;
     verifyTokenManually(access_id, (accepted, data) => {
         if (accepted){
             // Check if user already exists
@@ -140,7 +144,7 @@ function createUserPost(socket, message){
                     return;
                 }
                 // Add user
-                var result = executeSQLQuery("INSERT INTO users (username, email, id) VALUES (\"" + username + "\",\"" + data.email + "\",\"" + data.user_id + "\");");
+                var result = executeSQLQuery("INSERT INTO users (username, email, id, pubKey) VALUES (\"" + username + "\",\"" + data.email + "\",\"" + data.user_id + "\", \"" + pubKey + "\");");
                 var response = {"userCreated": {"access_id": access_id, "username": username, "user_id": data.user_id}};
                 socket.write(JSON.stringify(JSON.stringify(response)));
             });
@@ -167,8 +171,18 @@ function joinChatGet(socket, message){
                 // TODO ---Send request to user to join, including the pubKye and user name---
                 var response = {"requestToJoinChat": {"joinerId": joinerId, "pubKey": pubKey, "chatId": chatId}};
                 var address = serverConnection.usersAndAddressPort[founderId];
-                serverConnection.addressPortAndSocket[address].write(JSON.stringify(response));
-                console.log("Sending message : " + JSON.stringify(response) + "   to " + address);
+
+                // Checks if users is connected, else put message in invites buffer
+                if (address != undefined){
+                    serverConnection.addressPortAndSocket[address].write(JSON.stringify(response));
+                    console.log("Sending message : " + JSON.stringify(response) + "   to " + address);
+                } else {
+                    var query = `INSERT INTO invitesBuffer (destinationUser, messageToSend) VALUES ("${founderId}", "${JSON.stringify(response)}")`;
+                    executeSQLQuery(query, (error, result)=>{
+                        console.log("Added message to invites buffer");
+                    });
+                }
+
             });
         } else {
             socket.write(JSON.stringify({"error": "Invalid Token"}));
@@ -197,7 +211,17 @@ function allowUserToJoinChat(socket, message){
                             // Message joinerId w/ symkey
                             var response = {"acceptedToChat": {"symKey": symKey, "chatId": chatId}};
                             var address = serverConnection.usersAndAddressPort[joinerId];
-                            serverConnection.addressPortAndSocket[address].write(JSON.stringify(response));
+
+                            // Checks if users is connected, else put message in invites buffer
+                            if (address != undefined){
+                                serverConnection.addressPortAndSocket[address].write(JSON.stringify(response));
+                                console.log("Sending message : " + JSON.stringify(response) + "   to " + address);
+                            } else {
+                                var query = `INSERT INTO invitesBuffer (destinationUser, messageToSend) VALUES ("${joinerId}", "${JSON.stringify(response)}")`;
+                                executeSQLQuery(query, (error, result)=>{
+                                    console.log("Added message to invites buffer");
+                                });
+                            }
                         })
                     })
                 }else {
@@ -253,12 +277,41 @@ function signIn(socket, message){
         if (accepted){
             var userId = data.user_id;
             serverConnection.addUser(socket, userId);
+
+            // Check if any invites in buffer
+            var query = "SELECT * FROM invitesBuffer WHERE destinationUser = \"" + userId + "\";";
+            executeSQLQuery(query, (error, results)=>{
+                if (results == undefined) return;
+                for (var i = 0; i < results.length; i++){
+                    var messageToSend = results[i].messageToSend;
+                    socket.write(messageToSend);
+                }
+            });
+
         } else {
             socket.write(JSON.stringify({"error": "Invalid Token"}));
         }
     });
 }
 
+function getUsers(socket, message){
+    var access_id = message.access_id;
+    verifyTokenManually(access_id, (accepted, data) => {
+        if (accepted){
+            var user_id = data.user_id;
+            var query = "SELECT * FROM users;";
+            executeSQLQuery(query, (error, results)=>{
+                if (error) throw error;
+                var response = {
+                    "usersList": results
+                };
+                socket.write(JSON.stringify(response));
+            })
+        } else {
+            socket.write(JSON.stringify({"error": "Invalid Token"}));
+        }
+    });
+}
 
 
 

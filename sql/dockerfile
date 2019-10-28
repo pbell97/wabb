@@ -2,7 +2,7 @@
 # To create:
 #   docker build -t custom-mysql:latest .
 # After building, run following command to create:
-#   docker run -d -p 3306:3306 --name my-mysql -e MYSQL_ROOT_PASSWORD=secretpassword custom-mysql:latest
+#   docker run -d -p 3306:3306 --name wabbSQL -e MYSQL_ROOT_PASSWORD=secretpassword custom-mysql:latest
 # Connect by using:
 #   docker exec -it my-mysql bash
 # Login to mysql by doing:

@@ -13,7 +13,8 @@ createUser: used the for creating user after signing in to google
         "type": "createUser",
         "content": {
             "access_id": "access_id Goes Here",
-            "username": "username goes here"
+            "username": "username goes here",
+            "pubKey": "public key goes here"
         }
     }
     - Reponse: 
@@ -133,7 +134,26 @@ messageGet: gets messages for a chat from a specific point
         }
     }
 
-
-*** Need to add buffer for users requesting to join and users accepting others. ***
-    - Maybe make simple table, with message already created. When user signs in it will grab 
-      and messages from that table and send it to them.
+getUsers: returns a list of all the data on the users
+{
+        "type": "getUsers",
+        "content": {
+            "access_id": "access_id goes here"
+        }
+    }
+    - Response:
+    {
+        "usersList": [
+            { 
+                username: 'username',
+                email: 'email',
+                id: 'id',
+                pubKey: 'pubKey'
+            }, {
+                username: 'username',
+                email: 'email',
+                id: 'id',
+                pubKey: 'pubKey'
+            }
+        ]
+    }
