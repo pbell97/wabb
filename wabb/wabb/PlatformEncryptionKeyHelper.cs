@@ -1,17 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-using Android.App;
-using Android.Content;
+﻿using Android.Content;
 using Android.OS;
-using Android.Runtime;
 using Android.Security.Keystore;
-using Android.Views;
-using Android.Widget;
 using Java.Security;
-using Javax.Crypto;
 
 namespace wabb
 {
@@ -19,10 +9,10 @@ namespace wabb
     //  https://msicc.net/xamarin-android-asymmetric-encryption-without-any-user-input-or-hardcoded-values/
     public class PlatformEncryptionKeyHelper
     {
-        private readonly int KeySize = 2048; // I guess?
-        private readonly string KEYSTORE_NAME = "AndroidKeyStore"; // I guess?
+        private readonly int KeySize = 2048; // I guess? We choose I believe
+        private readonly string KEYSTORE_NAME = "AndroidKeyStore"; // I guess? Static I believe
         private Context _context;
-        private string _keyName;
+        private string _keyName; // key alias
         private KeyStore _androidKeyStore;
 
         public PlatformEncryptionKeyHelper(Context context, string keyName)
@@ -35,12 +25,15 @@ namespace wabb
 
         public void CreateKeyPair()
         {
+            // Removes key if it already exists, no change otherwise
             DeleteKey();
             KeyPairGenerator keyGenerator =
                 KeyPairGenerator.GetInstance(KeyProperties.KeyAlgorithmRsa, KEYSTORE_NAME);
 
+            // I believe this is always the case for us
             if (Build.VERSION.SdkInt >= BuildVersionCodes.M)
             {
+                // Parameters affiliated with the Transformation settings used when making Cipher (@MainActivity.EncryptData())
                 var builder =
                     new KeyGenParameterSpec.Builder(_keyName, KeyStorePurpose.Encrypt | KeyStorePurpose.Decrypt)
                         .SetBlockModes(KeyProperties.BlockModeEcb)
@@ -56,6 +49,7 @@ namespace wabb
             keyGenerator.GenerateKeyPair();
         }
 
+        //TODO: Check that key pairs persist
         public IKey GetPublicKey()
         {
             if (!_androidKeyStore.ContainsAlias(_keyName))
@@ -68,8 +62,9 @@ namespace wabb
             if (!_androidKeyStore.ContainsAlias(_keyName))
                 return null;
             return _androidKeyStore.GetKey(_keyName, null);
-            // Apparently this null acts as a key-pair password, to make private key 
+            // Apparently this second parameter acts as a key-pair password, to make private key 
             //  more difficult to get to
+            // I dunno when the password would have been set though
         }
 
         public bool DeleteKey()
