@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Threading.Tasks;
 using Android.App;
 using Android.OS;
 using Android.Runtime;
@@ -8,10 +9,11 @@ using Android.Support.V7.App;
 using Android.Views;
 using Android.Widget;
 using Javax.Crypto;
+using Xamarin.Essentials;
 
 namespace wabb
 {
-    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true)]
+    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
     public class MainActivity : AppCompatActivity
     {
 
@@ -19,15 +21,85 @@ namespace wabb
         {
             base.OnCreate(savedInstanceState);
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
-            SetContentView(Resource.Layout.list_item);
+            SetContentView(Resource.Layout.activity_main);
 
-            //var listview = FindViewById<ListView>(Resource.Id.listView);
-            //listview.AddView(FindViewById(Resource.Layout.list_item));
-            var button = FindViewById<Button>(Resource.Id.createButton);
-            button.Click += (o, e) => {
-                var aliasView = FindViewById<EditText>(Resource.Id.keyAlias);
-                var messageView = FindViewById<EditText>(Resource.Id.inputText);
-                CreateKey(aliasView.Text, messageView.Text); };
+            var saveButton = FindViewById<Button>(Resource.Id.saveButton);
+            var getButton = FindViewById<Button>(Resource.Id.getButton);
+            var deleteButton = FindViewById<Button>(Resource.Id.deleteButton);
+            var deleteAllButton = FindViewById<Button>(Resource.Id.deleteAllButton);
+
+            saveButton.Click += (o, e) =>
+                {
+                    var key = FindViewById<EditText>(Resource.Id.storedKeyText).Text;
+                    var data = FindViewById<EditText>(Resource.Id.storedMessageText).Text;
+                    CreateStoredItem(key, data);
+                };
+            getButton.Click += (o, e) =>
+                {
+                    var key = FindViewById<EditText>(Resource.Id.storedKeyText).Text;
+                    Print(GetStoredItem(key));
+                };
+
+            deleteButton.Click += (o, e) =>
+                {
+                    var key = FindViewById<EditText>(Resource.Id.storedKeyText).Text;
+                    Print(DeleteStoredItem(key).ToString());
+                };
+            deleteAllButton.Click += (o, e) =>
+                {
+                    DeleteAllStoredItems();
+                };
+
+            //View header = (View)getLayoutInflater().inflate(Resource.Layout.header_view, null);
+            //listView.AddHeaderView(header);
+
+                //var listview = FindViewById<ListView>(Resource.Id.listView);
+                //listview.AddView(FindViewById(Resource.Layout.list_item));
+                //var button = FindViewById<Button>(Resource.Id.createButton);
+                //button.Click += (o, e) => {
+                //    var aliasView = FindViewById<EditText>(Resource.Id.keyAlias);
+                //    var messageView = FindViewById<EditText>(Resource.Id.inputText);
+                //    CreateKey(aliasView.Text, messageView.Text); };
+        }
+
+        public void CreateStoredItem(string key, string data)
+        {
+            try
+            {
+                Xamarin.Essentials.SecureStorage.SetAsync(key, data).Wait();
+            }
+            catch
+            {
+                Print("Failed to create");
+            }
+        }
+
+        public string GetStoredItem(string key)
+        {
+            try
+            {
+                return SecureStorage.GetAsync(key).Result;
+            }
+            catch
+            {
+                return "Failed to get";
+            }
+        }
+
+        public bool DeleteStoredItem(string key)
+        {
+            return SecureStorage.Remove(key);
+        }
+
+        public void DeleteAllStoredItems()
+        {
+            SecureStorage.RemoveAll();
+        }
+
+        public void Print(string output)
+        {
+            var keysText = FindViewById<TextView>(Resource.Id.keysText);
+            keysText.Text = output;
         }
 
         public void CreateKey(string alias, string message)
