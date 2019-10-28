@@ -19,6 +19,8 @@ namespace tlsTesting
         public string access_id;
         public string username;
         public string user_id;
+        public string email;
+        public string pubKey;
 
         public User(){
 
@@ -26,13 +28,15 @@ namespace tlsTesting
 
         public User(string JSON){
             JObject newMessage = JObject.Parse(JSON);
-            this.access_id = newMessage["response"]["access_id"].ToString();
-            this.username = newMessage["response"]["username"].ToString();
-            this.user_id = newMessage["response"]["user_id"].ToString();
+            if (newMessage["access_id"] != null) this.access_id = newMessage["access_id"].ToString();
+            this.username = newMessage["username"].ToString();
+            this.user_id = newMessage["id"].ToString();
+            this.email = newMessage["email"].ToString();
+            this.pubKey = newMessage["pubKey"].ToString();
         }
 
         public string createJSONString(){
-            return "{" + $"\"access_id\": \"{this.access_id}\", \"username\": \"{this.username}\", \"user_id\": \"{user_id}\"" + "}";
+            return "{" + $"\"access_id\": \"{this.access_id}\", \"username\": \"{this.username}\", \"user_id\": \"{user_id}\", \"email\": \"{this.email}\", \"pubKey\": \"{this.pubKey}\" "+ "}";
         }
 
     }

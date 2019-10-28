@@ -44,9 +44,9 @@ namespace tlsTesting
             ASCIIEncoding encoder;
 
             User myUser = new User();
-            myUser.username = "PatrickBell";
+            myUser.username = "PatricksMSU";
             // MsState email
-            myUser.access_id = "ya29.ImGiByDWZN1ry1S3qwf3C2_jcmtI7RhbBZo8fXsRwZ23dUo1Kl2bUg_CHO4QzwSFj135_zaUjSlBKozOc976HVqzPwLiDo31-h6Jl84pStTBfRaAuZJ8tXZj-4GEFSsuhK8f";
+            myUser.access_id = "ya29.ImGpBw4bjVL67rxZilaQu6H_RPJFe7Bzh1Ck0uZFBy-J_7BNE7NA5jFIFQ_lCfNFe93WRScf01r7cV8UWr8kp5jectuZnY3LMWJ3dMEKzHVoZZLuobb6iVEDcdWyWqCgER4j";
             // Gmail below
             // myUser.access_id = "ya29.Il-bB3YQJzIemDXlWBtnXg2MRlrs0inhqcXr1e0XlhFnhvCn2ClPQh_1eefAEY4wY3bOaeRXxbjriLvTNq38ZBADs0UDsNp5r0Vg1D0GD_wPaklYs7jUI6V9ZBErkjSqzg";
             
@@ -55,12 +55,16 @@ namespace tlsTesting
             myMessage.chatId = "-1060544732";
             myMessage.messageContent = "This is a message sent from the first client";
             this.WriteMessage("signIn", "{\"access_id\": \"" + myMessage.access_id + "\"}");
+            Thread.Sleep(500);
+            this.WriteMessage("getUsers", "{\"access_id\": \"" + myMessage.access_id + "\"}");
             // this.WriteMessage("createUser", "{\"access_id\": \"" + myMessage.access_id + "\", \"username\": \"" + "PatricksGmail" + "\"}");
             // this.WriteMessage("messageGet", "{\"access_id\": \"" + myMessage.access_id + "\", \"chatId\": \"" + "-1060544732" + "\", \"messageId\": \"" + "10" + "\"}");
             // this.WriteMessage("createChat", "{\"access_id\": \"" + myMessage.access_id + "\", \"chatName\": \"" + "myChat" + "\"}");
             // this.WriteMessage("joinChat", "{\"access_id\": \"" + myMessage.access_id + "\", \"chatId\": \"" + "2136482312" + "\", \"pubKey\": \"" + "pubKeyGoesHere" + "\"}");
             // this.WriteMessage("allowUserToJoinChat", "{\"access_id\": \"" + myMessage.access_id + "\", \"chatId\": \"" + "2136482312" + "\", \"symKey\": \"" + "symKeyGoesHere" + "\", \"joinerId\": \"" + "113467843674295288430" + "\"}");
             // this.WriteMessage("messagePost", myMessage.createJSONString());
+
+
 
             while (true)
             {
@@ -69,14 +73,10 @@ namespace tlsTesting
                     // Read up to 4096 bytes
                     Console.WriteLine("Getting bytesRead");
                     bytesRead = this.sslStream.Read(messageBytes, 0, 4096);
-                    Console.WriteLine("Here1");
                     encoder = new ASCIIEncoding();
                     receivedMessage = encoder.GetString(messageBytes, 0, bytesRead).Replace("\\", "").Replace("\"{", "{").Replace("}\"", "}");
-                    Console.WriteLine("Here2");
                     this.unreadMessages.Add(receivedMessage);
-                    Console.WriteLine("Here3");
                     this.OnMessageReceived(this, new EventArgs());
-                    Console.WriteLine("Here4");
                     Thread.Sleep(500);
                 }
                 catch (Exception e)
@@ -105,11 +105,28 @@ namespace tlsTesting
         }
 
         public void DisplayMessage(object sender, EventArgs e){
-            Console.WriteLine("Here5");
             Console.WriteLine("Got message: " + this.unreadMessages[0]);
-            Console.WriteLine("Here6");            
+            JObject message = JObject.Parse(this.unreadMessages[0]);
+            string type = message.Properties().Select(p => p.Name).ToList()[0];
+            Console.WriteLine("Type: " + type);
+
+            if (type == "usersList"){
+                JArray usersArray = (JArray) message["usersList"];
+                int length = usersArray.Count;
+                Console.WriteLine("Length: " + length.ToString());
+                User myUser;
+                for (int i = 0; i < length; i++){
+                    myUser = new User(message["usersList"][i].ToString());
+                }
+            }
+
+            if (type == "receivedMessage"){
+                Message myMessage = new Message(message["receivedMessage"].ToString());
+            }
+
+            // Console.WriteLine(l.ToString());
             this.unreadMessages.RemoveAt(0);
-            Console.WriteLine("Here7");
+            Console.WriteLine();
         }
     }
 

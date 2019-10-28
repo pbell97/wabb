@@ -32,7 +32,7 @@ namespace tlsTesting
 
         public Message(string JSON){
             JObject newMessage = JObject.Parse(JSON);
-            this.access_id = newMessage["access_id"].ToString();
+            if (newMessage["access_id"] != null) this.access_id = newMessage["access_id"].ToString();
             this.chatId = newMessage["chatId"].ToString();
             this.messageContent = newMessage["messageContent"].ToString();
             this.user_id = newMessage["user_id"].ToString();
@@ -40,7 +40,11 @@ namespace tlsTesting
         }
 
         public string createJSONString(){
-            return "{" + $"\"access_id\": \"{this.access_id}\", \"chatId\": \"{this.chatId}\", \"messageContent\": \"{this.messageContent}\", \"user_id\": \"" + this.user_id + "\", \"messageId\": \"" + this.messageId + "\"}";
+            if (this.access_id != null){
+                return "{" + $"\"access_id\": \"{this.access_id}\", \"chatId\": \"{this.chatId}\", \"messageContent\": \"{this.messageContent}\", \"user_id\": \"" + this.user_id + "\", \"messageId\": \"" + this.messageId + "\"}";
+            } else {
+                return "{" + $"\"chatId\": \"{this.chatId}\", \"messageContent\": \"{this.messageContent}\", \"user_id\": \"" + this.user_id + "\", \"messageId\": \"" + this.messageId + "\"}";
+            }
         }
 
 
