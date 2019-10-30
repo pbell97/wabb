@@ -12,3 +12,6 @@ Storage:
 - Data (messages, chat metadata, etc)
 
 Need to be able to encrypt all our keys (sym and asym) with a password and send it up to our server for 'backup' so we can pull it down later and restore keys to a new device.
+
+Whenever we restore to a new device, we'll generate a new asym public/private pair and then update our public key on the server for other people to use.
+Our symmetric keys we receive from others for chats needs to be stored in secure storage.
