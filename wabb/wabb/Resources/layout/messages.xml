@@ -1,0 +1,45 @@
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:minWidth="25px"
+    android:minHeight="25px"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/linearLayout1">
+    <TextView
+        android:text="Message Recipient"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/messageRecvr"
+        android:layout_marginTop="10dp"
+        android:layout_marginHorizontal="10dp"
+        android:textStyle="bold" />
+    <TextView
+        android:text="Message Author\n\tMessage"
+        android:layout_width="match_parent"
+        android:layout_height="389.5dp"
+        android:id="@+id/messageDisplay"
+        android:layout_margin="10dp" />
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/newMessage"
+        android:layout_marginHorizontal="10dp"
+        android:layout_gravity="end" />
+    <Button
+        android:text="SEND"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/sendButton"
+        android:layout_marginHorizontal="10dp"
+        android:layout_gravity="end" />
+    <Button
+        android:text="BUTTON"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/backButton"
+        android:layout_marginHorizontal="10dp"
+        android:layout_gravity="end" />
+</LinearLayout>
