@@ -22,8 +22,59 @@ namespace wabb
         {
             base.OnCreate(savedInstanceState);
             Platform.Init(this, savedInstanceState);
-            SetContentView(Resource.Layout.activity_main);
+            SetContentView(Resource.Layout.StoredItems);
 
+            SetupKeyCreationTesting();
+            //SetupStoredItemTesting();
+        }
+
+        public void SetupKeyCreationTesting()
+        {
+            // Grab the buttons
+            var saveButton = FindViewById<Button>(Resource.Id.saveButton);
+            var getButton = FindViewById<Button>(Resource.Id.getButton);
+            var deleteButton = FindViewById<Button>(Resource.Id.deleteButton);
+
+            var deleteAllButton = FindViewById<Button>(Resource.Id.deleteAllButton);
+            var parentView = FindViewById<LinearLayout>(Resource.Id.linearLayout2);
+
+            // Remove since it is not possible
+            parentView.RemoveView(deleteAllButton);
+
+            // Janky add listeners to buttons
+            saveButton.Click += (o, e) =>
+            {
+                var key = FindViewById<EditText>(Resource.Id.storedKeyText).Text;
+                var data = FindViewById<EditText>(Resource.Id.storedMessageText).Text;
+                Print(CreateKey(key, data));
+            };
+            getButton.Click += (o, e) =>
+            {
+                var key = FindViewById<EditText>(Resource.Id.storedKeyText).Text;
+                var data = FindViewById<EditText>(Resource.Id.storedMessageText).Text;
+                var helper = new PlatformEncryptionKeyHelper(key);
+
+                var encryptedData = EncryptMessage(helper, data);
+                Print(DecryptMessage(helper, encryptedData));
+            };
+
+            deleteButton.Click += (o, e) =>
+            {
+                var key = FindViewById<EditText>(Resource.Id.storedKeyText).Text;
+                var helper = new PlatformEncryptionKeyHelper(key);
+                Print(helper.DeleteKey().ToString());
+            };
+
+            // Grab the text inputs
+            var nameInput = FindViewById<EditText>(Resource.Id.storedKeyText);
+            var messageInput = FindViewById<EditText>(Resource.Id.storedMessageText);
+            // Set prompts
+            nameInput.Hint = "Key alias";
+            messageInput.Hint = "Message to be encrypted";
+        }
+
+        public void SetupStoredItemTesting()
+        {
             // Grab the buttons
             var saveButton = FindViewById<Button>(Resource.Id.saveButton);
             var getButton = FindViewById<Button>(Resource.Id.getButton);
@@ -32,37 +83,33 @@ namespace wabb
 
             // Janky add listeners to buttons
             saveButton.Click += (o, e) =>
-                {
-                    var key = FindViewById<EditText>(Resource.Id.storedKeyText).Text;
-                    var data = FindViewById<EditText>(Resource.Id.storedMessageText).Text;
-                    CreateStoredItem(key, data);
-                };
+            {
+                var key = FindViewById<EditText>(Resource.Id.storedKeyText).Text;
+                var data = FindViewById<EditText>(Resource.Id.storedMessageText).Text;
+                CreateStoredItem(key, data);
+            };
             getButton.Click += (o, e) =>
-                {
-                    var key = FindViewById<EditText>(Resource.Id.storedKeyText).Text;
-                    Print(GetStoredItem(key));
-                };
+            {
+                var key = FindViewById<EditText>(Resource.Id.storedKeyText).Text;
+                Print(GetStoredItem(key));
+            };
 
             deleteButton.Click += (o, e) =>
-                {
-                    var key = FindViewById<EditText>(Resource.Id.storedKeyText).Text;
-                    Print(DeleteStoredItem(key).ToString());
-                };
+            {
+                var key = FindViewById<EditText>(Resource.Id.storedKeyText).Text;
+                Print(DeleteStoredItem(key).ToString());
+            };
             deleteAllButton.Click += (o, e) =>
-                {
-                    DeleteAllStoredItems();
-                };
+            {
+                DeleteAllStoredItems();
+            };
 
-            //View header = (View)getLayoutInflater().inflate(Resource.Layout.header_view, null);
-            //listView.AddHeaderView(header);
-
-                //var listview = FindViewById<ListView>(Resource.Id.listView);
-                //listview.AddView(FindViewById(Resource.Layout.list_item));
-                //var button = FindViewById<Button>(Resource.Id.createButton);
-                //button.Click += (o, e) => {
-                //    var aliasView = FindViewById<EditText>(Resource.Id.keyAlias);
-                //    var messageView = FindViewById<EditText>(Resource.Id.inputText);
-                //    CreateKey(aliasView.Text, messageView.Text); };
+            // Grab the text inputs
+            var nameInput = FindViewById<EditText>(Resource.Id.storedKeyText);
+            var messageInput = FindViewById<EditText>(Resource.Id.storedMessageText);
+            // Set prompts
+            nameInput.Hint = "Stored item key name";
+            messageInput.Hint = "Stored item contents";
         }
 
         public void CreateStoredItem(string key, string data)
@@ -71,7 +118,7 @@ namespace wabb
             {
                 // This returns as Task<>, can bubble up async instead of lame .Wait()
                 // key and data must be strings
-                Xamarin.Essentials.SecureStorage.SetAsync(key, data).Wait();
+                SecureStorage.SetAsync(key, data).Wait();
             }
             catch
             {
@@ -110,16 +157,16 @@ namespace wabb
             keysText.Text = output;
         }
 
-        public void CreateKey(string alias, string message)
+        public string CreateKey(string alias, string message)
         {
             // Make use of that helper bay-bee, yeet
-            var helper = new PlatformEncryptionKeyHelper(Application.Context, alias);
+            var helper = new PlatformEncryptionKeyHelper(alias);
             helper.CreateKeyPair();
 
             // If encrypted data is converted from byte[] to string, then back to byte[]
             // it does not come back the same, will not decrypt
             var encryptedData = EncryptMessage(helper, message);
-            DecryptMessage(helper, encryptedData);
+            return DecryptMessage(helper, encryptedData);
         }
 
         public byte[] EncryptMessage(PlatformEncryptionKeyHelper helper, string message)
@@ -127,21 +174,35 @@ namespace wabb
             // Define the key parameters (I just copied this)
             var transformation = "RSA/ECB/PKCS1Padding";
             var cipher = Cipher.GetInstance(transformation);
+            var publicKey = helper.GetPublicKey();
+            if (publicKey == null)
+            {
+                return null;
+            }
+
             // Set up encryption machine
-            cipher.Init(CipherMode.EncryptMode, helper.GetPublicKey());
+            cipher.Init(CipherMode.EncryptMode, publicKey);
 
             // Mostly jsut copied this, convert UTF8 to bytes?
             var encryptedData = cipher.DoFinal(Encoding.UTF8.GetBytes(message));
-            var textbox = FindViewById<TextView>(Resource.Id.encrypted);
-            textbox.Text = Encoding.UTF8.GetString(encryptedData);
             return encryptedData;
         }
 
-        public void DecryptMessage(PlatformEncryptionKeyHelper helper, byte[] encryptedData)
+        public string DecryptMessage(PlatformEncryptionKeyHelper helper, byte[] encryptedData)
         {
             // Define the key parameters (I just copied this)
             var transformation = "RSA/ECB/PKCS1Padding";
             var cipher = Cipher.GetInstance(transformation);
+            if (encryptedData == null)
+            {
+                return "Failed to recieve encrypted data";
+            }
+
+            var privateKey = helper.GetPrivateKey();
+            if (privateKey == null)
+            {
+                return "Failed to retrieve private key";
+            }
             // Set up decryption machine
             cipher.Init(CipherMode.DecryptMode, helper.GetPrivateKey());
 
@@ -153,9 +214,7 @@ namespace wabb
             // go from bytes to string
             var decryptedBytes = cipher.DoFinal(encryptedData);
             var decryptedMessage = Encoding.UTF8.GetString(decryptedBytes);
-
-            var textbox = FindViewById<TextView>(Resource.Id.decrypted);
-            textbox.Text = decryptedMessage;
+            return decryptedMessage;
         }
 
         public override bool OnCreateOptionsMenu(IMenu menu)

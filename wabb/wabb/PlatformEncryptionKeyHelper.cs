@@ -11,13 +11,11 @@ namespace wabb
     {
         private readonly int KeySize = 2048; // I guess? We choose I believe
         private readonly string KEYSTORE_NAME = "AndroidKeyStore"; // I guess? Static I believe
-        private Context _context;
         private string _keyName; // key alias
         private KeyStore _androidKeyStore;
 
-        public PlatformEncryptionKeyHelper(Context context, string keyName)
+        public PlatformEncryptionKeyHelper(string keyName)
         {
-            _context = context;
             _keyName = keyName.ToLowerInvariant();
             _androidKeyStore = KeyStore.GetInstance(KEYSTORE_NAME);
             _androidKeyStore.Load(null);

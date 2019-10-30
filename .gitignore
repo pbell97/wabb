@@ -61,3 +61,4 @@ typings/
 .next
 wabb/wabb/Resources/Resource.designer.cs
 wabb/wabb.sln
+wabb/wabb/.vscode/c_cpp_properties.json
