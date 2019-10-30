@@ -22,7 +22,9 @@ createUser: used the for creating user after signing in to google
         "userCreated": {
             "access_id": "access_id goes here", 
             "username": "username goes here", 
-            "user_id": "user_id goes here"
+            "user_id": "user_id goes here",
+            "email": "email",
+            "pubKey": pubKey
         }
     }
 
@@ -69,7 +71,9 @@ joinChat: requests to join a specific chat
     {
         "acceptedToChat": {
             "symKey": symKey, 
-            "chatId": chatId
+            "chatId": chatId,
+            "chatName": chatName,
+            "users": users
         }
     }
 
@@ -135,7 +139,7 @@ messageGet: gets messages for a chat from a specific point
     }
 
 getUsers: returns a list of all the data on the users
-{
+    {
         "type": "getUsers",
         "content": {
             "access_id": "access_id goes here"
@@ -155,5 +159,24 @@ getUsers: returns a list of all the data on the users
                 id: 'id',
                 pubKey: 'pubKey'
             }
+        ]
+    }
+
+getChats: returns list of all chats
+    {
+        "type": "getUsers",
+        "content": {
+            "access_id": "access_id goes here"
+        }
+    }
+    - Response:
+    {
+        "chatsList": [
+            {
+                "chatId": "chatId goes here"
+                "chatName": "chatName goes here"
+                "founderId": "founderId goes here"
+                "users": "users goes here"
+            }, continued...
         ]
     }

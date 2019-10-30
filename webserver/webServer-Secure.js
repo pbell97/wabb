@@ -56,6 +56,9 @@ function interpretMessage(socket, message){
         case "getUsers":
             getUsers(socket, message.content);
             break;
+        case "getChats":
+            getChats(socket, message.content);
+            break;
         default:
             socket.write(JSON.stringify({"response": "Invalid Request"}));
             break;
@@ -145,7 +148,7 @@ function createUserPost(socket, message){
                 }
                 // Add user
                 var result = executeSQLQuery("INSERT INTO users (username, email, id, pubKey) VALUES (\"" + username + "\",\"" + data.email + "\",\"" + data.user_id + "\", \"" + pubKey + "\");");
-                var response = {"userCreated": {"access_id": access_id, "username": username, "user_id": data.user_id}};
+                var response = {"userCreated": {"access_id": access_id, "username": username, "user_id": data.user_id, "email": data.email, "pubKey": pubKey}};
                 socket.write(JSON.stringify(JSON.stringify(response)));
             });
         } else {
@@ -203,13 +206,15 @@ function allowUserToJoinChat(socket, message){
             executeSQLQuery(query, (error, result)=>{
                 if (result[0]['founderId'] == accepterId){
                     // Add joinerId to DB
-                    executeSQLQuery(`SELECT users FROM chats WHERE chatId = "${chatId}";`, (error, results) => {
+                    executeSQLQuery(`SELECT * FROM chats WHERE chatId = "${chatId}";`, (error, results) => {
                         if (error) throw error;
                         var users = results[0].users + "," + joinerId;
+                        var chatName = results[0].chatName;
+                        var chatUsers = results[0].users;
                         executeSQLQuery(`UPDATE chats SET users = "${users}" WHERE chatId = "${chatId}";`, (error, results) => {
                             if (error) throw error;
                             // Message joinerId w/ symkey
-                            var response = {"acceptedToChat": {"symKey": symKey, "chatId": chatId}};
+                            var response = {"acceptedToChat": {"symKey": symKey, "chatId": chatId, "chatName": chatName, "users": chatUsers}};
                             var address = serverConnection.usersAndAddressPort[joinerId];
 
                             // Checks if users is connected, else put message in invites buffer
@@ -304,6 +309,25 @@ function getUsers(socket, message){
                 if (error) throw error;
                 var response = {
                     "usersList": results
+                };
+                socket.write(JSON.stringify(response));
+            })
+        } else {
+            socket.write(JSON.stringify({"error": "Invalid Token"}));
+        }
+    });
+}
+
+function getChats(socket, message){
+    var access_id = message.access_id;
+    verifyTokenManually(access_id, (accepted, data) => {
+        if (accepted){
+            var user_id = data.user_id;
+            var query = "SELECT * FROM chats;";
+            executeSQLQuery(query, (error, results)=>{
+                if (error) throw error;
+                var response = {
+                    "chatsList": results
                 };
                 socket.write(JSON.stringify(response));
             })
