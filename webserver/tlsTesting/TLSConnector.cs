@@ -46,7 +46,7 @@ namespace tlsTesting
             User myUser = new User();
             myUser.username = "PatricksMSU";
             // MsState email
-            myUser.access_id = "ya29.ImGpBw4bjVL67rxZilaQu6H_RPJFe7Bzh1Ck0uZFBy-J_7BNE7NA5jFIFQ_lCfNFe93WRScf01r7cV8UWr8kp5jectuZnY3LMWJ3dMEKzHVoZZLuobb6iVEDcdWyWqCgER4j";
+            myUser.access_id = "ya29.ImGpByjBgXYDMlO9sdT4AZqRsVh2XSHqwT39Hd6xWOtajP9t3dTD0QRLlXQIl1izveE1rBI2o8gopgFtdG83ttubgfBUN0HZ24UEJ2zD4uSYwbI4kT6ZLaUlmN-J3gt0hLD2";
             // Gmail below
             // myUser.access_id = "ya29.Il-bB3YQJzIemDXlWBtnXg2MRlrs0inhqcXr1e0XlhFnhvCn2ClPQh_1eefAEY4wY3bOaeRXxbjriLvTNq38ZBADs0UDsNp5r0Vg1D0GD_wPaklYs7jUI6V9ZBErkjSqzg";
             
@@ -57,6 +57,7 @@ namespace tlsTesting
             this.WriteMessage("signIn", "{\"access_id\": \"" + myMessage.access_id + "\"}");
             Thread.Sleep(500);
             this.WriteMessage("getUsers", "{\"access_id\": \"" + myMessage.access_id + "\"}");
+            this.WriteMessage("getChats", "{\"access_id\": \"" + myMessage.access_id + "\"}");
             // this.WriteMessage("createUser", "{\"access_id\": \"" + myMessage.access_id + "\", \"username\": \"" + "PatricksGmail" + "\"}");
             // this.WriteMessage("messageGet", "{\"access_id\": \"" + myMessage.access_id + "\", \"chatId\": \"" + "-1060544732" + "\", \"messageId\": \"" + "10" + "\"}");
             // this.WriteMessage("createChat", "{\"access_id\": \"" + myMessage.access_id + "\", \"chatName\": \"" + "myChat" + "\"}");
@@ -114,14 +115,28 @@ namespace tlsTesting
                 JArray usersArray = (JArray) message["usersList"];
                 int length = usersArray.Count;
                 Console.WriteLine("Length: " + length.ToString());
-                User myUser;
+                User aUser;
                 for (int i = 0; i < length; i++){
-                    myUser = new User(message["usersList"][i].ToString());
+                    aUser = new User(message["usersList"][i].ToString());
                 }
             }
 
             if (type == "receivedMessage"){
                 Message myMessage = new Message(message["receivedMessage"].ToString());
+            }
+
+            if (type == "userCreated"){
+                User myUser = new User(message["userCreated"].ToString());
+            }
+
+            if (type == "chatsList"){
+                JArray chatsArray = (JArray) message["chatsList"];
+                int length = chatsArray.Count;
+                Console.WriteLine("Length: " + length.ToString());
+                Chat aChat;
+                for (int i = 0; i < length; i++){
+                    aChat = new Chat(message["chatsList"][i].ToString());
+                }
             }
 
             // Console.WriteLine(l.ToString());
