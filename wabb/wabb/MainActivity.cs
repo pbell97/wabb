@@ -8,6 +8,7 @@ using Android.Support.Design.Widget;
 using Android.Support.V7.App;
 using Android.Views;
 using Android.Widget;
+using Java.Security;
 using Javax.Crypto;
 // Used for SecureStorage
 using Xamarin.Essentials;
@@ -24,6 +25,7 @@ namespace wabb
             Platform.Init(this, savedInstanceState);
             SetContentView(Resource.Layout.StoredItems);
 
+            // these are mutually exclusive
             SetupKeyCreationTesting();
             //SetupStoredItemTesting();
         }
@@ -34,12 +36,9 @@ namespace wabb
             var saveButton = FindViewById<Button>(Resource.Id.saveButton);
             var getButton = FindViewById<Button>(Resource.Id.getButton);
             var deleteButton = FindViewById<Button>(Resource.Id.deleteButton);
-
+            // Renamed, get all can feed into delete all if desired
             var deleteAllButton = FindViewById<Button>(Resource.Id.deleteAllButton);
-            var parentView = FindViewById<LinearLayout>(Resource.Id.linearLayout2);
-
-            // Remove since it is not possible
-            parentView.RemoveView(deleteAllButton);
+            deleteAllButton.Text = "Get All";
 
             // Janky add listeners to buttons
             saveButton.Click += (o, e) =>
@@ -61,8 +60,17 @@ namespace wabb
             deleteButton.Click += (o, e) =>
             {
                 var key = FindViewById<EditText>(Resource.Id.storedKeyText).Text;
-                var helper = new PlatformEncryptionKeyHelper(key);
-                Print(helper.DeleteKey().ToString());
+                Print(DeleteKey(key).ToString());
+            };
+            deleteAllButton.Click += (o, e) =>
+            {
+                var keyAliases = GetAllKeys();
+                var output = "Key aliases: \n";
+                foreach (var alias in keyAliases)
+                {
+                    output += alias + "\n";
+                }
+                Print(output);
             };
 
             // Grab the text inputs
@@ -112,6 +120,13 @@ namespace wabb
             messageInput.Hint = "Stored item contents";
         }
 
+        public void Print(string output)
+        {
+            var keysText = FindViewById<TextView>(Resource.Id.keysText);
+            keysText.Text = output;
+        }
+
+        // ----- SecureStorage Interactions -----
         public void CreateStoredItem(string key, string data)
         {
             try
@@ -151,22 +166,22 @@ namespace wabb
             SecureStorage.RemoveAll();
         }
 
-        public void Print(string output)
-        {
-            var keysText = FindViewById<TextView>(Resource.Id.keysText);
-            keysText.Text = output;
-        }
 
+        // ----- KeyStore Interactions -----
         public string CreateKey(string alias, string message)
         {
             // Make use of that helper bay-bee, yeet
             var helper = new PlatformEncryptionKeyHelper(alias);
-            helper.CreateKeyPair();
+            // Used for Asymm keys
+            //helper.CreateKeyPair();
+            // Used for Symm keys
+            var testKeyOutput = helper.CreateSymmetricKey();
+            return testKeyOutput;
 
             // If encrypted data is converted from byte[] to string, then back to byte[]
             // it does not come back the same, will not decrypt
-            var encryptedData = EncryptMessage(helper, message);
-            return DecryptMessage(helper, encryptedData);
+            //var encryptedData = EncryptMessage(helper, message); //TEMP uncomment once done testing
+            //return DecryptMessage(helper, encryptedData); //TEMP uncomment once done testing
         }
 
         public byte[] EncryptMessage(PlatformEncryptionKeyHelper helper, string message)
@@ -217,29 +232,42 @@ namespace wabb
             return decryptedMessage;
         }
 
-        public override bool OnCreateOptionsMenu(IMenu menu)
+        public JavaList<string> GetAllKeys()
         {
-            MenuInflater.Inflate(Resource.Menu.menu_main, menu);
-            return true;
-        }
+            var keyStore = KeyStore.GetInstance("AndroidKeyStore");
+            keyStore.Load(null);
 
-        public override bool OnOptionsItemSelected(IMenuItem item)
-        {
-            int id = item.ItemId;
-            if (id == Resource.Id.action_settings)
+            var keyAliasEnumerator = keyStore.Aliases();
+            var keyAliases = new JavaList<string>();
+
+            while (keyAliasEnumerator.HasMoreElements)
             {
-                return true;
+                keyAliases.Add(keyAliasEnumerator.NextElement());
             }
-
-            return base.OnOptionsItemSelected(item);
+            return keyAliases;
         }
 
-        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
+        public bool DeleteAllKeys()
         {
-            Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+            var output = true;
+            var keyAliases = GetAllKeys();
 
-            base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+            foreach(var alias in keyAliases)
+            {
+                // xamarin key is used to build SecureStorage
+                if (alias.Contains("xamarin"))
+                    continue;
+                output = output && DeleteKey(alias);
+            }
+            return output;
         }
+
+        public bool DeleteKey(string keyAlias)
+        {
+            var helper = new PlatformEncryptionKeyHelper(keyAlias);
+            return helper.DeleteKey();
+        }
+
     }
 }
 

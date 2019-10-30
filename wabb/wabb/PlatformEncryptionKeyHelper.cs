@@ -9,7 +9,8 @@ namespace wabb
     //  https://msicc.net/xamarin-android-asymmetric-encryption-without-any-user-input-or-hardcoded-values/
     public class PlatformEncryptionKeyHelper
     {
-        private readonly int KeySize = 2048; // I guess? We choose I believe
+        private readonly int AsymmetricKeySize = 2048; // I guess? We choose I believe
+        private readonly int SymmetricKeySize = 256;
         private readonly string KEYSTORE_NAME = "AndroidKeyStore"; // I guess? Static I believe
         private string _keyName; // key alias
         private KeyStore _androidKeyStore;
@@ -36,7 +37,7 @@ namespace wabb
                     new KeyGenParameterSpec.Builder(_keyName, KeyStorePurpose.Encrypt | KeyStorePurpose.Decrypt)
                         .SetBlockModes(KeyProperties.BlockModeEcb)
                         .SetEncryptionPaddings(KeyProperties.EncryptionPaddingRsaPkcs1)
-                        .SetRandomizedEncryptionRequired(false).SetKeySize(KeySize);
+                        .SetRandomizedEncryptionRequired(false).SetKeySize(AsymmetricKeySize);
                 keyGenerator.Initialize(builder.Build());
             }
             else 
@@ -47,14 +48,30 @@ namespace wabb
             keyGenerator.GenerateKeyPair();
         }
 
-        //TODO: Check that key pairs persist
+        //TODO
+        public string CreateSymmetricKey()
+        {
+            var generator = Javax.Crypto.KeyGenerator.GetInstance(KeyProperties.KeyAlgorithmAes, KEYSTORE_NAME);
+            var builder = new KeyGenParameterSpec.Builder(_keyName, KeyStorePurpose.Encrypt | KeyStorePurpose.Decrypt)
+                .SetKeySize(SymmetricKeySize);
+
+            generator.Init(builder.Build());
+            var symmKey = generator.GenerateKey();
+
+            _androidKeyStore.SetKeyEntry(_keyName, symmKey, null, null);
+            var retrievedKey = _androidKeyStore.GetKey(_keyName, null);
+            return retrievedKey.ToString();
+        }
+
         public IKey GetPublicKey()
         {
             if (!_androidKeyStore.ContainsAlias(_keyName))
                 return null;
-            return _androidKeyStore.GetCertificate(_keyName)?.PublicKey;
+            var publicKey = _androidKeyStore.GetCertificate(_keyName)?.PublicKey;
+            Android.Widget.Toast.MakeText(Android.App.Application.Context, publicKey.ToString(), Android.Widget.ToastLength.Long).Show();
+            return publicKey;
         }
-
+        
         public IKey GetPrivateKey()
         {
             if (!_androidKeyStore.ContainsAlias(_keyName))
