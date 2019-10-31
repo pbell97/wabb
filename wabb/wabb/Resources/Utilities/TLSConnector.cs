@@ -85,12 +85,13 @@ namespace wabb.Utilities
                 }
 
 
-                if (this.unreadMessages.Count >= 3){
-                    Console.WriteLine("\n\nReceived 10+ messages...");
-                    this.unreadMessages.ForEach(Console.WriteLine);
-                    this.tcpClient.Close();
-                    break;
-                }
+                //if (this.unreadMessages.Count >= 3)
+                //{
+                //    Console.WriteLine("\n\nReceived 10+ messages...");
+                //    this.unreadMessages.ForEach(Console.WriteLine);
+                //    this.tcpClient.Close();
+                //    break;
+                //}
             }
         }
 

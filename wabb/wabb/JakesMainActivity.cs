@@ -8,6 +8,8 @@ using wabb.Utilities;
 using System;
 using Newtonsoft.Json.Linq;
 using System.Threading;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Chat_UI
 {
@@ -18,7 +20,9 @@ namespace Chat_UI
         string access_id = "ya29.ImGvBwlATU1km2NqTPIKEINgNFcGkb9fag_OhX8YXrnOc8CvsVpnQM_Jm1jJEQV99fRAWwnthLLjaG66IHrN4ABq-EbOFlVEmEEWI8l9onASTTSncH5nNHRSYznzuC6xx3Dt";
         string[] convoList = { "Patrick", "Spencer", "Kohler", "Dylan", "Jonathan", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat" };
         User mainUser;
-
+        //List<User> otherUsers = new List<User>();
+        Dictionary<string, User> otherUsers = new Dictionary<string, User> { };
+        Dictionary<string, Chat> myChats = new Dictionary<string, Chat> { };
 
         // MESSAGE SCREEN
         void messageScreen(string Sender, string Recvr)
@@ -92,6 +96,8 @@ namespace Chat_UI
             var button7 = FindViewById<Button>(Resource.Id.button7);
             var button8 = FindViewById<Button>(Resource.Id.button8);
 
+            Button[] buttons = { button0, button1, button2, button3, button4, button5, button6, button7, button8 };
+
             for (int i = 0; i < (convoList.Length); i++)
             {
                 if (i == 0)
@@ -131,6 +137,15 @@ namespace Chat_UI
                     button8.Text = convoList[i];
                 }
             }
+
+            // TODO: Make this scrollable
+            string[] myChatkeys = myChats.Keys.Select(x => x.ToString()).ToArray();
+            for (int i = 0; i < myChats.Count; i++)
+            {
+                if (i >= 9) continue;
+                buttons[i].Text = myChats[myChatkeys[i]].chatName;
+            }
+
 
             // INPUT HANDLING
             // Button0 Click Event
@@ -231,24 +246,89 @@ namespace Chat_UI
             serverConnection.WriteMessage("signIn", message);
         }
 
+        // Creates mainUser and goes to convo screen
         void signInToServerResponse(object sender, EventArgs e)
         {
-            RunOnUiThread(() => { 
-                int messageIndex = serverConnection.unreadMessages.Count - 1;
-                if (messageIndex < 0) return;
-                JObject message = JObject.Parse(serverConnection.unreadMessages[messageIndex]);
-                string type = serverConnection.interpretMessageType(message);
+            int messageIndex = serverConnection.unreadMessages.Count - 1;
+            if (messageIndex < 0) return;
+            JObject message = JObject.Parse(serverConnection.unreadMessages[messageIndex]);
+            string type = serverConnection.interpretMessageType(message);
 
-                if (type == "signedIn")
+            if (type == "signedIn")
+            {
+                this.mainUser = new User();
+                mainUser.username = message[type]["username"].ToString();
+                mainUser.email = message[type]["email"].ToString();
+                mainUser.user_id = message[type]["id"].ToString();
+                mainUser.pubKey = message[type]["pubKey"].ToString();
+
+                // Post sign-in activities
+                getAllUsers();
+                getMyChats();
+            }
+        }
+
+        // Sends getUsers request to server
+        void getAllUsers()
+        {
+            string message = "{\"access_id\": \"" + this.access_id + "\"}";
+            serverConnection.WriteMessage("getUsers", message);
+        }
+
+        // Adds all users to otherUsers dictionary
+        void getAllUsersResponse(object sender, EventArgs e)
+        {
+            int messageIndex = serverConnection.unreadMessages.Count - 1;
+            if (messageIndex < 0) return;
+            JObject message = JObject.Parse(serverConnection.unreadMessages[messageIndex]);
+            string type = serverConnection.interpretMessageType(message);
+
+            if (type == "usersList"){
+                JArray usersArray = (JArray)message[type];
+                int length = usersArray.Count;
+                Console.WriteLine("Length: " + length.ToString());
+                User aUser;
+                for (int i = 0; i < length; i++)
                 {
-                    this.mainUser = new User();
-                    mainUser.username = message[type]["username"].ToString();
-                    mainUser.email = message[type]["email"].ToString();
-                    mainUser.user_id = message[type]["id"].ToString();
-                    mainUser.pubKey = message[type]["pubKey"].ToString();
-                    convoScreen();
+                    aUser = new User(message[type][i].ToString());
+                    otherUsers[aUser.username] = aUser;
                 }
-            });
+            }
+        }
+
+        // Sends request to get all user's chats
+        void getMyChats()
+        {
+            string message = "{\"access_id\": \"" + this.access_id + "\"}";
+            serverConnection.WriteMessage("getMyChats", message);
+        }
+
+        // Adds all users to otherUsers dictionary
+        void getMyChatsResponse(object sender, EventArgs e)
+        {
+            int messageIndex = serverConnection.unreadMessages.Count - 1;
+            if (messageIndex < 0) return;
+            JObject message = JObject.Parse(serverConnection.unreadMessages[messageIndex]);
+            string type = serverConnection.interpretMessageType(message);
+
+            if (type == "myChatsList")
+            {
+                JArray chatsArray = (JArray)message[type];
+                int length = chatsArray.Count;
+                Console.WriteLine("Length: " + length.ToString());
+                Chat aChat;
+                for (int i = 0; i < length; i++)
+                {
+                    aChat = new Chat(message[type][i].ToString());
+                    myChats[aChat.chatName] = aChat;
+                }
+
+                RunOnUiThread(() =>
+                {
+                    convoScreen();
+                });
+
+            }
         }
 
         protected override void OnCreate(Bundle savedInstanceState)
@@ -258,10 +338,12 @@ namespace Chat_UI
 
             //this.convoList 
             serverConnection = new TLSConnector();
-            serverConnection.OnMessageReceived += new EventHandler(signInToServerResponse);
+            serverConnection.OnMessageReceived += new EventHandler(signInToServerResponse); 
+            serverConnection.OnMessageReceived += new EventHandler(getAllUsersResponse);
+            serverConnection.OnMessageReceived += new EventHandler(getMyChatsResponse); 
 
-            // Starts connection to server on new thread
-            ThreadStart connectionThreadRef = new ThreadStart(serverConnection.Connect);
+             // Starts connection to server on new thread
+             ThreadStart connectionThreadRef = new ThreadStart(serverConnection.Connect);
             Thread connectionThread = new Thread(connectionThreadRef);
             connectionThread.Start();
 

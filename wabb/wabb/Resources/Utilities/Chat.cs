@@ -27,9 +27,9 @@ namespace wabb.Utilities
 
         public Chat(string JSON){
             JObject newChat = JObject.Parse(JSON);
+            if (this.symKey != null) this.symKey = newChat["symKey"].ToString();
             this.chatId = newChat["chatId"].ToString();
             this.chatName = newChat["chatName"].ToString();
-            this.symKey = newChat["symKey"].ToString();
             this.users = newChat["users"].ToString().Split(',');
         }
 
