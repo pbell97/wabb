@@ -7,32 +7,28 @@ using Android.App;
 using Android.Content;
 using Android.OS;
 using Android.Runtime;
+using Android.Util;
 using Android.Views;
 using Android.Widget;
 using Java.Security;
 using Javax.Crypto;
 using Javax.Crypto.Spec;
+using Xamarin.Essentials;
 
 namespace wabb
 {
-    class PasswordBasedKeyHelper : KeyHelper
+    class PasswordBasedKeyHelper
     {
-        private const int KEY_SIZE = 1024;
+        private const int KEY_SIZE = 256;
         private const string TRANSFORMATION = "AES";
         private const int ITERATIONS = 1000;
         private readonly byte[] SALT = Encoding.UTF8.GetBytes("Team Patrick, Kohler, Jake, and Spencer!"); // May change this to be non-static
 
+        private readonly string _keyAlias;
+
         public PasswordBasedKeyHelper(string keyName)
         {
             _keyAlias = keyName.ToLowerInvariant();
-            _androidKeyStore = KeyStore.GetInstance(KEYSTORE_NAME);
-            _androidKeyStore.Load(null);
-        }
-
-        // Do not use this. Use CreateKey(string).
-        public override void CreateKey()
-        {
-            // Umm so this can't be done? I guess inheriting from the abstract class kind of breaksdown here
         }
 
         public void CreateKey(string password)
@@ -40,19 +36,30 @@ namespace wabb
             DeleteKey();
 
             var spec = new PBEKeySpec(password.ToCharArray(), SALT, ITERATIONS, KEY_SIZE);
-            var passwordBasedKey = SecretKeyFactory.GetInstance("PBKDF2WithHmacSHA1").GenerateSecret(spec);
+            var keyGenerator = SecretKeyFactory.GetInstance("PBEWithHmacSHA256AndAES_256");
+            var key = keyGenerator.GenerateSecret(spec);
+            var serializedKey = Base64.EncodeToString(key.GetEncoded(), default);
 
-            _androidKeyStore.SetKeyEntry(_keyAlias, passwordBasedKey, null, null);
+            SecureStorage.SetAsync(_keyAlias, serializedKey);
+        }
+
+        public bool DeleteKey()
+        {
+            return SecureStorage.Remove(_keyAlias);
         }
 
         private IKey GetKey()
         {
-            if (!_androidKeyStore.ContainsAlias(_keyAlias))
+            var serializedKey = SecureStorage.GetAsync(_keyAlias).Result;
+            if (String.IsNullOrEmpty(serializedKey))
                 return null;
-            return _androidKeyStore.GetKey(_keyAlias, null);
+
+            var deserializedKey = Base64.Decode(serializedKey, default);
+            var key = new SecretKeySpec(deserializedKey, 0, deserializedKey.Length,TRANSFORMATION);
+            return key;
         }
 
-        public override byte[] EncryptData(string plaintext)
+        public byte[] EncryptData(string plaintext)
         {
             var cipher = Cipher.GetInstance(TRANSFORMATION);
             var key = GetKey();
@@ -68,7 +75,7 @@ namespace wabb
             return cipher.DoFinal(Encoding.UTF8.GetBytes(plaintext));
         }
 
-        public override string DecryptData(byte[] encryptedData)
+        public string DecryptData(byte[] encryptedData)
         {
             var cipher = Cipher.GetInstance(TRANSFORMATION);
             var key = GetKey();

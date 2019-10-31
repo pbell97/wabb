@@ -27,8 +27,8 @@ namespace wabb
             SetContentView(Resource.Layout.StoredItems);
 
             // these are mutually exclusive
-            //SetupPasswordBasedTesting();
-            SetupKeyCreationTesting();
+            SetupPasswordBasedTesting();
+            //SetupKeyCreationTesting();
             //SetupStoredItemTesting();
         }
 
