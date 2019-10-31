@@ -5,7 +5,14 @@ signIn: User needs to send a sign in message to register their connection
             "access_id": "access_id Goes Here"
         }
     }
-    - No response
+    - Responds with user's info:
+    {
+    "signedIn" : {
+        "username": username,
+        "email": email,
+        "id": id,
+        "pubKey": pubKey
+    }
 
 
 createUser: used the for creating user after signing in to google
@@ -164,7 +171,7 @@ getUsers: returns a list of all the data on the users
 
 getChats: returns list of all chats
     {
-        "type": "getUsers",
+        "type": "getChats",
         "content": {
             "access_id": "access_id goes here"
         }
@@ -172,6 +179,24 @@ getChats: returns list of all chats
     - Response:
     {
         "chatsList": [
+            {
+                "chatId": "chatId goes here"
+                "chatName": "chatName goes here"
+                "founderId": "founderId goes here"
+                "users": "users goes here"
+            }, continued...
+        ]
+    }
+getMyChats: returns list of all chats requesting user is in
+    {
+        "type": "getMyChats",
+        "content": {
+            "access_id": "access_id goes here"
+        }
+    }
+    - Response:
+    {
+        "myChatsList": [
             {
                 "chatId": "chatId goes here"
                 "chatName": "chatName goes here"

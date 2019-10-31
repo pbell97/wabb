@@ -59,6 +59,9 @@ function interpretMessage(socket, message){
         case "getChats":
             getChats(socket, message.content);
             break;
+        case "getMyChats":
+            getMyChats(socket, message.content);
+            break;
         default:
             socket.write(JSON.stringify({"response": "Invalid Request"}));
             break;
@@ -283,6 +286,23 @@ function signIn(socket, message){
             var userId = data.user_id;
             serverConnection.addUser(socket, userId);
 
+            // Returns user params
+            var query = "SELECT * FROM users WHERE id = \"" + userId + "\";";
+            executeSQLQuery(query, (error, results)=>{
+                if (results == undefined) return;
+                var messageToSend = {
+                    "signedIn" : {
+                        "username": results[0].username,
+                        "email": results[0].email,
+                        "id": results[0].id,
+                        "pubKey": results[0].pubKey
+                    }
+                }
+                socket.write(JSON.stringify(messageToSend));
+                console.log("Client: " + messageToSend.signedIn.username);
+            });
+
+
             // Check if any invites in buffer
             var query = "SELECT * FROM invitesBuffer WHERE destinationUser = \"" + userId + "\";";
             executeSQLQuery(query, (error, results)=>{
@@ -290,6 +310,7 @@ function signIn(socket, message){
                 for (var i = 0; i < results.length; i++){
                     var messageToSend = results[i].messageToSend;
                     socket.write(messageToSend);
+                    // TODO: DELETE MESSAGE FROM BUFFER
                 }
             });
 
@@ -337,7 +358,24 @@ function getChats(socket, message){
     });
 }
 
-
+function getMyChats(socket, message){
+    var access_id = message.access_id;
+    verifyTokenManually(access_id, (accepted, data) => {
+        if (accepted){
+            var user_id = data.user_id;
+            var query = "SELECT * FROM chats WHERE users LIKE \"%" + user_id + "%\";";
+            executeSQLQuery(query, (error, results)=>{
+                if (error) throw error;
+                var response = {
+                    "myChatsList": results
+                };
+                socket.write(JSON.stringify(response));
+            })
+        } else {
+            socket.write(JSON.stringify({"error": "Invalid Token"}));
+        }
+    });
+}
 
 function verifyTokenManually(access_id, callback){
     // Checks if token is cached instead of querying Google

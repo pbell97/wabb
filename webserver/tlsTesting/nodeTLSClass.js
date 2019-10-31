@@ -25,8 +25,7 @@ class TLSConnection {
     listen() {
         var thisClass = this;
         this.server = tls.createServer(this.options, (socket) => {
-            console.log('Server connected to client: ',
-                        socket.authorized ? 'authorized' : 'unauthorized');
+            console.log('Server connected to client: ');
             socket.setEncoding('utf8');
             // thisClass.sockets.push(socket);
         

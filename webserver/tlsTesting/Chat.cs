@@ -19,6 +19,7 @@ namespace tlsTesting
         public string chatId;
         public string chatName;
         public string symKey;
+        public string founderId;
         public string[] users;
 
         public Chat(){
@@ -27,10 +28,11 @@ namespace tlsTesting
 
         public Chat(string JSON){
             JObject newChat = JObject.Parse(JSON);
+            if (newChat["symKey"] != null)  this.symKey = newChat["symKey"].ToString();
             this.chatId = newChat["chatId"].ToString();
             this.chatName = newChat["chatName"].ToString();
-            this.symKey = newChat["symKey"].ToString();
             this.users = newChat["users"].ToString().Split(',');
+            this.founderId = newChat["founderId"].ToString();
         }
 
         public string createJSONString(){
