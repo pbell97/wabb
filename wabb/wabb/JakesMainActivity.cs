@@ -3,12 +3,16 @@ using Android.OS;
 using Android.Support.V7.App;
 using Android.Runtime;
 using Android.Widget;
+using wabb;
 
 namespace Chat_UI
 {
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
     public class MainActivity : AppCompatActivity
     {
+        string[] convoList;
+
+
         // MESSAGE SCREEN
         void messageScreen(string Sender, string Recvr)
         {
@@ -18,6 +22,12 @@ namespace Chat_UI
             string[] Conversation = new string[]{ Sender, "Kill me please lol", Recvr, "Nah fam sorry I am busy" };
             string messages = "";
             int messageListLen = Conversation.Length;
+
+            Button backButton = FindViewById<Button>(Resource.Id.backButton);
+            backButton.Click += (o,e) =>
+            {
+
+            }
 
             // Build conversation string from message senders/receivers and their conversation
             for (int i = 0; i < (messageListLen); i++)
@@ -214,6 +224,8 @@ namespace Chat_UI
         {
             base.OnCreate(savedInstanceState);
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
+            this.convoList = new string[]{ "Patrick", "Spencer", "Kohler", "Dylan", "Jonathan", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat" };
+
             loginScreen();
 
         }
