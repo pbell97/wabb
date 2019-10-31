@@ -4,13 +4,20 @@ using Android.Support.V7.App;
 using Android.Runtime;
 using Android.Widget;
 using wabb;
+using wabb.Utilities;
+using System;
+using Newtonsoft.Json.Linq;
+using System.Threading;
 
 namespace Chat_UI
 {
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
     public class MainActivity : AppCompatActivity
     {
-        string[] convoList;
+        TLSConnector serverConnection;
+        string access_id = "ya29.ImGvBwlATU1km2NqTPIKEINgNFcGkb9fag_OhX8YXrnOc8CvsVpnQM_Jm1jJEQV99fRAWwnthLLjaG66IHrN4ABq-EbOFlVEmEEWI8l9onASTTSncH5nNHRSYznzuC6xx3Dt";
+        string[] convoList = { "Patrick", "Spencer", "Kohler", "Dylan", "Jonathan", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat" };
+        User mainUser;
 
 
         // MESSAGE SCREEN
@@ -22,12 +29,6 @@ namespace Chat_UI
             string[] Conversation = new string[]{ Sender, "Kill me please lol", Recvr, "Nah fam sorry I am busy" };
             string messages = "";
             int messageListLen = Conversation.Length;
-
-            Button backButton = FindViewById<Button>(Resource.Id.backButton);
-            backButton.Click += (o,e) =>
-            {
-
-            }
 
             // Build conversation string from message senders/receivers and their conversation
             for (int i = 0; i < (messageListLen); i++)
@@ -69,13 +70,15 @@ namespace Chat_UI
             var BackButton = FindViewById<Button>(Resource.Id.backButton);
             BackButton.Click += (sender, e) =>
             {
-                convoScreen(Conversation, Sender);
+                convoScreen(Sender);
             };
         }
 
         // Conversation Screen
-        void convoScreen(string[] convoList, string username)
+        void convoScreen(string username = null)
         {
+            if (username == null) username = this.mainUser.username;
+
             SetContentView(Resource.Layout.conversations);
 
             // POPULATE CONVERSATION BUTTONS
@@ -214,21 +217,58 @@ namespace Chat_UI
                 // SEND LOGIN AND VERIFY
 
                 // Pass conversation list and username to convoScreen
-                string[] convoList = { "Patrick", "Spencer", "Kohler", "Dylan", "Jonathan", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat" };
-                convoScreen(convoList, username);
+                signInToServer();
+                //convoScreen(username);
             };
 
+        }
+
+
+        // Sends sign-in message to server to log IP w/socket
+        void signInToServer()
+        {
+            string message = "{\"access_id\": \"" + this.access_id + "\"}";
+            serverConnection.WriteMessage("signIn", message);
+        }
+
+        void signInToServerResponse(object sender, EventArgs e)
+        {
+            RunOnUiThread(() => { 
+                int messageIndex = serverConnection.unreadMessages.Count - 1;
+                if (messageIndex < 0) return;
+                JObject message = JObject.Parse(serverConnection.unreadMessages[messageIndex]);
+                string type = serverConnection.interpretMessageType(message);
+
+                if (type == "signedIn")
+                {
+                    this.mainUser = new User();
+                    mainUser.username = message[type]["username"].ToString();
+                    mainUser.email = message[type]["email"].ToString();
+                    mainUser.user_id = message[type]["id"].ToString();
+                    mainUser.pubKey = message[type]["pubKey"].ToString();
+                    convoScreen();
+                }
+            });
         }
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
-            this.convoList = new string[]{ "Patrick", "Spencer", "Kohler", "Dylan", "Jonathan", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat" };
 
+            //this.convoList 
+            serverConnection = new TLSConnector();
+            serverConnection.OnMessageReceived += new EventHandler(signInToServerResponse);
+
+            // Starts connection to server on new thread
+            ThreadStart connectionThreadRef = new ThreadStart(serverConnection.Connect);
+            Thread connectionThread = new Thread(connectionThreadRef);
+            connectionThread.Start();
+
+            // Starts the login screen
             loginScreen();
-
         }
+
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
         {
             Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
