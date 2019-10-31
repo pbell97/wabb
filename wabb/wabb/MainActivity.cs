@@ -18,6 +18,7 @@ namespace wabb
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
     public class MainActivity : AppCompatActivity
     {
+        private string keyStyle = "symmetric";
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -26,8 +27,69 @@ namespace wabb
             SetContentView(Resource.Layout.StoredItems);
 
             // these are mutually exclusive
+            //SetupPasswordBasedTesting();
             SetupKeyCreationTesting();
             //SetupStoredItemTesting();
+        }
+
+        public void SetupPasswordBasedTesting()
+        {
+            // Grab the buttons
+            var saveButton = FindViewById<Button>(Resource.Id.saveButton);
+            var getButton = FindViewById<Button>(Resource.Id.getButton);
+            var deleteButton = FindViewById<Button>(Resource.Id.deleteButton);
+            // Renamed, get all can feed into delete all if desired
+            var deleteAllButton = FindViewById<Button>(Resource.Id.deleteAllButton);
+            deleteAllButton.Text = "Get All";
+
+            // Remove unused inputs
+            var radioGroup = FindViewById<RadioGroup>(Resource.Id.radioGroup1);
+            var parent = FindViewById<LinearLayout>(Resource.Id.linearLayout1);
+            parent.RemoveView(radioGroup);
+
+            // Janky add listeners to buttons
+            saveButton.Click += (o, e) =>
+            {
+                var key = FindViewById<EditText>(Resource.Id.storedKeyText).Text;
+                var password = FindViewById<EditText>(Resource.Id.storedMessageText).Text;
+                var helper = new PasswordBasedKeyHelper(key);
+
+                helper.CreateKey(password);
+                var encryptedData = helper.EncryptData("Password based key creation success");
+                Print(helper.DecryptData(encryptedData));
+            };
+            getButton.Click += (o, e) =>
+            {
+                var key = FindViewById<EditText>(Resource.Id.storedKeyText).Text;
+                var helper = new PasswordBasedKeyHelper(key);
+
+                var encryptedData = helper.EncryptData("Password based key retrieved success");
+                Print(helper.DecryptData(encryptedData));
+            };
+
+            deleteButton.Click += (o, e) =>
+            {
+                var key = FindViewById<EditText>(Resource.Id.storedKeyText).Text;
+                var helper = new PasswordBasedKeyHelper(key);
+                Print(helper.DeleteKey().ToString());
+            };
+            deleteAllButton.Click += (o, e) =>
+            {
+                var keyAliases = GetAllKeys();
+                var output = "Key aliases: \n";
+                foreach (var alias in keyAliases)
+                {
+                    output += alias + "\n";
+                }
+                Print(output);
+            };
+
+            // Grab the text inputs
+            var nameInput = FindViewById<EditText>(Resource.Id.storedKeyText);
+            var messageInput = FindViewById<EditText>(Resource.Id.storedMessageText);
+            // Set prompts
+            nameInput.Hint = "Password based key alias";
+            messageInput.Hint = "Password";
         }
 
         public void SetupKeyCreationTesting()
@@ -40,6 +102,12 @@ namespace wabb
             var deleteAllButton = FindViewById<Button>(Resource.Id.deleteAllButton);
             deleteAllButton.Text = "Get All";
 
+            // !!!
+            // Put private key in symm cipher => No output
+            // Put symm key in asymm cipher => Exception
+            var symmButton = FindViewById<RadioButton>(Resource.Id.SymmRadioButton);
+            var asymmButton = FindViewById<RadioButton>(Resource.Id.AsymmRadioButton);
+
             // Janky add listeners to buttons
             saveButton.Click += (o, e) =>
             {
@@ -51,10 +119,19 @@ namespace wabb
             {
                 var key = FindViewById<EditText>(Resource.Id.storedKeyText).Text;
                 var data = FindViewById<EditText>(Resource.Id.storedMessageText).Text;
-                var helper = new PlatformEncryptionKeyHelper(key);
+                KeyHelper helper;
 
-                var encryptedData = EncryptMessage(helper, data);
-                Print(DecryptMessage(helper, encryptedData));
+                if (keyStyle == "asymmetric")
+                {
+                    helper = new AsymmetricKeyHelper(key);
+                }
+                else
+                {
+                    helper = new SymmetricKeyHelper(key);
+                }
+
+                var encryptedData = helper.EncryptData(data);
+                Print(helper.DecryptData(encryptedData));
             };
 
             deleteButton.Click += (o, e) =>
@@ -73,6 +150,15 @@ namespace wabb
                 Print(output);
             };
 
+            symmButton.Click += (o, e) =>
+            {
+                keyStyle = "symmetric";
+            };
+            asymmButton.Click += (o, e) =>
+            {
+                keyStyle = "asymmetric";
+            };
+
             // Grab the text inputs
             var nameInput = FindViewById<EditText>(Resource.Id.storedKeyText);
             var messageInput = FindViewById<EditText>(Resource.Id.storedMessageText);
@@ -88,6 +174,11 @@ namespace wabb
             var getButton = FindViewById<Button>(Resource.Id.getButton);
             var deleteButton = FindViewById<Button>(Resource.Id.deleteButton);
             var deleteAllButton = FindViewById<Button>(Resource.Id.deleteAllButton);
+
+            // Remove unused inputs
+            var radioGroup = FindViewById<RadioGroup>(Resource.Id.radioGroup1);
+            var parent = FindViewById<LinearLayout>(Resource.Id.linearLayout1);
+            parent.RemoveView(radioGroup);
 
             // Janky add listeners to buttons
             saveButton.Click += (o, e) =>
@@ -171,65 +262,23 @@ namespace wabb
         public string CreateKey(string alias, string message)
         {
             // Make use of that helper bay-bee, yeet
-            var helper = new PlatformEncryptionKeyHelper(alias);
-            // Used for Asymm keys
-            //helper.CreateKeyPair();
-            // Used for Symm keys
-            var testKeyOutput = helper.CreateSymmetricKey();
-            return testKeyOutput;
+            KeyHelper helper;
+
+            if (keyStyle == "asymmetric")
+            {
+                helper = new AsymmetricKeyHelper(alias);
+            }
+            else
+            {
+                helper = new SymmetricKeyHelper(alias);
+            }
+
+            helper.CreateKey();
 
             // If encrypted data is converted from byte[] to string, then back to byte[]
             // it does not come back the same, will not decrypt
-            //var encryptedData = EncryptMessage(helper, message); //TEMP uncomment once done testing
-            //return DecryptMessage(helper, encryptedData); //TEMP uncomment once done testing
-        }
-
-        public byte[] EncryptMessage(PlatformEncryptionKeyHelper helper, string message)
-        {
-            // Define the key parameters (I just copied this)
-            var transformation = "RSA/ECB/PKCS1Padding";
-            var cipher = Cipher.GetInstance(transformation);
-            var publicKey = helper.GetPublicKey();
-            if (publicKey == null)
-            {
-                return null;
-            }
-
-            // Set up encryption machine
-            cipher.Init(CipherMode.EncryptMode, publicKey);
-
-            // Mostly jsut copied this, convert UTF8 to bytes?
-            var encryptedData = cipher.DoFinal(Encoding.UTF8.GetBytes(message));
-            return encryptedData;
-        }
-
-        public string DecryptMessage(PlatformEncryptionKeyHelper helper, byte[] encryptedData)
-        {
-            // Define the key parameters (I just copied this)
-            var transformation = "RSA/ECB/PKCS1Padding";
-            var cipher = Cipher.GetInstance(transformation);
-            if (encryptedData == null)
-            {
-                return "Failed to recieve encrypted data";
-            }
-
-            var privateKey = helper.GetPrivateKey();
-            if (privateKey == null)
-            {
-                return "Failed to retrieve private key";
-            }
-            // Set up decryption machine
-            cipher.Init(CipherMode.DecryptMode, helper.GetPrivateKey());
-
-            // This was when I tried to pull the encrypted data from the viewer as string
-            // the string must add padding/data because it excepts
-            //var encryptedMessageView = FindViewById<TextView>(Resource.Id.encrypted);
-            //var encryptedMessage = Encoding.UTF8.GetBytes(encryptedMessageView.Text);
-            
-            // go from bytes to string
-            var decryptedBytes = cipher.DoFinal(encryptedData);
-            var decryptedMessage = Encoding.UTF8.GetString(decryptedBytes);
-            return decryptedMessage;
+            var encryptedData = helper.EncryptData(message);
+            return helper.DecryptData(encryptedData);
         }
 
         public JavaList<string> GetAllKeys()
@@ -259,12 +308,21 @@ namespace wabb
                     continue;
                 output = output && DeleteKey(alias);
             }
+            keyAliases.Dispose();
             return output;
         }
 
         public bool DeleteKey(string keyAlias)
         {
-            var helper = new PlatformEncryptionKeyHelper(keyAlias);
+            KeyHelper helper;
+            if (keyStyle == "asymmetric")
+            {
+                helper = new AsymmetricKeyHelper(keyAlias);
+            }
+            else
+            {
+                helper = new SymmetricKeyHelper(keyAlias);
+            }
             return helper.DeleteKey();
         }
 
