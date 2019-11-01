@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Text;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Android.App;
 using Android.OS;
@@ -7,6 +7,7 @@ using Android.Runtime;
 using Android.Support.Design.Widget;
 using Android.Support.V7.App;
 using Android.Views;
+using Android.Util;
 using Android.Widget;
 using Java.Security;
 using Javax.Crypto;
@@ -30,6 +31,14 @@ namespace wabb
             SetupPasswordBasedTesting();
             //SetupKeyCreationTesting();
             //SetupStoredItemTesting();
+
+            Print(DEBUGTEST());
+        }
+
+        public string DEBUGTEST()
+        {
+            var output = "DEBUGTEST\n";
+            return output;
         }
 
         public void SetupPasswordBasedTesting()
@@ -54,7 +63,7 @@ namespace wabb
                 var password = FindViewById<EditText>(Resource.Id.storedMessageText).Text;
                 var helper = new PasswordBasedKeyHelper(key);
 
-                helper.CreateKey(password);
+                helper.CreateKey(password, "dummy@email.code");
                 var encryptedData = helper.EncryptData("Password based key creation success");
                 Print(helper.DecryptData(encryptedData));
             };

@@ -31,11 +31,11 @@ namespace wabb
             _keyAlias = keyName.ToLowerInvariant();
         }
 
-        public void CreateKey(string password)
+        public void CreateKey(string password, string userEmail)
         {
             DeleteKey();
 
-            var spec = new PBEKeySpec(password.ToCharArray(), SALT, ITERATIONS, KEY_SIZE);
+            var spec = new PBEKeySpec((password+userEmail).ToCharArray(), SALT, ITERATIONS, KEY_SIZE);
             var keyGenerator = SecretKeyFactory.GetInstance("PBEWithHmacSHA256AndAES_256");
             var key = keyGenerator.GenerateSecret(spec);
             var serializedKey = Base64.EncodeToString(key.GetEncoded(), default);
