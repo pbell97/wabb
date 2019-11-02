@@ -128,7 +128,14 @@ namespace wabb.Utilities
             }
 
             if (type == "receivedMessage"){
-                Message myMessage = new Message(message["receivedMessage"].ToString());
+                //JArray messagesArray = (JArray)message["receivedMessage"];
+                //int length = messagesArray.Count;
+                //Console.WriteLine("Length: " + length.ToString());
+                //WabbMessage myMessage;
+                //for (int i = 0; i < length; i++)
+                //{
+                //    myMessage = new WabbMessage(message["receivedMessage"][i].ToString());
+                //}
             }
 
             if (type == "userCreated"){

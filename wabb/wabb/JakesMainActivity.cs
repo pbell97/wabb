@@ -17,22 +17,43 @@ namespace Chat_UI
     public class MainActivity : AppCompatActivity
     {
         TLSConnector serverConnection;
-        string access_id = "ya29.ImGvBwlATU1km2NqTPIKEINgNFcGkb9fag_OhX8YXrnOc8CvsVpnQM_Jm1jJEQV99fRAWwnthLLjaG66IHrN4ABq-EbOFlVEmEEWI8l9onASTTSncH5nNHRSYznzuC6xx3Dt";
+        string access_id = "ya29.ImGvB2mgWUfgN6L8qWBkmK_9_Suj7GEAhl1u9i_2msGTQDbjDOkTk8uF7Ah3H6KbMpKxHmclVRbjxP1KFxa147cG5hyEUC6m6jAEAyr5dE71K_3I9g9-GsJp2OTCZNxNZpLb";
         string[] convoList = { "Patrick", "Spencer", "Kohler", "Dylan", "Jonathan", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat" };
         User mainUser;
-        //List<User> otherUsers = new List<User>();
-        Dictionary<string, User> otherUsers = new Dictionary<string, User> { };
-        Dictionary<string, Chat> myChats = new Dictionary<string, Chat> { };
+        Dictionary<string, User> otherUsers = new Dictionary<string, User> { }; // username:user
+        Dictionary<string, string> usernameIdMatches = new Dictionary<string, string> { };  //user_id:username
+        Dictionary<string, Chat> myChats = new Dictionary<string, Chat> { };    // chatname:chat
+        Dictionary<string, string> chatNameMatches = new Dictionary<string, string> { };    // chat_id:chatname
+        string activeChatName = "";
+        string activeChatId = "";
+        string currentView = "";
 
         // MESSAGE SCREEN
-        void messageScreen(string Sender, string Recvr)
+        void messageScreen(string chatName)
         {
+            string Sender = "SENDER";
+            string Recvr = "RECVR";
             SetContentView(Resource.Layout.messages);
+            currentView = "messageScreen";
+
+
+            activeChatName = chatName;
+            activeChatId = myChats[chatName].chatId;
 
             // INSERTION OF MESSAGE CONTENTS
             string[] Conversation = new string[]{ Sender, "Kill me please lol", Recvr, "Nah fam sorry I am busy" };
             string messages = "";
             int messageListLen = Conversation.Length;
+
+            int numOfMessages = myChats[chatName].messages.Count;
+            for (int i = 0; i < numOfMessages; i++)
+            {
+                string username = usernameIdMatches[myChats[chatName].messages[i].user_id];
+                string messageToAdd = username + "\n\t" + myChats[chatName].messages[i].messageContent + "\n";
+                messages += messageToAdd;
+            }
+            
+
 
             // Build conversation string from message senders/receivers and their conversation
             for (int i = 0; i < (messageListLen); i++)
@@ -46,6 +67,7 @@ namespace Chat_UI
                     messages = messages + Conversation[i] + "\n";
                 }
             }
+
             // Display built string
             FindViewById<TextView>(Resource.Id.messageDisplay).Text = messages;
 
@@ -60,15 +82,17 @@ namespace Chat_UI
 
             // Send message from field
             var SendButton = FindViewById<Button>(Resource.Id.sendButton);
+            var that = this;
             SendButton.Click += (sender, e) =>
             {
-                string sendMessage = newMessage;
-                messages = messages + Sender + "\n\t" + newMessage + "\n";
-                FindViewById<TextView>(Resource.Id.messageDisplay).Text = messages;
-                inputField.Text = "";
+                //string sendMessage = newMessage;
+                //messages = messages + Sender + "\n\t" + newMessage + "\n";
+                //FindViewById<TextView>(Resource.Id.messageDisplay).Text = messages;
 
                 // SEND MESSAGE TO RECVR
+                that.sendChatMessage(activeChatId, newMessage);
 
+                inputField.Text = "";
             };
             // Send back to conversation page
             var BackButton = FindViewById<Button>(Resource.Id.backButton);
@@ -84,6 +108,8 @@ namespace Chat_UI
             if (username == null) username = this.mainUser.username;
 
             SetContentView(Resource.Layout.conversations);
+            currentView = "convoScreen";
+
 
             // POPULATE CONVERSATION BUTTONS
             var button0 = FindViewById<Button>(Resource.Id.button0);
@@ -152,55 +178,55 @@ namespace Chat_UI
             button0.Click += (sender, e) =>
             {
                 // Send to messages screen
-                messageScreen(username, convoList[0]);
+                messageScreen(myChats[myChatkeys[0]].chatName);
             };
             // Button1 Click Event
             button1.Click += (sender, e) =>
             {
                 // Send to messages screen
-                messageScreen(username, convoList[1]);
+                messageScreen(myChats[myChatkeys[1]].chatName);
             };
             // Button2 Click Event
             button2.Click += (sender, e) =>
             {
                 // Send to messages screen
-                messageScreen(username, convoList[2]);
+                messageScreen(myChats[myChatkeys[2]].chatName);
             };
             // Button3 Click Event
             button3.Click += (sender, e) =>
             {
                 // Send to messages screen
-                messageScreen(username, convoList[3]);
+                messageScreen(myChats[myChatkeys[3]].chatName);
             };
             // Button4 Click Event
             button4.Click += (sender, e) =>
             {
                 // Send to messages screen
-                messageScreen(username, convoList[4]);
+                messageScreen(myChats[myChatkeys[4]].chatName);
             };
             // Button5 Click Event
             button5.Click += (sender, e) =>
             {
                 // Send to messages screen
-                messageScreen(username, convoList[5]);
+                messageScreen(myChats[myChatkeys[5]].chatName);
             };
             // Button6 Click Event
             button6.Click += (sender, e) =>
             {
                 // Send to messages screen
-                messageScreen(username, convoList[6]);
+                messageScreen(myChats[myChatkeys[6]].chatName);
             };
             // Button7 Click Event
             button7.Click += (sender, e) =>
             {
                 // Send to messages screen
-                messageScreen(username, convoList[7]);
+                messageScreen(myChats[myChatkeys[7]].chatName);
             };
             // Button8 Click Event
             button8.Click += (sender, e) =>
             {
                 // Send to messages screen
-                messageScreen(username, convoList[8]);
+                messageScreen(myChats[myChatkeys[8]].chatName);
             };
         }
 
@@ -208,6 +234,7 @@ namespace Chat_UI
         void loginScreen()
         {
             SetContentView(Resource.Layout.login);
+            currentView = "loginScreen";
 
             string username = "";
             string password = "";
@@ -237,6 +264,9 @@ namespace Chat_UI
             };
 
         }
+
+
+        // Sign in calls : signInToServer() -> getAllUsers() -> getMyChats() -> getNewMessages() -> convoScreen()
 
 
         // Sends sign-in message to server to log IP w/socket
@@ -292,6 +322,7 @@ namespace Chat_UI
                 {
                     aUser = new User(message[type][i].ToString());
                     otherUsers[aUser.username] = aUser;
+                    usernameIdMatches[aUser.user_id] = aUser.username;
                 }
             }
         }
@@ -321,6 +352,12 @@ namespace Chat_UI
                 {
                     aChat = new Chat(message[type][i].ToString());
                     myChats[aChat.chatName] = aChat;
+                    chatNameMatches[aChat.chatId] = aChat.chatName;
+                }
+
+                // Get new message for all chats
+                foreach (KeyValuePair<string, Chat> entry in myChats) {
+                    getNewMessages(entry.Value);
                 }
 
                 RunOnUiThread(() =>
@@ -331,6 +368,60 @@ namespace Chat_UI
             }
         }
 
+        // Requests new messages for a chat
+        void getNewMessages(Chat requestingChat) 
+        {
+            int lastMessageIndex = requestingChat.messages.Count - 1;
+            int lastMessageId = 0;
+            if (lastMessageIndex != -1) { 
+                lastMessageId = requestingChat.messages[lastMessageIndex].messageId;
+            }
+            string message = "{\"access_id\": \"" + this.access_id + "\", \"chatId\": \"" + requestingChat.chatId + "\", \"messageId\": \"" + lastMessageId.ToString() + "\"}";
+            serverConnection.WriteMessage("messageGet", message);
+        }
+
+        // Adds new messages to appropriate chat objects, updates screen if neccessary
+        void proccessNewMessages(object sender, EventArgs e)
+        {
+            int messageIndex = serverConnection.unreadMessages.Count - 1;
+            if (messageIndex < 0) return;
+            JObject message = JObject.Parse(serverConnection.unreadMessages[messageIndex]);
+            string type = serverConnection.interpretMessageType(message);
+
+            if (type == "receivedMessage")
+            {
+                JArray messagesArray = (JArray)message["receivedMessage"];
+                int length = messagesArray.Count;
+                Console.WriteLine("Length: " + length.ToString());
+                WabbMessage newMessage;
+                for (int i = 0; i < length; i++)
+                {
+                    newMessage = new WabbMessage(message["receivedMessage"][i].ToString());
+                    string chatName = chatNameMatches[newMessage.chatId];
+                    myChats[chatName].messages.Add(newMessage);
+
+                    // If message is received while viewing the chat
+                    if (activeChatId == newMessage.chatId && currentView == "messageScreen")
+                    {
+                        string username = usernameIdMatches[myChats[chatName].messages[i].user_id];
+                        string messageToAdd = username + "\n\t" + newMessage.messageContent + "\n";
+                        FindViewById<TextView>(Resource.Id.messageDisplay).Text = FindViewById<TextView>(Resource.Id.messageDisplay).Text + messageToAdd;
+                    }
+                }                
+            }
+        }
+
+        // Sends a message to the server to post in the chat
+        void sendChatMessage(string chatId, string messageContent)
+        {
+            string message = "{\"access_id\": \"" + this.access_id + "\", \"chatId\": \"" + chatId + "\", \"messageContent\": \"" + messageContent + "\"}";
+            serverConnection.WriteMessage("messagePost", message);
+        }
+
+
+
+
+
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
@@ -340,10 +431,11 @@ namespace Chat_UI
             serverConnection = new TLSConnector();
             serverConnection.OnMessageReceived += new EventHandler(signInToServerResponse); 
             serverConnection.OnMessageReceived += new EventHandler(getAllUsersResponse);
-            serverConnection.OnMessageReceived += new EventHandler(getMyChatsResponse); 
+            serverConnection.OnMessageReceived += new EventHandler(getMyChatsResponse);
+            serverConnection.OnMessageReceived += new EventHandler(proccessNewMessages); 
 
-             // Starts connection to server on new thread
-             ThreadStart connectionThreadRef = new ThreadStart(serverConnection.Connect);
+            // Starts connection to server on new thread
+            ThreadStart connectionThreadRef = new ThreadStart(serverConnection.Connect);
             Thread connectionThread = new Thread(connectionThreadRef);
             connectionThread.Start();
 

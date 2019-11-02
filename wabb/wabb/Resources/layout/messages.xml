@@ -22,19 +22,20 @@
         android:layout_height="389.5dp"
         android:id="@+id/messageDisplay"
         android:layout_margin="10dp" />
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/newMessage"
-        android:layout_marginHorizontal="10dp"
-        android:layout_gravity="end" />
-    <Button
-        android:text="SEND"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/sendButton"
-        android:layout_marginHorizontal="10dp"
-        android:layout_gravity="end" />
+	<EditText
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:id="@+id/newMessage"
+		android:layout_gravity="end"
+		android:layout_marginHorizontal="10dp" />
+	<Button
+		android:text="SEND"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:id="@+id/sendButton"
+		android:layout_marginHorizontal="10dp"
+		android:layout_gravity="end"
+		android:paddingBottom="20dp" />
     <Button
         android:text="BUTTON"
         android:layout_width="match_parent"

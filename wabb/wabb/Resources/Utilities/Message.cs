@@ -18,7 +18,7 @@ using Newtonsoft.Json.Linq;
 
 namespace wabb.Utilities
 {
-    public class Message
+    public class WabbMessage
     {
         public string access_id;
         public string chatId;
@@ -26,11 +26,11 @@ namespace wabb.Utilities
         public string user_id;
         public int messageId;
 
-        public Message(){
+        public WabbMessage(){
 
         }
 
-        public Message(string JSON){
+        public WabbMessage(string JSON){
             JObject newMessage = JObject.Parse(JSON);
             if (newMessage["access_id"] != null) this.access_id = newMessage["access_id"].ToString();
             this.chatId = newMessage["chatId"].ToString();

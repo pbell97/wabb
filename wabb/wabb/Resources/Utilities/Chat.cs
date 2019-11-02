@@ -20,9 +20,10 @@ namespace wabb.Utilities
         public string chatName;
         public string symKey;
         public string[] users;
+        public List<WabbMessage> messages;
 
         public Chat(){
-
+            this.messages = new List<WabbMessage>();
         }
 
         public Chat(string JSON){
@@ -31,6 +32,8 @@ namespace wabb.Utilities
             this.chatId = newChat["chatId"].ToString();
             this.chatName = newChat["chatName"].ToString();
             this.users = newChat["users"].ToString().Split(',');
+
+            this.messages = new List<WabbMessage>();
         }
 
         public string createJSONString(){
