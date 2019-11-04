@@ -17,7 +17,7 @@ namespace Chat_UI
     public class MainActivity : AppCompatActivity
     {
         TLSConnector serverConnection;
-        string access_id = "ya29.ImGvB_sR-7hF0R0NZUTJKxwG2gFHa8XOj6bL1wJUvyGAiKob0GpYqCZrCfTXdwieDKFlPPez0ssZ-TJYioVdJZyyA0oSSuNG3ZK0AwDKojcsjefezPiOA4yhzxPpnLHN-jWn";
+        string access_id = "ya29.ImGvByVGA_sf8HdIXIAavvguV8WfXE5GE5NXrdK-NKKR2QkqpHDtVv0fmwQzVZwDuptDYUiYOS3ZUTWFLi_rrJykK_n_f7cL-_BDJkF-eLo7g76jAUgxe-0huoIlguXzQzPb";
         string[] convoList = { "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat" };
         User mainUser;
         Dictionary<string, User> otherUsers = new Dictionary<string, User> { }; // username:user
@@ -506,7 +506,7 @@ namespace Chat_UI
                     // If message is received while viewing the chat
                     if (activeChatId == newMessage.chatId && currentView == "messageScreen")
                     {
-                        string username = usernameIdMatches[myChats[chatName].messages[i].user_id];
+                        string username = usernameIdMatches[newMessage.user_id];
                         string messageToAdd = username + "\n\t" + newMessage.messageContent + "\n";
                         FindViewById<TextView>(Resource.Id.messageDisplay).Text = FindViewById<TextView>(Resource.Id.messageDisplay).Text + messageToAdd;
                         // TODO: Scroll textbox down
