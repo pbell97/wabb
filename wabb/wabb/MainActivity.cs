@@ -28,8 +28,8 @@ namespace wabb
             SetContentView(Resource.Layout.StoredItems);
 
             // these are mutually exclusive
-            SetupPasswordBasedTesting();
-            //SetupKeyCreationTesting();
+            //SetupPasswordBasedTesting();
+            SetupKeyCreationTesting();
             //SetupStoredItemTesting();
 
             Print(DEBUGTEST());
@@ -128,19 +128,22 @@ namespace wabb
             {
                 var key = FindViewById<EditText>(Resource.Id.storedKeyText).Text;
                 var data = FindViewById<EditText>(Resource.Id.storedMessageText).Text;
-                KeyHelper helper;
 
                 if (keyStyle == "asymmetric")
                 {
-                    helper = new AsymmetricKeyHelper(key);
+                    var helper = new AsymmetricKeyHelper(key);
+
+                    var encryptedData = helper.EncryptData(data);
+                    Print(helper.DecryptData(encryptedData));
                 }
                 else
                 {
-                    helper = new SymmetricKeyHelper(key);
+                    var helper = new SymmetricKeyHelper(key);
+
+                    var encryptedData = helper.EncryptData(data);
+                    Print(helper.DecryptData(encryptedData));
                 }
 
-                var encryptedData = helper.EncryptData(data);
-                Print(helper.DecryptData(encryptedData));
             };
 
             deleteButton.Click += (o, e) =>
@@ -270,24 +273,26 @@ namespace wabb
         // ----- KeyStore Interactions -----
         public string CreateKey(string alias, string message)
         {
-            // Make use of that helper bay-bee, yeet
-            KeyHelper helper;
-
             if (keyStyle == "asymmetric")
             {
-                helper = new AsymmetricKeyHelper(alias);
+                var helper = new AsymmetricKeyHelper(alias); helper.CreateKey();
+
+                // If encrypted data is converted from byte[] to string, then back to byte[]
+                // it does not come back the same, will not decrypt
+                var encryptedData = helper.EncryptData(message);
+                return helper.DecryptData(encryptedData);
             }
             else
             {
-                helper = new SymmetricKeyHelper(alias);
+                var helper = new SymmetricKeyHelper(alias); helper.CreateKey();
+
+                // If encrypted data is converted from byte[] to string, then back to byte[]
+                // it does not come back the same, will not decrypt
+                var encryptedData = helper.EncryptData(message);
+                return helper.DecryptData(encryptedData);
             }
 
-            helper.CreateKey();
-
-            // If encrypted data is converted from byte[] to string, then back to byte[]
-            // it does not come back the same, will not decrypt
-            var encryptedData = helper.EncryptData(message);
-            return helper.DecryptData(encryptedData);
+            
         }
 
         public JavaList<string> GetAllKeys()
@@ -323,16 +328,16 @@ namespace wabb
 
         public bool DeleteKey(string keyAlias)
         {
-            KeyHelper helper;
             if (keyStyle == "asymmetric")
             {
-                helper = new AsymmetricKeyHelper(keyAlias);
+                var helper = new AsymmetricKeyHelper(keyAlias);
+                return helper.DeleteKey();
             }
             else
             {
-                helper = new SymmetricKeyHelper(keyAlias);
+                var helper = new SymmetricKeyHelper(keyAlias);
+                return helper.DeleteKey();
             }
-            return helper.DeleteKey();
         }
 
     }

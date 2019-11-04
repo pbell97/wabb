@@ -3,48 +3,67 @@ using Android.OS;
 using Android.Security.Keystore;
 using Java.Security;
 using Javax.Crypto;
+using Javax.Crypto.Spec;
 using System.Text;
 
 namespace wabb
 {
-    public class SymmetricKeyHelper : KeyHelper
+    public class SymmetricKeyHelper
     {
         private const int KEY_SIZE = 256;
-        private const string TRANSFORMATION = "AES/ECB/PKCS7Padding";
+        private const string TRANSFORMATION = "AES";//"AES/ECB/PKCS7Padding";
+
+        private readonly string _keyAlias;
+        private SecureStorageHelper _storageHelper = new SecureStorageHelper();
 
         public SymmetricKeyHelper(string keyName)
         {
             _keyAlias = keyName.ToLowerInvariant();
-            _androidKeyStore = KeyStore.GetInstance(KEYSTORE_NAME);
-            _androidKeyStore.Load(null);
+            //_androidKeyStore = KeyStore.GetInstance(KEYSTORE_NAME);
+            //_androidKeyStore.Load(null);
         }
 
-        public override void CreateKey()
+        public void CreateKey()
         {
             // Removes key if it already exists, no change otherwise
             DeleteKey();
-            var keyGenerator = KeyGenerator.GetInstance(KeyProperties.KeyAlgorithmAes, KEYSTORE_NAME);
-            var builder = new KeyGenParameterSpec.Builder(_keyAlias, KeyStorePurpose.Encrypt | KeyStorePurpose.Decrypt)
-                .SetBlockModes(KeyProperties.BlockModeEcb)
-                .SetEncryptionPaddings(KeyProperties.EncryptionPaddingPkcs7)
-                .SetRandomizedEncryptionRequired(false).SetKeySize(KEY_SIZE);
 
-            keyGenerator.Init(builder.Build());
-            var symmKey = keyGenerator.GenerateKey();
+            var keyGenerator = KeyGenerator.GetInstance("AES");
+            keyGenerator.Init(KEY_SIZE);
+            var secretKey = keyGenerator.GenerateKey();
 
-            _androidKeyStore.SetKeyEntry(_keyAlias, symmKey, null, null);
-            builder.Dispose();
-            keyGenerator.Dispose();
+            _storageHelper.StoreItem<byte[]>(_keyAlias, secretKey.GetEncoded());
+
+            //var keyGenerator = KeyGenerator.GetInstance(KeyProperties.KeyAlgorithmAes);
+            //var builder = new KeyGenParameterSpec.Builder(_keyAlias, KeyStorePurpose.Encrypt | KeyStorePurpose.Decrypt)
+            //    .SetBlockModes(KeyProperties.BlockModeEcb)
+            //    .SetEncryptionPaddings(KeyProperties.EncryptionPaddingPkcs7)
+            //    .SetRandomizedEncryptionRequired(false).SetKeySize(KEY_SIZE);
+
+            //keyGenerator.Init(builder.Build());
+            //var symmKey = keyGenerator.GenerateKey();
+
+            //_androidKeyStore.SetKeyEntry(_keyAlias, symmKey, null, null);
+            //builder.Dispose();
+            //keyGenerator.Dispose();
         }
 
         private IKey GetKey()
         {
-            if (!_androidKeyStore.ContainsAlias(_keyAlias))
-                return null;
-            return _androidKeyStore.GetKey(_keyAlias, null);
+            var jsonKey = _storageHelper.GetItem<byte[]>(_keyAlias);
+            var key = new SecretKeySpec(jsonKey, 0, jsonKey.Length, TRANSFORMATION);
+            return key;
+            //if (!_androidKeyStore.ContainsAlias(_keyAlias))
+            //    return null;
+            //return _androidKeyStore.GetKey(_keyAlias, null);
         }
 
-        public override byte[] EncryptData(string plaintext)
+        public bool DeleteKey()
+        {
+            return _storageHelper.RemoveItem(_keyAlias);
+        }
+
+        public byte[] EncryptData(string plaintext)
         {
             var cipher = Cipher.GetInstance(TRANSFORMATION);
             var key = GetKey();
@@ -60,7 +79,7 @@ namespace wabb
             return cipher.DoFinal(Encoding.UTF8.GetBytes(plaintext));
         }
 
-        public override string DecryptData(byte[] encryptedData)
+        public string DecryptData(byte[] encryptedData)
         {
             var cipher = Cipher.GetInstance(TRANSFORMATION);
             var key = GetKey();
