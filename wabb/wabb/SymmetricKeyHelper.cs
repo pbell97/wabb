@@ -10,6 +10,10 @@ namespace wabb
 {
     public class SymmetricKeyHelper
     {
+        // Please ignore commented code
+        // The commented code is the former Symm keys in the keystore
+        // Unfortunately, keystore keys cannot be retrieved and thus
+        //  cannot be sent to other users
         private const int KEY_SIZE = 256;
         private const string TRANSFORMATION = "AES";//"AES/ECB/PKCS7Padding";
 
@@ -28,10 +32,11 @@ namespace wabb
             // Removes key if it already exists, no change otherwise
             DeleteKey();
 
+            // Generate AES key
             var keyGenerator = KeyGenerator.GetInstance("AES");
             keyGenerator.Init(KEY_SIZE);
             var secretKey = keyGenerator.GenerateKey();
-
+            // Push into the secureStorage
             _storageHelper.StoreItem<byte[]>(_keyAlias, secretKey.GetEncoded());
 
             //var keyGenerator = KeyGenerator.GetInstance(KeyProperties.KeyAlgorithmAes);
@@ -50,6 +55,7 @@ namespace wabb
 
         private IKey GetKey()
         {
+            // Pull key and reform it into a key
             var jsonKey = _storageHelper.GetItem<byte[]>(_keyAlias);
             var key = new SecretKeySpec(jsonKey, 0, jsonKey.Length, TRANSFORMATION);
             return key;
@@ -65,6 +71,7 @@ namespace wabb
 
         public byte[] EncryptData(string plaintext)
         {
+            // Get encryption cipher
             var cipher = Cipher.GetInstance(TRANSFORMATION);
             var key = GetKey();
             if (key == null)
@@ -75,7 +82,7 @@ namespace wabb
             // Set up encryption machine
             cipher.Init(CipherMode.EncryptMode, key);
 
-            // Mostly just copied this, convert UTF8 to bytes?
+            // Cipher on the bytes
             return cipher.DoFinal(Encoding.UTF8.GetBytes(plaintext));
         }
 
