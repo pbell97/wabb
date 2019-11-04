@@ -112,19 +112,12 @@ function messageGet(socket, message){
             var messageId = (message.messageId) ? message.messageId : 0;
             userIsInChat(chatId, id, (isInChat) => {
                 if (isInChat){
-                    executeSQLQuery(`SELECT id, messageId, messageContent FROM messages WHERE chatid = "${chatId}" AND messageId > ${messageId};`, (error, results) =>{
+                    executeSQLQuery(`SELECT id AS user_id, messageId, messageContent, chatId FROM messages WHERE chatid = "${chatId}" AND messageId > ${messageId} ORDER BY messageId ASC;`, (error, results) =>{
                         if (error) throw error;
-                        for (var i = 0; i < results.length; i++){
-                            var response = {
-                                "receivedMessage": {
-                                    "user_id": results[i].id,
-                                    "chatId": chatId,
-                                    "messageId": results[i].messageId,
-                                    "messageContent": results[i].messageContent
-                                }
-                            }
-                            socket.write(JSON.stringify(response));
-                        }
+                        var response = {
+                            "receivedMessage": results
+                        };
+                        socket.write(JSON.stringify(response));
                     });
                 } else {
                     socket.write(JSON.stringify({"response": "User is not in chat"}));
@@ -183,8 +176,9 @@ function joinChatGet(socket, message){
                     serverConnection.addressPortAndSocket[address].write(JSON.stringify(response));
                     console.log("Sending message : " + JSON.stringify(response) + "   to " + address);
                 } else {
-                    var query = `INSERT INTO invitesBuffer (destinationUser, messageToSend) VALUES ("${founderId}", "${JSON.stringify(response)}")`;
+                    var query = `INSERT INTO invitesBuffer (destinationUser, messageToSend) VALUES ("${founderId}", '${JSON.stringify(response)}')`;
                     executeSQLQuery(query, (error, result)=>{
+                        if (error) throw error;
                         console.log("Added message to invites buffer");
                     });
                 }
@@ -225,9 +219,10 @@ function allowUserToJoinChat(socket, message){
                                 serverConnection.addressPortAndSocket[address].write(JSON.stringify(response));
                                 console.log("Sending message : " + JSON.stringify(response) + "   to " + address);
                             } else {
-                                var query = `INSERT INTO invitesBuffer (destinationUser, messageToSend) VALUES ("${joinerId}", "${JSON.stringify(response)}")`;
+                                var query = `INSERT INTO invitesBuffer (destinationUser, messageToSend) VALUES ("${joinerId}", '${JSON.stringify(response)}')`;
                                 executeSQLQuery(query, (error, result)=>{
-                                    console.log("Added message to invites buffer");
+                                    if (error) throw error;
+                                    console.log("Added message to invites buffer: " + result);
                                 });
                             }
                         })
@@ -270,8 +265,13 @@ function createChat(socket, message){
             var querry = "INSERT INTO chats (chatId, chatName, founderId, users) VALUES (\"" + chatId + "\", \"" + chatName + "\", \"" + user_id + "\", \"" + user_id + "\");";
             executeSQLQuery(querry, (error, results) => {
                 if (error) throw error;
-                var response = {"chatCreated": {"chatId": chatId, "chatName": chatName}};
-                socket.write(JSON.stringify(response));
+
+                var query = "SELECT * FROM chats WHERE chatId = \"" + chatId + "\";";
+                executeSQLQuery(query, (error, results) => {
+                    if (error) throw error;
+                    var response = {"chatCreated": results[0]};
+                    socket.write(JSON.stringify(response));
+                });
             });
         }else {
             socket.write(JSON.stringify({"error": "Invalid Token"}));
@@ -448,16 +448,16 @@ function sendMessageToRecipients(senderId, message, chatId, messageId){
     executeSQLQuery(query, (error, result)=>{
         var users = result[0]['users'].split(',');
         var response = {
-            "receivedMessage":{
+            "receivedMessage":[{
                 "user_id": senderId,
                 "chatId": chatId,
                 "messageId": messageId,
                 "messageContent": message
-            }
+            }]
         }
         console.log(serverConnection.usersAndAddressPort);
         for (var i = 0; i < users.length; i++){
-            if (users[i] == senderId) continue;
+            // if (users[i] == senderId) continue;
             var addressPort = serverConnection.usersAndAddressPort[users[i]];
             if (addressPort == undefined) continue;
             console.log("Sending message to " + addressPort);

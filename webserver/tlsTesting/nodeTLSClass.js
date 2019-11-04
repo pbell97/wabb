@@ -25,7 +25,7 @@ class TLSConnection {
     listen() {
         var thisClass = this;
         this.server = tls.createServer(this.options, (socket) => {
-            console.log('Server connected to client: ');
+            console.log('Server connected to client but has yet to sign in... ');
             socket.setEncoding('utf8');
             // thisClass.sockets.push(socket);
         
@@ -49,6 +49,7 @@ class TLSConnection {
                     // Delete socket from both tracking lists
                     var addressAndPort = socket.remoteAddress + socket.remotePort
                     var userId = thisClass.addressPortAndUser[addressAndPort];
+                    console.log("Client disconnected: " + thisClass.addressPortAndUser[addressAndPort]);
                     delete thisClass.addressPortAndSocket[addressAndPort];
                     delete thisClass.addressPortAndUser[addressAndPort];
                     delete thisClass.usersAndAddressPort[userId];

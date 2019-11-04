@@ -47,8 +47,10 @@ createChat: creates a chat with the given name
     - Reponse:
     {
         "chatCreated": {
-            "chatId": chatId, 
-            "chatName": chatName
+            "chatId": "chatId goes here"
+            "chatName": "chatName goes here"
+            "founderId": "founderId goes here"
+            "users": "users goes here"
         }
     }
 
@@ -118,12 +120,12 @@ messagePost: when a user sends a message to a chat
     }
     - Server sends the message to all connected users in the format:
     {
-        "receivedMessage": {
+        "receivedMessage": [{
             "user_id": senderId,
             "chatId": chatId,
             "messageId": messageId,
             "messageContent": message
-        }
+        }]
     }
 
 messageGet: gets messages for a chat from a specific point
@@ -137,12 +139,14 @@ messageGet: gets messages for a chat from a specific point
     }
     - Response:
     {
-        "receivedMessage": {
+        "receivedMessage": [ 
+            {
             "user_id": senderId,
             "chatId": chatId,
             "messageId": messageId,
             "messageContent": message
-        }
+        } .. continues ..
+        ]
     }
 
 getUsers: returns a list of all the data on the users

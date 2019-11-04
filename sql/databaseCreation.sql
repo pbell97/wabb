@@ -14,3 +14,6 @@ INSERT INTO users (username, email, id, pubKey) VALUES ("PatricksGMail", "mewing
 
 INSERT INTO chats (chatId, chatName, founderId, users) VALUES ("2136482312", "FirstChat", "114493981662126316478", "114493981662126316478,113467843674295288430");
 INSERT INTO chats (chatId, chatName, founderId, users) VALUES ("-1060544732", "myChat", "114493981662126316478", "114493981662126316478");
+
+-- INSERT INTO messages(id, chatId, messageId, messageContent) VALUES ("114493981662126316478", "2136482312", 1, "FirstMessage");
+-- INSERT INTO messages(id, chatId, messageId, messageContent) VALUES ("113467843674295288430", "2136482312", 2, "SecoondMessage");
