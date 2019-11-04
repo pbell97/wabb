@@ -7,13 +7,9 @@ using Android.App;
 using Android.Content;
 using Android.OS;
 using Android.Runtime;
-using Android.Util;
-using Android.Views;
-using Android.Widget;
 using Java.Security;
 using Javax.Crypto;
 using Javax.Crypto.Spec;
-using Xamarin.Essentials;
 
 namespace wabb
 {
@@ -25,6 +21,7 @@ namespace wabb
         private readonly byte[] SALT = Encoding.UTF8.GetBytes("Team Patrick, Kohler, Jake, and Spencer!"); // May change this to be non-static
 
         private readonly string _keyAlias;
+        private SecureStorageHelper _storageHelper = new SecureStorageHelper();
 
         public PasswordBasedKeyHelper(string keyName)
         {
@@ -38,24 +35,19 @@ namespace wabb
             var spec = new PBEKeySpec((password+userEmail).ToCharArray(), SALT, ITERATIONS, KEY_SIZE);
             var keyGenerator = SecretKeyFactory.GetInstance("PBEWithHmacSHA256AndAES_256");
             var key = keyGenerator.GenerateSecret(spec);
-            var serializedKey = Base64.EncodeToString(key.GetEncoded(), default);
 
-            SecureStorage.SetAsync(_keyAlias, serializedKey);
+            _storageHelper.StoreItem<byte[]>(_keyAlias, key.GetEncoded());
         }
 
         public bool DeleteKey()
         {
-            return SecureStorage.Remove(_keyAlias);
+            return _storageHelper.RemoveItem(_keyAlias);
         }
 
         private IKey GetKey()
         {
-            var serializedKey = SecureStorage.GetAsync(_keyAlias).Result;
-            if (String.IsNullOrEmpty(serializedKey))
-                return null;
-
-            var deserializedKey = Base64.Decode(serializedKey, default);
-            var key = new SecretKeySpec(deserializedKey, 0, deserializedKey.Length,TRANSFORMATION);
+            var jsonKey = _storageHelper.GetItem<byte[]>(_keyAlias);
+            var key = new SecretKeySpec(jsonKey, 0, jsonKey.Length, TRANSFORMATION);
             return key;
         }
 
