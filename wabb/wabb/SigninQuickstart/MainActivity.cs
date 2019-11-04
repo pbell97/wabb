@@ -97,17 +97,23 @@ namespace SigninQuickstart
 			if (requestCode == RC_SIGN_IN)
 			{
 				var result = Auth.GoogleSignInApi.GetSignInResultFromIntent(data);
+
 				HandleSignInResult(result);
 			}
 		}
 
 		public void HandleSignInResult(GoogleSignInResult result)
 		{
+
 			Log.Debug(TAG, "handleSignInResult:" + result.IsSuccess);
-			if (result.IsSuccess)
+            
+           
+            if (result.IsSuccess)
 			{
-				// Signed in successfully, show authenticated UI.
-				var acct = result.SignInAccount;
+
+                // Signed in successfully, show authenticated UI.
+                var acct = result.SignInAccount;
+                
 				mStatusTextView.Text = string.Format(GetString(Resource.String.signed_in_fmt), acct.DisplayName);
 				UpdateUI(true);
 			}

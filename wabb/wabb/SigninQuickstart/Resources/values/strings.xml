@@ -6,8 +6,8 @@
     <string name="signed_in_fmt">Signed in as: {0}</string>
     <string name="signing_in">Signing in…</string>
     <string name="signed_out">Signed out</string>
-	<string name="loading">Loading…</string>
-    <string name="server_client_id">154600092899-9tdri4c4k80lg38ak4bd9s6aro95s9nt.apps.googleusercontent.com</string>
+	  <string name="loading">Loading…</string>
+    <string name="server_client_id">194187796125-1tk73jfb7ors490aj61ehh9kaos1ie5d.apps.googleusercontent.com</string>
 
     <!-- Google Play Services error for Toast -->
     <string name="play_services_error_fmt">Google Play Services Error: {0}</string>
