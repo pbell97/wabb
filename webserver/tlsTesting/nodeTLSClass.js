@@ -38,6 +38,7 @@ class TLSConnection {
                     
                 } catch (error) {
                     console.error(error);
+                    console.log("Received JSON with error: " + receivedJSON);
                 }
             });
         

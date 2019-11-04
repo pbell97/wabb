@@ -146,6 +146,7 @@ function createUserPost(socket, message){
                 var result = executeSQLQuery("INSERT INTO users (username, email, id, pubKey) VALUES (\"" + username + "\",\"" + data.email + "\",\"" + data.user_id + "\", \"" + pubKey + "\");");
                 var response = {"userCreated": {"access_id": access_id, "username": username, "user_id": data.user_id, "email": data.email, "pubKey": pubKey}};
                 socket.write(JSON.stringify(JSON.stringify(response)));
+                console.log("Created User:" + username);
             });
         } else {
             socket.write(JSON.stringify({"error": "Invalid Token"}));
@@ -208,24 +209,29 @@ function allowUserToJoinChat(socket, message){
                         var users = results[0].users + "," + joinerId;
                         var chatName = results[0].chatName;
                         var chatUsers = results[0].users;
-                        executeSQLQuery(`UPDATE chats SET users = "${users}" WHERE chatId = "${chatId}";`, (error, results) => {
-                            if (error) throw error;
-                            // Message joinerId w/ symkey
-                            var response = {"acceptedToChat": {"symKey": symKey, "chatId": chatId, "chatName": chatName, "users": chatUsers}};
-                            var address = serverConnection.usersAndAddressPort[joinerId];
 
-                            // Checks if users is connected, else put message in invites buffer
-                            if (address != undefined){
-                                serverConnection.addressPortAndSocket[address].write(JSON.stringify(response));
-                                console.log("Sending message : " + JSON.stringify(response) + "   to " + address);
-                            } else {
-                                var query = `INSERT INTO invitesBuffer (destinationUser, messageToSend) VALUES ("${joinerId}", '${JSON.stringify(response)}')`;
-                                executeSQLQuery(query, (error, result)=>{
-                                    if (error) throw error;
-                                    console.log("Added message to invites buffer: " + result);
-                                });
-                            }
-                        })
+                        // If already added, don't re-add to list
+                        if (!chatUsers.includes(joinerId)){
+                            executeSQLQuery(`UPDATE chats SET users = "${users}" WHERE chatId = "${chatId}";`, (error, results) => {
+                                if (error) throw error;
+                            });
+                        } 
+
+                        // Message joinerId w/ symkey
+                        var response = {"acceptedToChat": {"symKey": symKey, "chatId": chatId, "chatName": chatName, "users": chatUsers}};
+                        var address = serverConnection.usersAndAddressPort[joinerId];
+
+                        // Checks if users is connected, else put message in invites buffer
+                        if (address != undefined){
+                            serverConnection.addressPortAndSocket[address].write(JSON.stringify(response));
+                            console.log("Sending message : " + JSON.stringify(response) + "   to " + address);
+                        } else {
+                            var query = `INSERT INTO invitesBuffer (destinationUser, messageToSend) VALUES ("${joinerId}", '${JSON.stringify(response)}')`;
+                            executeSQLQuery(query, (error, result)=>{
+                                if (error) throw error;
+                                console.log("Added message to invites buffer: " + result);
+                            });
+                        } 
                     })
                 }else {
                     socket.write(JSON.stringify({"error": "You are not the owner"}));
@@ -289,17 +295,22 @@ function signIn(socket, message){
             // Returns user params
             var query = "SELECT * FROM users WHERE id = \"" + userId + "\";";
             executeSQLQuery(query, (error, results)=>{
-                if (results == undefined) return;
-                var messageToSend = {
-                    "signedIn" : {
-                        "username": results[0].username,
-                        "email": results[0].email,
-                        "id": results[0].id,
-                        "pubKey": results[0].pubKey
+                try {
+                    if (results == undefined) return;
+                    if (error) throw error;
+                    var messageToSend = {
+                        "signedIn" : {
+                            "username": results[0].username,
+                            "email": results[0].email,
+                            "id": results[0].id,
+                            "pubKey": results[0].pubKey
+                        }
                     }
+                    socket.write(JSON.stringify(messageToSend));
+                    console.log("Client: " + messageToSend.signedIn.username);
+                } catch (error) {
+                    console.log("Had error in sign-in: " + error);
                 }
-                socket.write(JSON.stringify(messageToSend));
-                console.log("Client: " + messageToSend.signedIn.username);
             });
 
 
