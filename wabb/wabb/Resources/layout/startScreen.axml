@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="vertical" android:layout_width="match_parent" android:layout_height="match_parent">
+	<CheckedTextView
+		android:layout_width="match_parent"
+		android:layout_height="183.0dp"
+		android:minWidth="25px"
+		android:minHeight="25px"
+		android:id="@+id/checkedTextView1"
+		android:text="Welcome to WhatsApp But Better (wabb)!"
+		android:layout_gravity="center"
+		android:gravity="center_horizontal"/>
+	<Button
+		android:text="Login"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:id="@+id/loginButton" />
+	<Button
+		android:text="Create Account"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:id="@+id/createAccountButton" />
+</LinearLayout>

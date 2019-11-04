@@ -17,8 +17,8 @@ namespace Chat_UI
     public class MainActivity : AppCompatActivity
     {
         TLSConnector serverConnection;
-        string access_id = "ya29.ImGvB7sVy2DPK5YsbF9NWnPr8K5Au1GcpRCZFH8C0zXal72gEc0jjRP3j2MZHGWX8oARYS4gcS6A_856Pz46VT_3ISjH6J8fZSFTHofh9-hcX3CqAHoS2fSOBz9Bwedg2xaV";
-        string[] convoList = { "Patrick", "Spencer", "Kohler", "Dylan", "Jonathan", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat" };
+        string access_id = "ya29.ImGvB_sR-7hF0R0NZUTJKxwG2gFHa8XOj6bL1wJUvyGAiKob0GpYqCZrCfTXdwieDKFlPPez0ssZ-TJYioVdJZyyA0oSSuNG3ZK0AwDKojcsjefezPiOA4yhzxPpnLHN-jWn";
+        string[] convoList = { "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat" };
         User mainUser;
         Dictionary<string, User> otherUsers = new Dictionary<string, User> { }; // username:user
         Dictionary<string, string> usernameIdMatches = new Dictionary<string, string> { };  //user_id:username
@@ -55,18 +55,18 @@ namespace Chat_UI
             
 
 
-            // Build conversation string from message senders/receivers and their conversation
-            for (int i = 0; i < (messageListLen); i++)
-            {
-                if (i % 2 == 0)
-                {
-                    messages = messages + Conversation[i] + "\n\t";
-                }
-                else
-                {
-                    messages = messages + Conversation[i] + "\n";
-                }
-            }
+            //// Build conversation string from message senders/receivers and their conversation
+            //for (int i = 0; i < (messageListLen); i++)
+            //{
+            //    if (i % 2 == 0)
+            //    {
+            //        messages = messages + Conversation[i] + "\n\t";
+            //    }
+            //    else
+            //    {
+            //        messages = messages + Conversation[i] + "\n";
+            //    }
+            //}
 
             // Display built string
             FindViewById<TextView>(Resource.Id.messageDisplay).Text = messages;
@@ -319,8 +319,55 @@ namespace Chat_UI
             };
         }
 
+        // Startup screen
+        void startupScreen()
+        {
+            SetContentView(Resource.Layout.startScreen);
+            currentView = "startScreen";
+
+            var loginButton = FindViewById<Button>(Resource.Id.loginButton);
+            loginButton.Click += (sender, e) =>
+            {
+                loginScreen();
+            };
+
+            var createAccountButton = FindViewById<Button>(Resource.Id.createAccountButton);
+            createAccountButton.Click += (sender, e) =>
+            {
+                createAccountScreen();
+            };
+        }
+
+        void createAccountScreen()
+        {
+            SetContentView(Resource.Layout.createAccount);
+            currentView = "startScreen";
+
+            var createAcc = FindViewById<Button>(Resource.Id.createUserButton);
+            createAcc.Click += (sender, e) =>
+            {
+                // GOOGLE SIGN IN CODE
+                // TODO: Get access code
+                // TODO: Remove when get login working
+                access_id = "ya29.ImCvB6VbczgIvH8uP3FVXS7fPuzGyf9M3LLzbDfF2yUBVcy2hKLMkvNumUZNyRVnKSqm-E4kAPNND1zTkWZKvoCY-ew8FsBj0ywd0APSWrv4KscyeScTp9xLLGUvabVThS0";
+
+                string username = FindViewById<EditText>(Resource.Id.username).Text;
+                string restorationPassword = FindViewById<EditText>(Resource.Id.restorationPassword).Text;
+
+                // TODO: generate pubkey
+                string pubKey = "testPubKey";
 
 
+                createUser(username, pubKey);
+            };
+
+            var backButton = FindViewById<Button>(Resource.Id.backButton);
+            backButton.Click += (sender, e) =>
+            {
+                startupScreen();
+            };
+
+        }
 
         // Sign in calls : signInToServer() -> getAllUsers() -> getMyChats() -> getNewMessages() -> convoScreen()
 
@@ -528,6 +575,26 @@ namespace Chat_UI
 
         }
 
+        void createUser(string username, string pubKey)
+        {
+            string message = "{\"access_id\": \"" + this.access_id + "\", \"username\": \"" + username + "\", \"pubKey\": \"" + pubKey + "\"}";
+            serverConnection.WriteMessage("createUser", message);
+        }
+
+        void proccessCreatedUser(object sender, EventArgs e)
+        {
+            int messageIndex = serverConnection.unreadMessages.Count - 1;
+            if (messageIndex < 0) return;
+            JObject message = JObject.Parse(serverConnection.unreadMessages[messageIndex]);
+            string type = serverConnection.interpretMessageType(message);
+
+            if (type == "userCreated")
+            {
+                access_id = message[type]["access_id"].ToString();
+                signInToServer();
+            }
+        }
+
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
@@ -540,6 +607,7 @@ namespace Chat_UI
             serverConnection.OnMessageReceived += new EventHandler(getMyChatsResponse);
             serverConnection.OnMessageReceived += new EventHandler(proccessNewMessages); 
             serverConnection.OnMessageReceived += new EventHandler(proccessNewChat); 
+            serverConnection.OnMessageReceived += new EventHandler(proccessCreatedUser); 
 
             // Starts connection to server on new thread
             ThreadStart connectionThreadRef = new ThreadStart(serverConnection.Connect);
@@ -547,7 +615,8 @@ namespace Chat_UI
             connectionThread.Start();
 
             // Starts the login screen
-            loginScreen();
+            //loginScreen();
+            startupScreen();
         }
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)

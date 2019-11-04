@@ -113,18 +113,20 @@ namespace wabb.Utilities
 
         public void DisplayMessage(object sender, EventArgs e){
             Console.WriteLine("Got message: " + this.unreadMessages[0]);
-            JObject message = JObject.Parse(this.unreadMessages[0]);
-            string type = interpretMessageType(message);
+            int messageIndex = this.unreadMessages.Count - 1;
+            if (messageIndex < 0) return;
+            JObject message = JObject.Parse(this.unreadMessages[messageIndex]);
+            string type = this.interpretMessageType(message);
             Console.WriteLine("Type: " + type);
 
             if (type == "usersList"){
-                JArray usersArray = (JArray) message["usersList"];
-                int length = usersArray.Count;
-                Console.WriteLine("Length: " + length.ToString());
-                User aUser;
-                for (int i = 0; i < length; i++){
-                    aUser = new User(message["usersList"][i].ToString());
-                }
+                //JArray usersArray = (JArray) message["usersList"];
+                //int length = usersArray.Count;
+                //Console.WriteLine("Length: " + length.ToString());
+                //User aUser;
+                //for (int i = 0; i < length; i++){
+                //    aUser = new User(message["usersList"][i].ToString());
+                //}
             }
 
             if (type == "receivedMessage"){
@@ -139,17 +141,17 @@ namespace wabb.Utilities
             }
 
             if (type == "userCreated"){
-                User myUser = new User(message["userCreated"].ToString());
+                //User myUser = new User(message["userCreated"].ToString());
             }
 
             if (type == "chatsList"){
-                JArray chatsArray = (JArray) message["chatsList"];
-                int length = chatsArray.Count;
-                Console.WriteLine("Length: " + length.ToString());
-                Chat aChat;
-                for (int i = 0; i < length; i++){
-                    aChat = new Chat(message["chatsList"][i].ToString());
-                }
+                //JArray chatsArray = (JArray) message["chatsList"];
+                //int length = chatsArray.Count;
+                //Console.WriteLine("Length: " + length.ToString());
+                //Chat aChat;
+                //for (int i = 0; i < length; i++){
+                //    aChat = new Chat(message["chatsList"][i].ToString());
+                //}
             }
 
             if (type == "error")
