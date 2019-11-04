@@ -26,7 +26,7 @@ namespace tlsTesting
         public event EventHandler OnMessageReceived;
         
         public TLSConnector(){
-            this.OnMessageReceived += new EventHandler(DisplayMessage);
+            // this.OnMessageReceived += new EventHandler(DisplayMessage);
         }
 
         public void Connect() 
@@ -44,26 +44,26 @@ namespace tlsTesting
             ASCIIEncoding encoder;
 
             User myUser = new User();
-            myUser.username = "PatricksMSU";
+            myUser.username = "PatricksGMail";
             // MsState email
-            myUser.access_id = "ya29.ImGpByjBgXYDMlO9sdT4AZqRsVh2XSHqwT39Hd6xWOtajP9t3dTD0QRLlXQIl1izveE1rBI2o8gopgFtdG83ttubgfBUN0HZ24UEJ2zD4uSYwbI4kT6ZLaUlmN-J3gt0hLD2";
+            myUser.access_id = "ya29.ImCvBz7tBSA-yKtai_ON3b5H7U_Kx1Xa-9K4ilGJAVRJ6cPIetMgDGb9OvHklh6SxtVO6ASbOvzJpdRjrSym84xs6E0db3xbZRz6uqQU0EeOHNnIoC27koucdIxIId8it4k";
             // Gmail below
             // myUser.access_id = "ya29.Il-bB3YQJzIemDXlWBtnXg2MRlrs0inhqcXr1e0XlhFnhvCn2ClPQh_1eefAEY4wY3bOaeRXxbjriLvTNq38ZBADs0UDsNp5r0Vg1D0GD_wPaklYs7jUI6V9ZBErkjSqzg";
             
             Message myMessage = new Message();
             myMessage.access_id = myUser.access_id;
             myMessage.chatId = "-1060544732";
-            myMessage.messageContent = "This is a message sent from the first client";
+            myMessage.messageContent = "Yeet skeet";
             this.WriteMessage("signIn", "{\"access_id\": \"" + myMessage.access_id + "\"}");
             Thread.Sleep(500);
-            this.WriteMessage("getUsers", "{\"access_id\": \"" + myMessage.access_id + "\"}");
-            this.WriteMessage("getChats", "{\"access_id\": \"" + myMessage.access_id + "\"}");
+            // this.WriteMessage("getUsers", "{\"access_id\": \"" + myMessage.access_id + "\"}");
+            // this.WriteMessage("getChats", "{\"access_id\": \"" + myMessage.access_id + "\"}");
             // this.WriteMessage("createUser", "{\"access_id\": \"" + myMessage.access_id + "\", \"username\": \"" + "PatricksGmail" + "\"}");
             // this.WriteMessage("messageGet", "{\"access_id\": \"" + myMessage.access_id + "\", \"chatId\": \"" + "-1060544732" + "\", \"messageId\": \"" + "10" + "\"}");
             // this.WriteMessage("createChat", "{\"access_id\": \"" + myMessage.access_id + "\", \"chatName\": \"" + "myChat" + "\"}");
             // this.WriteMessage("joinChat", "{\"access_id\": \"" + myMessage.access_id + "\", \"chatId\": \"" + "2136482312" + "\", \"pubKey\": \"" + "pubKeyGoesHere" + "\"}");
             // this.WriteMessage("allowUserToJoinChat", "{\"access_id\": \"" + myMessage.access_id + "\", \"chatId\": \"" + "2136482312" + "\", \"symKey\": \"" + "symKeyGoesHere" + "\", \"joinerId\": \"" + "113467843674295288430" + "\"}");
-            // this.WriteMessage("messagePost", myMessage.createJSONString());
+            this.WriteMessage("messagePost", myMessage.createJSONString());
 
 
 

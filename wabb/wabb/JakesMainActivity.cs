@@ -17,7 +17,7 @@ namespace Chat_UI
     public class MainActivity : AppCompatActivity
     {
         TLSConnector serverConnection;
-        string access_id = "ya29.ImGvB2mgWUfgN6L8qWBkmK_9_Suj7GEAhl1u9i_2msGTQDbjDOkTk8uF7Ah3H6KbMpKxHmclVRbjxP1KFxa147cG5hyEUC6m6jAEAyr5dE71K_3I9g9-GsJp2OTCZNxNZpLb";
+        string access_id = "ya29.ImGvB7sVy2DPK5YsbF9NWnPr8K5Au1GcpRCZFH8C0zXal72gEc0jjRP3j2MZHGWX8oARYS4gcS6A_856Pz46VT_3ISjH6J8fZSFTHofh9-hcX3CqAHoS2fSOBz9Bwedg2xaV";
         string[] convoList = { "Patrick", "Spencer", "Kohler", "Dylan", "Jonathan", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat" };
         User mainUser;
         Dictionary<string, User> otherUsers = new Dictionary<string, User> { }; // username:user
@@ -85,10 +85,6 @@ namespace Chat_UI
             var that = this;
             SendButton.Click += (sender, e) =>
             {
-                //string sendMessage = newMessage;
-                //messages = messages + Sender + "\n\t" + newMessage + "\n";
-                //FindViewById<TextView>(Resource.Id.messageDisplay).Text = messages;
-
                 // SEND MESSAGE TO RECVR
                 that.sendChatMessage(activeChatId, newMessage);
 
@@ -100,7 +96,39 @@ namespace Chat_UI
             {
                 convoScreen(Sender);
             };
+            // Invite more users
+            var inviteUsersButton = FindViewById<Button>(Resource.Id.inviteUsers);
+            inviteUsersButton.Click += (sender, e) =>
+            {
+                inviteUsersScreen(chatName);
+            };
         }
+
+        // Invite users to a chat
+        void inviteUsersScreen(string chatName)
+        {
+            SetContentView(Resource.Layout.inviteUsers);
+            currentView = "inviteUsersScreen";
+
+            var inviteUsersButton = FindViewById<Button>(Resource.Id.inviteUsers);
+            inviteUsersButton.Click += (sender, e) =>
+            {
+                // Invite Users
+                string[] usersToInvite = FindViewById<EditText>(Resource.Id.chatInvites).Text.Split(',');
+                for (int i = 0; i < usersToInvite.Length; i++)
+                {
+                    inviteUsersToChat(chatName, usersToInvite[i]);
+                }
+                FindViewById<EditText>(Resource.Id.chatInvites).Text = "";
+            };
+            var backButton = FindViewById<Button>(Resource.Id.backButtonOnInviteUsers);
+            backButton.Click += (sender, e) =>
+            {
+                messageScreen(chatName);
+            };
+
+        }
+
 
         // Conversation Screen
         void convoScreen(string username = null)
@@ -110,6 +138,11 @@ namespace Chat_UI
             SetContentView(Resource.Layout.conversations);
             currentView = "convoScreen";
 
+            var createChatButton = FindViewById<Button>(Resource.Id.createNewChatButton);
+            createChatButton.Click += (sender, e) =>
+            {
+                createChatScreen();
+            };
 
             // POPULATE CONVERSATION BUTTONS
             var button0 = FindViewById<Button>(Resource.Id.button0);
@@ -265,6 +298,29 @@ namespace Chat_UI
 
         }
 
+        // CREATE CHAT SCREEN
+        void createChatScreen()
+        {
+            SetContentView(Resource.Layout.createChat);
+            currentView = "createChatScreen";
+
+            var chatNameField = FindViewById<EditText>(Resource.Id.chatNameField);
+            var createChatButton = FindViewById<Button>(Resource.Id.createChatButton);
+            createChatButton.Click += (sender, e) =>
+            {
+                createChat(chatNameField.Text);
+                // Wait for chat creation?
+            };
+            // Send back to conversation page
+            var BackButton = FindViewById<Button>(Resource.Id.backButtonOnCreateChat);
+            BackButton.Click += (sender, e) =>
+            {
+                convoScreen();
+            };
+        }
+
+
+
 
         // Sign in calls : signInToServer() -> getAllUsers() -> getMyChats() -> getNewMessages() -> convoScreen()
 
@@ -406,6 +462,7 @@ namespace Chat_UI
                         string username = usernameIdMatches[myChats[chatName].messages[i].user_id];
                         string messageToAdd = username + "\n\t" + newMessage.messageContent + "\n";
                         FindViewById<TextView>(Resource.Id.messageDisplay).Text = FindViewById<TextView>(Resource.Id.messageDisplay).Text + messageToAdd;
+                        // TODO: Scroll textbox down
                     }
                 }                
             }
@@ -418,9 +475,58 @@ namespace Chat_UI
             serverConnection.WriteMessage("messagePost", message);
         }
 
+        void createChat(string chatName)
+        {
+            string message = "{\"access_id\": \"" + this.access_id + "\", \"chatName\": \"" + chatName + "\"}";
+            serverConnection.WriteMessage("createChat", message);
 
+        }
 
+        // Adds newly created chat to our list
+        void proccessNewChat(object sender, EventArgs e)
+        {
+            int messageIndex = serverConnection.unreadMessages.Count - 1;
+            if (messageIndex < 0) return;
+            JObject message = JObject.Parse(serverConnection.unreadMessages[messageIndex]);
+            string type = serverConnection.interpretMessageType(message);
 
+            if (type == "chatCreated")
+            {
+                // Add new chat to our list
+                Chat aChat = new Chat(message[type].ToString());
+                myChats[aChat.chatName] = aChat;
+                chatNameMatches[aChat.chatId] = aChat.chatName;
+
+                // Invite Users
+                string[] usersToInvite = FindViewById<EditText>(Resource.Id.chatInvites).Text.Split(',');
+                for (int i = 0; i < usersToInvite.Length; i++)
+                {
+                    inviteUsersToChat(aChat.chatName, usersToInvite[i]);
+                }
+
+                // TODO: CREATE SYMKEY
+
+                RunOnUiThread(() =>
+                {
+                    convoScreen();
+                });
+            }
+        }
+
+        void inviteUsersToChat(string chatName, string username)
+        {
+            string chatId = myChats[chatName].chatId;
+            myChats[chatName].symKey = "testSymKey";        // TODO: REMOVE THIS AFTER SYMKEY CREATION IS INSTALLED
+            string joinerId = otherUsers[username].user_id;
+            string joinerPubKey = otherUsers[username].pubKey;
+            string symKeyEncrypted = myChats[chatName].symKey;
+
+            // TODO: Encrypt symkey with pub key
+
+            string message = "{\"access_id\": \"" + this.access_id + "\", \"chatId\": \"" + chatId + "\", \"symKey\": \"" + symKeyEncrypted + "\", \"joinerId\": \"" + joinerId + "\"}";
+            serverConnection.WriteMessage("allowUserToJoinChat", message);
+
+        }
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -433,6 +539,7 @@ namespace Chat_UI
             serverConnection.OnMessageReceived += new EventHandler(getAllUsersResponse);
             serverConnection.OnMessageReceived += new EventHandler(getMyChatsResponse);
             serverConnection.OnMessageReceived += new EventHandler(proccessNewMessages); 
+            serverConnection.OnMessageReceived += new EventHandler(proccessNewChat); 
 
             // Starts connection to server on new thread
             ThreadStart connectionThreadRef = new ThreadStart(serverConnection.Connect);

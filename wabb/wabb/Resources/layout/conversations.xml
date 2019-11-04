@@ -7,6 +7,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/linearLayout1">
+	<Button
+		android:text="Create Chat"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:id="@+id/createNewChatButton" />
     <Button
         android:text="Patrick"
         android:layout_width="match_parent"
