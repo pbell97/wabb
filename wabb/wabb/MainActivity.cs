@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Android.App;
+﻿using Android.App;
 using Android.OS;
 using Android.Runtime;
-using Android.Support.Design.Widget;
 using Android.Support.V7.App;
-using Android.Views;
-using Android.Util;
 using Android.Widget;
 using Java.Security;
-using Javax.Crypto;
 // Used for SecureStorage
 using Xamarin.Essentials;
 
@@ -41,15 +34,14 @@ namespace wabb
             return output;
         }
 
+        // Show how to use Password Based Helper
         public void SetupPasswordBasedTesting()
         {
             // Grab the buttons
             var saveButton = FindViewById<Button>(Resource.Id.saveButton);
             var getButton = FindViewById<Button>(Resource.Id.getButton);
             var deleteButton = FindViewById<Button>(Resource.Id.deleteButton);
-            // Renamed, get all can feed into delete all if desired
             var deleteAllButton = FindViewById<Button>(Resource.Id.deleteAllButton);
-            deleteAllButton.Text = "Get All";
 
             // Remove unused inputs
             var radioGroup = FindViewById<RadioGroup>(Resource.Id.radioGroup1);
@@ -84,13 +76,8 @@ namespace wabb
             };
             deleteAllButton.Click += (o, e) =>
             {
-                var keyAliases = GetAllKeys();
-                var output = "Key aliases: \n";
-                foreach (var alias in keyAliases)
-                {
-                    output += alias + "\n";
-                }
-                Print(output);
+                var storageHelper = new SecureStorageHelper();
+                storageHelper.RemoveAllItems();
             };
 
             // Grab the text inputs
@@ -101,6 +88,8 @@ namespace wabb
             messageInput.Hint = "Password";
         }
 
+        // Show how to use Symm and Asymm Helpers (no longer very similar)
+        //  Symm keys are in app-level SecureStorage now, Asymm keys are in os-level keystore
         public void SetupKeyCreationTesting()
         {
             // Grab the buttons
@@ -229,6 +218,7 @@ namespace wabb
             keysText.Text = output;
         }
 
+
         // ----- SecureStorage Interactions -----
         public void CreateStoredItem(string key, string data)
         {
@@ -292,7 +282,7 @@ namespace wabb
                 return helper.DecryptData(encryptedData);
             }
 
-            
+
         }
 
         public JavaList<string> GetAllKeys()
@@ -315,7 +305,7 @@ namespace wabb
             var output = true;
             var keyAliases = GetAllKeys();
 
-            foreach(var alias in keyAliases)
+            foreach (var alias in keyAliases)
             {
                 // xamarin key is used to build SecureStorage
                 if (alias.Contains("xamarin"))

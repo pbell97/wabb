@@ -1,15 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-using Android.App;
-using Android.Content;
-using Android.OS;
-using Android.Runtime;
-using Java.Security;
+﻿using Java.Security;
 using Javax.Crypto;
 using Javax.Crypto.Spec;
+using System.Text;
 
 namespace wabb
 {
@@ -18,21 +10,25 @@ namespace wabb
         private const int KEY_SIZE = 256;
         private const string TRANSFORMATION = "AES";
         private const int ITERATIONS = 1000;
+        // Salt does not have to be static, just reproducable
         private readonly byte[] SALT = Encoding.UTF8.GetBytes("Team Patrick, Kohler, Jake, and Spencer!"); // May change this to be non-static
 
         private readonly string _keyAlias;
-        private SecureStorageHelper _storageHelper = new SecureStorageHelper();
+        private readonly SecureStorageHelper _storageHelper = new SecureStorageHelper();
 
         public PasswordBasedKeyHelper(string keyName)
         {
+            // May think about adding a prefix to indicate Password Based key
             _keyAlias = keyName.ToLowerInvariant();
         }
 
         public void CreateKey(string password, string userEmail)
         {
+            // Remove key to overwrite, otherwise nothing
             DeleteKey();
 
-            var spec = new PBEKeySpec((password+userEmail).ToCharArray(), SALT, ITERATIONS, KEY_SIZE);
+            // Make password based key with many iterations, a salt, and user-related value (email?)
+            var spec = new PBEKeySpec((password + userEmail).ToCharArray(), SALT, ITERATIONS, KEY_SIZE);
             var keyGenerator = SecretKeyFactory.GetInstance("PBEWithHmacSHA256AndAES_256");
             var key = keyGenerator.GenerateSecret(spec);
 
@@ -46,6 +42,7 @@ namespace wabb
 
         private IKey GetKey()
         {
+            // Reform key object
             var jsonKey = _storageHelper.GetItem<byte[]>(_keyAlias);
             var key = new SecretKeySpec(jsonKey, 0, jsonKey.Length, TRANSFORMATION);
             return key;
@@ -78,6 +75,7 @@ namespace wabb
 
             // Set up decryption machine
             cipher.Init(CipherMode.DecryptMode, key);
+            key.Dispose();
 
             // go from bytes to string
             var decryptedBytes = cipher.DoFinal(encryptedData);

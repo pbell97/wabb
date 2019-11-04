@@ -1,6 +1,4 @@
-﻿using Android.Content;
-using Android.OS;
-using Android.Security.Keystore;
+﻿using Android.Security.Keystore;
 using Java.Security;
 using Javax.Crypto;
 using System.Text;
@@ -9,10 +7,15 @@ namespace wabb
 {
     // Class derived from examples here:
     //  https://msicc.net/xamarin-android-asymmetric-encryption-without-any-user-input-or-hardcoded-values/
-    public class AsymmetricKeyHelper : KeyHelper
+    public class AsymmetricKeyHelper
     {
-        private const int KEY_SIZE = 2048; // I guess? We choose I believe
+        private const string KEYSTORE_NAME = "AndroidKeyStore";
+        private const int KEY_SIZE = 2048;
         private const string TRANSFORMATION = "RSA/ECB/PKCS1Padding";
+
+
+        private readonly string _keyAlias;
+        private readonly KeyStore _androidKeyStore;
 
         public AsymmetricKeyHelper(string keyName)
         {
@@ -21,31 +24,32 @@ namespace wabb
             _androidKeyStore.Load(null);
         }
 
-        public override void CreateKey()
+        public void CreateKey()
         {
             // Removes key if it already exists, no change otherwise
             DeleteKey();
             KeyPairGenerator keyGenerator =
                 KeyPairGenerator.GetInstance(KeyProperties.KeyAlgorithmRsa, KEYSTORE_NAME);
 
-            // I believe this is always the case for us
-            if (Build.VERSION.SdkInt >= BuildVersionCodes.M)
-            {
-                // Parameters affiliated with the Transformation settings used when making Cipher (@MainActivity.EncryptData())
-                var builder = new KeyGenParameterSpec.Builder(_keyAlias, KeyStorePurpose.Encrypt | KeyStorePurpose.Decrypt)
-                        .SetBlockModes(KeyProperties.BlockModeEcb)
-                        .SetEncryptionPaddings(KeyProperties.EncryptionPaddingRsaPkcs1)
-                        .SetRandomizedEncryptionRequired(false).SetKeySize(KEY_SIZE);
-                keyGenerator.Initialize(builder.Build());
-                builder.Dispose();
-            }
-            else 
-            {
-                // Oh buddy it's wild
-            }
+            // Parameters affiliated with the Transformation settings used when making Cipher
+            var builder = new KeyGenParameterSpec.Builder(_keyAlias, KeyStorePurpose.Encrypt | KeyStorePurpose.Decrypt)
+                    .SetBlockModes(KeyProperties.BlockModeEcb)
+                    .SetEncryptionPaddings(KeyProperties.EncryptionPaddingRsaPkcs1)
+                    .SetRandomizedEncryptionRequired(false).SetKeySize(KEY_SIZE);
+            keyGenerator.Initialize(builder.Build());
+            builder.Dispose();
 
+            // Keys automattically added to KeyStore
             keyGenerator.GenerateKeyPair();
             keyGenerator.Dispose();
+        }
+
+        public bool DeleteKey()
+        {
+            if (!_androidKeyStore.ContainsAlias(_keyAlias))
+                return false;
+            _androidKeyStore.DeleteEntry(_keyAlias);
+            return true;
         }
 
         private IKey GetPublicKey()
@@ -54,18 +58,15 @@ namespace wabb
                 return null;
             return _androidKeyStore.GetCertificate(_keyAlias)?.PublicKey;
         }
-        
+
         private IKey GetPrivateKey()
         {
             if (!_androidKeyStore.ContainsAlias(_keyAlias))
                 return null;
             return _androidKeyStore.GetKey(_keyAlias, null);
-            // Apparently this second parameter acts as a key-pair password, to make private key 
-            //  more difficult to get to
-            // I dunno when the password would have been set though
         }
 
-        public override byte[] EncryptData(string plaintext)
+        public byte[] EncryptData(string plaintext)
         {
             var cipher = Cipher.GetInstance(TRANSFORMATION);
             var publicKey = GetPublicKey();
@@ -81,7 +82,7 @@ namespace wabb
             return cipher.DoFinal(Encoding.UTF8.GetBytes(plaintext));
         }
 
-        public override string DecryptData(byte[] encryptedData)
+        public string DecryptData(byte[] encryptedData)
         {
             var cipher = Cipher.GetInstance(TRANSFORMATION);
             var privateKey = GetPrivateKey();
