@@ -11,7 +11,7 @@ namespace wabb
         private const string TRANSFORMATION = "AES";
 
         private readonly string _keyAlias;
-        private SecureStorageHelper _storageHelper = new SecureStorageHelper();
+        private readonly SecureStorageHelper _storageHelper = new SecureStorageHelper();
 
         public SymmetricKeyHelper(string keyName)
         {
