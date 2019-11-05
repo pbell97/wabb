@@ -15,8 +15,8 @@ using System;
 
 namespace wabb
 {
-    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
-    //[Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar")]
+    //[Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
+    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar")]
     public class MainActivity : AppCompatActivity
     {
         private string keyStyle = "symmetric";
@@ -30,7 +30,7 @@ namespace wabb
 
             AsymmetricKeyHelper firstKey = new AsymmetricKeyHelper("firstKey");
             firstKey.CreateKey();
-            byte[] encodedKey1 = firstKey.GetPublicKeyEncoded();
+            byte[] encodedKey1 = firstKey.GetPublicKeyBytes();
 
             AsymmetricKeyHelper secondKey = new AsymmetricKeyHelper("secondKey");
             //byte[] encryptedText = firstKey.EncryptDataWithAnotherPublicKey(encodedKey1, "TestValueGoesHere");
@@ -40,7 +40,7 @@ namespace wabb
 
             SymmetricKeyHelper skh = new SymmetricKeyHelper("firstKey");
             skh.CreateKey();
-            var encryptedText = skh.EncryptData("Testing123");
+            var encryptedText = skh.EncryptDataToBytes("Testing123");
             var keyString = skh.GetKeyString();
 
 
@@ -177,7 +177,7 @@ namespace wabb
                 {
                     var helper = new SymmetricKeyHelper(key);
 
-                    var encryptedData = helper.EncryptData(data);
+                    var encryptedData = helper.EncryptDataToBytes(data);
                     Print(helper.DecryptData(encryptedData));
                 }
 
@@ -326,7 +326,7 @@ namespace wabb
 
                 // If encrypted data is converted from byte[] to string, then back to byte[]
                 // it does not come back the same, will not decrypt
-                var encryptedData = helper.EncryptData(message);
+                var encryptedData = helper.EncryptDataToBytes(message);
                 return helper.DecryptData(encryptedData);
             }
 

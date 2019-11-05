@@ -32,7 +32,7 @@ namespace wabb.Utilities
             this.chatId = newChat["chatId"].ToString();
             this.chatName = newChat["chatName"].ToString();
             this.users = newChat["users"].ToString().Split(',');
-
+            this.symKeyAlias = this.chatName + "chat";
             this.messages = new List<WabbMessage>();
         }
 
@@ -42,32 +42,31 @@ namespace wabb.Utilities
 
         public void createSymKey()
         {
-            symKeyAlias = chatName + "chat";
-            SymmetricKeyHelper symHelper = new SymmetricKeyHelper(symKeyAlias);
+            SymmetricKeyHelper symHelper = new SymmetricKeyHelper(chatName + "chat");
             symHelper.CreateKey();
         }
 
         public string getSharableKey()
         {
-            SymmetricKeyHelper symHelper = new SymmetricKeyHelper(symKeyAlias);
+            SymmetricKeyHelper symHelper = new SymmetricKeyHelper(chatName + "chat");
             return symHelper.GetKeyString();
         }
 
         public void loadChatKey(string chatSymKey)
         {
-            SymmetricKeyHelper symHelper = new SymmetricKeyHelper(symKeyAlias);
+            SymmetricKeyHelper symHelper = new SymmetricKeyHelper(chatName + "chat");
             symHelper.LoadKey(chatSymKey);
         }
 
         public string encryptMessage(string messagePlaintext)
         {
-            SymmetricKeyHelper symHelper = new SymmetricKeyHelper(symKeyAlias);
-            return symHelper.EncryptDataToBytes(messagePlaintext).ToString();
+            SymmetricKeyHelper symHelper = new SymmetricKeyHelper(chatName + "chat");
+            return symHelper.EncryptDataToSring(messagePlaintext);
         }
 
         public string decryptMessage(string messageEncrypted)
         {
-            SymmetricKeyHelper symHelper = new SymmetricKeyHelper(symKeyAlias);
+            SymmetricKeyHelper symHelper = new SymmetricKeyHelper(chatName + "chat");
             return symHelper.DecryptData(messageEncrypted);
         }
 

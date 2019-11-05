@@ -46,8 +46,7 @@ namespace tlsTesting
             User myUser = new User();
             myUser.username = "PatricksGMail";
             // MsState email
-            myUser.access_id = "ya29.ImCvBz7tBSA-yKtai_ON3b5H7U_Kx1Xa-9K4ilGJAVRJ6cPIetMgDGb9OvHklh6SxtVO6ASbOvzJpdRjrSym84xs6E0db3xbZRz6uqQU0EeOHNnIoC27koucdIxIId8it4k";
-            // Gmail below
+            myUser.access_id = "ya29.ImGvB1LpkArlUkPxbyn6PKNUIdFuzEWXxiHwdsxDC6hadS4LZXOB6kxO5_JkZbOo_agD3pJjKmYc8RRhrctiyEOhNjtPCMhysIZmIKAbrW-yexv39UPzQ3oJV2qsc7nhU14T";            // Gmail below
             // myUser.access_id = "ya29.Il-bB3YQJzIemDXlWBtnXg2MRlrs0inhqcXr1e0XlhFnhvCn2ClPQh_1eefAEY4wY3bOaeRXxbjriLvTNq38ZBADs0UDsNp5r0Vg1D0GD_wPaklYs7jUI6V9ZBErkjSqzg";
             
             Message myMessage = new Message();
@@ -63,7 +62,7 @@ namespace tlsTesting
             // this.WriteMessage("createChat", "{\"access_id\": \"" + myMessage.access_id + "\", \"chatName\": \"" + "myChat" + "\"}");
             // this.WriteMessage("joinChat", "{\"access_id\": \"" + myMessage.access_id + "\", \"chatId\": \"" + "2136482312" + "\", \"pubKey\": \"" + "pubKeyGoesHere" + "\"}");
             // this.WriteMessage("allowUserToJoinChat", "{\"access_id\": \"" + myMessage.access_id + "\", \"chatId\": \"" + "2136482312" + "\", \"symKey\": \"" + "symKeyGoesHere" + "\", \"joinerId\": \"" + "113467843674295288430" + "\"}");
-            this.WriteMessage("messagePost", myMessage.createJSONString());
+            // this.WriteMessage("messagePost", myMessage.createJSONString());
 
 
 

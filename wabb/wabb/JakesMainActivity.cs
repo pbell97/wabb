@@ -13,12 +13,13 @@ using System.Linq;
 
 namespace Chat_UI
 {
-    //[Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
-    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar")]
+    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
+    //[Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar")]
     public class MainActivity : AppCompatActivity
     {
         TLSConnector serverConnection;
-        string access_id = "ya29.ImGvB1v-AyXAA-zSrKxGiVhMZm960BiVEL84xfaMZi5bvMAHSNMtnJQ-H08Knm1PfflQsDHLjo-jCMXkEnbH6KBpMeMJlt9L8uZKgtH_Vo7nRA6S5auFGiSZB7o29ZGOCgtr";
+        string access_id = "ya29.ImGvByFb54QNQpE_ZCAdslURd3l3i4AR7N9-2kDA-d8pbbjZf7XOUohyq4SUyYOL7NDrXJ2-aXWqR9YZMTADcgOq5CnXiwplf9HvjtFPHGNyWs_YGrLjuyjcD6zprAT4eS8Z";
+        string myAsymKeyPairAlias = "myKeyPair";
         string[] convoList = { "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat" };
         User mainUser;
         Dictionary<string, User> otherUsers = new Dictionary<string, User> { }; // username:user
@@ -33,6 +34,12 @@ namespace Chat_UI
         // MESSAGE SCREEN
         void messageScreen(string chatName)
         {
+            // If "Empty Chat", dont do anything
+            if (!myChats.Keys.Contains<string>(chatName))
+            {
+                return;
+            }
+
             string Sender = "SENDER";
             string Recvr = "RECVR";
             SetContentView(Resource.Layout.messages);
@@ -43,15 +50,14 @@ namespace Chat_UI
             activeChatId = myChats[chatName].chatId;
 
             // INSERTION OF MESSAGE CONTENTS
-            string[] Conversation = new string[]{ Sender, "Kill me please lol", Recvr, "Nah fam sorry I am busy" };
             string messages = "";
-            int messageListLen = Conversation.Length;
 
             int numOfMessages = myChats[chatName].messages.Count;
             for (int i = 0; i < numOfMessages; i++)
             {
                 string username = usernameIdMatches[myChats[chatName].messages[i].user_id];
-                string messageToAdd = username + "\n\t" + myChats[chatName].messages[i].messageContent + "\n";
+                string decryptedContents = myChats[chatNameMatches[myChats[chatName].messages[i].chatId]].decryptMessage(myChats[chatName].messages[i].messageContent);
+                string messageToAdd = username + "\n\t" + decryptedContents + "\n";
                 messages += messageToAdd;
             }
 
@@ -201,54 +207,63 @@ namespace Chat_UI
             button0.Click += (sender, e) =>
             {
                 // Send to messages screen
+                if (myChatkeys.Length < 1) return;
                 messageScreen(myChats[myChatkeys[0]].chatName);
             };
             // Button1 Click Event
             button1.Click += (sender, e) =>
             {
                 // Send to messages screen
+                if (myChatkeys.Length < 2) return;
                 messageScreen(myChats[myChatkeys[1]].chatName);
             };
             // Button2 Click Event
             button2.Click += (sender, e) =>
             {
                 // Send to messages screen
+                if (myChatkeys.Length < 3) return;
                 messageScreen(myChats[myChatkeys[2]].chatName);
             };
             // Button3 Click Event
             button3.Click += (sender, e) =>
             {
                 // Send to messages screen
+                if (myChatkeys.Length < 4) return;
                 messageScreen(myChats[myChatkeys[3]].chatName);
             };
             // Button4 Click Event
             button4.Click += (sender, e) =>
             {
                 // Send to messages screen
+                if (myChatkeys.Length < 5) return;
                 messageScreen(myChats[myChatkeys[4]].chatName);
             };
             // Button5 Click Event
             button5.Click += (sender, e) =>
             {
                 // Send to messages screen
+                if (myChatkeys.Length < 6) return;
                 messageScreen(myChats[myChatkeys[5]].chatName);
             };
             // Button6 Click Event
             button6.Click += (sender, e) =>
             {
                 // Send to messages screen
+                if (myChatkeys.Length < 7) return;
                 messageScreen(myChats[myChatkeys[6]].chatName);
             };
             // Button7 Click Event
             button7.Click += (sender, e) =>
             {
                 // Send to messages screen
+                if (myChatkeys.Length < 8) return;
                 messageScreen(myChats[myChatkeys[7]].chatName);
             };
             // Button8 Click Event
             button8.Click += (sender, e) =>
             {
                 // Send to messages screen
+                if (myChatkeys.Length < 9) return;
                 messageScreen(myChats[myChatkeys[8]].chatName);
             };
         }
@@ -315,7 +330,7 @@ namespace Chat_UI
             SetContentView(Resource.Layout.startScreen);
             currentView = "startScreen";
 
-            var loginButton = FindViewById<Button>(Resource.Id.loginButton);
+            var loginButton = FindViewById<Button>(Resource.Id.loginButtonOnStartScreen);
             loginButton.Click += (sender, e) =>
             {
                 loginScreen();
@@ -348,7 +363,7 @@ namespace Chat_UI
                 string pubKey = "testPubKey";
 
 
-                createUser(username, pubKey);
+                createUser(username);
             };
 
             var backButton = FindViewById<Button>(Resource.Id.backButton);
@@ -522,7 +537,8 @@ namespace Chat_UI
                     if (activeChatId == newMessage.chatId && currentView == "messageScreen")
                     {
                         string username = usernameIdMatches[newMessage.user_id];
-                        string messageToAdd = username + "\n\t" + newMessage.messageContent + "\n";
+                        string decryptedContents = myChats[chatNameMatches[newMessage.chatId]].decryptMessage(newMessage.messageContent);
+                        string messageToAdd = username + "\n\t" + decryptedContents + "\n";
                         FindViewById<TextView>(Resource.Id.messageDisplay).Text = FindViewById<TextView>(Resource.Id.messageDisplay).Text + messageToAdd;
                         // TODO: Scroll textbox down
                     }
@@ -533,6 +549,8 @@ namespace Chat_UI
         // Sends a message to the server to post in the chat
         void sendChatMessage(string chatId, string messageContent)
         {
+            // Encrypts message with chat's sym key
+            messageContent = myChats[chatNameMatches[chatId]].encryptMessage(messageContent);
             string message = "{\"access_id\": \"" + this.access_id + "\", \"chatId\": \"" + chatId + "\", \"messageContent\": \"" + messageContent + "\"}";
             serverConnection.WriteMessage("messagePost", message);
         }
@@ -541,7 +559,6 @@ namespace Chat_UI
         {
             string message = "{\"access_id\": \"" + this.access_id + "\", \"chatName\": \"" + chatName + "\"}";
             serverConnection.WriteMessage("createChat", message);
-
         }
 
         // Adds newly created chat to our list
@@ -557,7 +574,7 @@ namespace Chat_UI
                 // Add new chat to our list
                 Chat aChat = new Chat(message[type].ToString());
 
-                // TODO: CREATE SYMKEY
+                // Creates sym key
                 aChat.createSymKey();
 
                 myChats[aChat.chatName] = aChat;
@@ -570,13 +587,21 @@ namespace Chat_UI
                     inviteUsersToChat(aChat.chatName, usersToInvite[i]);
                 }
 
-                
-                
 
                 RunOnUiThread(() =>
                 {
                     convoScreen();
                 });
+            }
+
+            if (type == "acceptedToChat")
+            {
+                Chat aChat = new Chat(message[type].ToString());
+                string symKey = message[type]["symKey"].ToString();
+                // TODO: Decrypt symKey with my private key
+                aChat.loadChatKey(symKey);
+                myChats[aChat.chatName] = aChat;
+                chatNameMatches[aChat.chatId] = aChat.chatName;
             }
         }
 
@@ -587,7 +612,7 @@ namespace Chat_UI
             string joinerPubKey = otherUsers[username].pubKey;
             string symKeyEncrypted = myChats[chatName].getSharableKey();
 
-            // TODO: Encrypt symkey with pub key
+            // TODO: Encrypt symkey with invited users' pub key
 
             string message = "{\"access_id\": \"" + this.access_id + "\", \"chatId\": \"" + chatId + "\", \"symKey\": \"" + symKeyEncrypted + "\", \"joinerId\": \"" + joinerId + "\"}";
             serverConnection.WriteMessage("allowUserToJoinChat", message);
@@ -596,7 +621,7 @@ namespace Chat_UI
 
         void createUser(string username)
         {
-            AsymmetricKeyHelper akh = new AsymmetricKeyHelper("myKeyPair");
+            AsymmetricKeyHelper akh = new AsymmetricKeyHelper(myAsymKeyPairAlias + username);
             akh.CreateKey();
             string pubKey = akh.GetPublicKeyString();
 
@@ -645,7 +670,6 @@ namespace Chat_UI
             base.OnCreate(savedInstanceState);
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
 
-            //this.convoList 
             serverConnection = new TLSConnector();
             serverConnection.OnMessageReceived += new EventHandler(signInToServerResponse); 
             serverConnection.OnMessageReceived += new EventHandler(getAllUsersResponse);
