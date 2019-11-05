@@ -17,7 +17,7 @@ namespace Chat_UI
     public class MainActivity : AppCompatActivity
     {
         TLSConnector serverConnection;
-        string access_id = "ya29.ImGvB_sR-7hF0R0NZUTJKxwG2gFHa8XOj6bL1wJUvyGAiKob0GpYqCZrCfTXdwieDKFlPPez0ssZ-TJYioVdJZyyA0oSSuNG3ZK0AwDKojcsjefezPiOA4yhzxPpnLHN-jWn";
+        string access_id = "ya29.ImCvB0FovhMdpX-A1VIzGQs4KpcJrC22GAvgEzc0UpeLYI576_Q6tUh5jV8DYkn5PoEKsUK3Y_2VoWdrplV1P_-8Y89KqUy0eFSH0mxoTKE-6PQ5zhzXdL1rrDCDOVovZRo";
         string[] convoList = { "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat" };
         User mainUser;
         Dictionary<string, User> otherUsers = new Dictionary<string, User> { }; // username:user
@@ -349,7 +349,7 @@ namespace Chat_UI
                 // GOOGLE SIGN IN CODE
                 // TODO: Get access code
                 // TODO: Remove when get login working
-                access_id = "ya29.ImCvB6VbczgIvH8uP3FVXS7fPuzGyf9M3LLzbDfF2yUBVcy2hKLMkvNumUZNyRVnKSqm-E4kAPNND1zTkWZKvoCY-ew8FsBj0ywd0APSWrv4KscyeScTp9xLLGUvabVThS0";
+                access_id = "ya29.ImCvB0FovhMdpX-A1VIzGQs4KpcJrC22GAvgEzc0UpeLYI576_Q6tUh5jV8DYkn5PoEKsUK3Y_2VoWdrplV1P_-8Y89KqUy0eFSH0mxoTKE-6PQ5zhzXdL1rrDCDOVovZRo";
 
                 string username = FindViewById<EditText>(Resource.Id.username).Text;
                 string restorationPassword = FindViewById<EditText>(Resource.Id.restorationPassword).Text;
