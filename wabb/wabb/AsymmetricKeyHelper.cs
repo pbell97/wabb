@@ -2,6 +2,10 @@
 using Java.Security;
 using Javax.Crypto;
 using System.Text;
+using Javax.Crypto.Spec;
+using Java.Security.Spec;
+using PCLCrypto;
+using System;
 
 namespace wabb
 {
@@ -11,7 +15,7 @@ namespace wabb
     {
         private const string KEYSTORE_NAME = "AndroidKeyStore";
         private const int KEY_SIZE = 2048;
-        private const string TRANSFORMATION = "RSA/ECB/PKCS1Padding";
+        private const string TRANSFORMATION = "RSA/ECB/PKCS1PADDING";
 
 
         private readonly string _keyAlias;
@@ -99,5 +103,39 @@ namespace wabb
             var decryptedMessage = Encoding.UTF8.GetString(decryptedBytes);
             return decryptedMessage;
         }
+
+        [System.Obsolete]
+        public byte[] EncryptDataWithAnotherPublicKey(byte[] pubKey, string plaintext)
+        {
+            IKey publicKey = new SecretKeySpec(pubKey, 0, pubKey.Length, TRANSFORMATION);
+            IKey actualPublicKey = GetPublicKey();
+            //X509EncodedKeySpec spec = new X509EncodedKeySpec(pubKey);
+            //KeyFactory keyFactory = KeyFactory.GetInstance("RSA");
+            //PublicKey publicKey = (Java.Security.PublicKey)keyFactory.GeneratePublic(spec);
+
+            var cipher = Cipher.GetInstance(TRANSFORMATION);
+            // Set up encryption machine
+            cipher.Init(CipherMode.EncryptMode, publicKey);
+
+            // Mostly just copied this, convert UTF8 to bytes?
+            return cipher.DoFinal(Encoding.UTF8.GetBytes(plaintext));
+        }
+
+        public byte[] GetPublicKeyBytes()
+        {
+            return GetPublicKey().GetEncoded();
+        }
+
+        public string GetPublicKeyString()
+        {
+            return Convert.ToBase64String(GetPublicKeyBytes());
+        }
+
+        public void EncryptWithPubKeyString(string pubKey)
+        {
+            byte[] bytesString = Convert.FromBase64String(pubKey);
+            // Do something here
+        }
+
     }
 }

@@ -13,17 +13,19 @@ using System.Linq;
 
 namespace Chat_UI
 {
-    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
+    //[Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
+    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar")]
     public class MainActivity : AppCompatActivity
     {
         TLSConnector serverConnection;
-        string access_id = "ya29.ImGvByVGA_sf8HdIXIAavvguV8WfXE5GE5NXrdK-NKKR2QkqpHDtVv0fmwQzVZwDuptDYUiYOS3ZUTWFLi_rrJykK_n_f7cL-_BDJkF-eLo7g76jAUgxe-0huoIlguXzQzPb";
+        string access_id = "ya29.ImGvB1v-AyXAA-zSrKxGiVhMZm960BiVEL84xfaMZi5bvMAHSNMtnJQ-H08Knm1PfflQsDHLjo-jCMXkEnbH6KBpMeMJlt9L8uZKgtH_Vo7nRA6S5auFGiSZB7o29ZGOCgtr";
         string[] convoList = { "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat" };
         User mainUser;
         Dictionary<string, User> otherUsers = new Dictionary<string, User> { }; // username:user
         Dictionary<string, string> usernameIdMatches = new Dictionary<string, string> { };  //user_id:username
         Dictionary<string, Chat> myChats = new Dictionary<string, Chat> { };    // chatname:chat
         Dictionary<string, string> chatNameMatches = new Dictionary<string, string> { };    // chat_id:chatname
+
         string activeChatName = "";
         string activeChatId = "";
         string currentView = "";
@@ -52,21 +54,6 @@ namespace Chat_UI
                 string messageToAdd = username + "\n\t" + myChats[chatName].messages[i].messageContent + "\n";
                 messages += messageToAdd;
             }
-            
-
-
-            //// Build conversation string from message senders/receivers and their conversation
-            //for (int i = 0; i < (messageListLen); i++)
-            //{
-            //    if (i % 2 == 0)
-            //    {
-            //        messages = messages + Conversation[i] + "\n\t";
-            //    }
-            //    else
-            //    {
-            //        messages = messages + Conversation[i] + "\n";
-            //    }
-            //}
 
             // Display built string
             FindViewById<TextView>(Resource.Id.messageDisplay).Text = messages;
@@ -129,7 +116,6 @@ namespace Chat_UI
 
         }
 
-
         // Conversation Screen
         void convoScreen(string username = null)
         {
@@ -137,6 +123,10 @@ namespace Chat_UI
 
             SetContentView(Resource.Layout.conversations);
             currentView = "convoScreen";
+
+            // Saves new 
+            saveChatsAndUsersToStorage();
+
 
             var createChatButton = FindViewById<Button>(Resource.Id.createNewChatButton);
             createChatButton.Click += (sender, e) =>
@@ -389,11 +379,23 @@ namespace Chat_UI
 
             if (type == "signedIn")
             {
-                this.mainUser = new User();
-                mainUser.username = message[type]["username"].ToString();
-                mainUser.email = message[type]["email"].ToString();
-                mainUser.user_id = message[type]["id"].ToString();
-                mainUser.pubKey = message[type]["pubKey"].ToString();
+                User newUser = new User();
+                newUser.username = message[type]["username"].ToString();
+                newUser.email = message[type]["email"].ToString();
+                newUser.user_id = message[type]["id"].ToString();
+                newUser.pubKey = message[type]["pubKey"].ToString();
+
+                // Load storage. If not same user, reset
+                loadChatsAndUsersFromStorage();
+                if (mainUser == null || newUser.user_id != mainUser.user_id)
+                {
+                    mainUser = newUser;
+                    otherUsers = new Dictionary<string, User> { }; // username:user
+                    usernameIdMatches = new Dictionary<string, string> { };  //user_id:username
+                    myChats = new Dictionary<string, Chat> { };    // chatname:chat
+                    chatNameMatches = new Dictionary<string, string> { };    // chat_id:chatname
+                }
+
 
                 // Post sign-in activities
                 getAllUsers();
@@ -417,6 +419,9 @@ namespace Chat_UI
             string type = serverConnection.interpretMessageType(message);
 
             if (type == "usersList"){
+
+                // Needs to compare with current list saved in memory
+
                 JArray usersArray = (JArray)message[type];
                 int length = usersArray.Count;
                 Console.WriteLine("Length: " + length.ToString());
@@ -447,15 +452,25 @@ namespace Chat_UI
 
             if (type == "myChatsList")
             {
+
+                // Needs to compare with current list im memory?
+
                 JArray chatsArray = (JArray)message[type];
                 int length = chatsArray.Count;
                 Console.WriteLine("Length: " + length.ToString());
                 Chat aChat;
+
+                var existingChatNames = myChats.Keys;
+
                 for (int i = 0; i < length; i++)
                 {
                     aChat = new Chat(message[type][i].ToString());
-                    myChats[aChat.chatName] = aChat;
-                    chatNameMatches[aChat.chatId] = aChat.chatName;
+
+                    if (!existingChatNames.Contains<string>(aChat.chatName))
+                    {
+                        myChats[aChat.chatName] = aChat;
+                        chatNameMatches[aChat.chatId] = aChat.chatName;
+                    }
                 }
 
                 // Get new message for all chats
@@ -541,6 +556,10 @@ namespace Chat_UI
             {
                 // Add new chat to our list
                 Chat aChat = new Chat(message[type].ToString());
+
+                // TODO: CREATE SYMKEY
+                aChat.createSymKey();
+
                 myChats[aChat.chatName] = aChat;
                 chatNameMatches[aChat.chatId] = aChat.chatName;
 
@@ -551,7 +570,8 @@ namespace Chat_UI
                     inviteUsersToChat(aChat.chatName, usersToInvite[i]);
                 }
 
-                // TODO: CREATE SYMKEY
+                
+                
 
                 RunOnUiThread(() =>
                 {
@@ -563,10 +583,9 @@ namespace Chat_UI
         void inviteUsersToChat(string chatName, string username)
         {
             string chatId = myChats[chatName].chatId;
-            myChats[chatName].symKey = "testSymKey";        // TODO: REMOVE THIS AFTER SYMKEY CREATION IS INSTALLED
             string joinerId = otherUsers[username].user_id;
             string joinerPubKey = otherUsers[username].pubKey;
-            string symKeyEncrypted = myChats[chatName].symKey;
+            string symKeyEncrypted = myChats[chatName].getSharableKey();
 
             // TODO: Encrypt symkey with pub key
 
@@ -575,8 +594,12 @@ namespace Chat_UI
 
         }
 
-        void createUser(string username, string pubKey)
+        void createUser(string username)
         {
+            AsymmetricKeyHelper akh = new AsymmetricKeyHelper("myKeyPair");
+            akh.CreateKey();
+            string pubKey = akh.GetPublicKeyString();
+
             string message = "{\"access_id\": \"" + this.access_id + "\", \"username\": \"" + username + "\", \"pubKey\": \"" + pubKey + "\"}";
             serverConnection.WriteMessage("createUser", message);
         }
@@ -594,6 +617,28 @@ namespace Chat_UI
                 signInToServer();
             }
         }
+
+        void saveChatsAndUsersToStorage()
+        {
+            SecureStorageHelper storageHelper = new SecureStorageHelper();
+            storageHelper.StoreItem<Dictionary<string, User>>("otherUsers", otherUsers);
+            storageHelper.StoreItem<Dictionary<string, string>>("usernameIdMatches", usernameIdMatches);
+            storageHelper.StoreItem<Dictionary<string, Chat>>("myChats", myChats);
+            storageHelper.StoreItem<Dictionary<string, string>>("chatNameMatches", chatNameMatches);
+            storageHelper.StoreItem<User>("mainUser", mainUser);
+
+        }
+
+        void loadChatsAndUsersFromStorage()
+        {
+            SecureStorageHelper storageHelper = new SecureStorageHelper();
+            otherUsers = storageHelper.GetItem<Dictionary<string, User>>("otherUsers");
+            usernameIdMatches = storageHelper.GetItem<Dictionary<string, string>>("usernameIdMatches");
+            myChats = storageHelper.GetItem<Dictionary<string, Chat>>("myChats");
+            chatNameMatches = storageHelper.GetItem<Dictionary<string, string>>("chatNameMatches");
+            mainUser = storageHelper.GetItem<User>("mainUser");
+        }
+
 
         protected override void OnCreate(Bundle savedInstanceState)
         {

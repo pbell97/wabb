@@ -6,10 +6,17 @@ using Android.Widget;
 using Java.Security;
 // Used for SecureStorage
 using Xamarin.Essentials;
+using Javax.Crypto;
+using Javax.Crypto.Spec;
+using System.Text;
+using Java.Security.Spec;
+using wabb.Utilities;
+using System;
 
 namespace wabb
 {
-    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar")]
+    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
+    //[Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar")]
     public class MainActivity : AppCompatActivity
     {
         private string keyStyle = "symmetric";
@@ -19,6 +26,47 @@ namespace wabb
             base.OnCreate(savedInstanceState);
             Platform.Init(this, savedInstanceState);
             SetContentView(Resource.Layout.StoredItems);
+
+
+            AsymmetricKeyHelper firstKey = new AsymmetricKeyHelper("firstKey");
+            firstKey.CreateKey();
+            byte[] encodedKey1 = firstKey.GetPublicKeyEncoded();
+
+            AsymmetricKeyHelper secondKey = new AsymmetricKeyHelper("secondKey");
+            //byte[] encryptedText = firstKey.EncryptDataWithAnotherPublicKey(encodedKey1, "TestValueGoesHere");
+
+            //string decryptedText = firstKey.DecryptData(encryptedText);
+
+
+            SymmetricKeyHelper skh = new SymmetricKeyHelper("firstKey");
+            skh.CreateKey();
+            var encryptedText = skh.EncryptData("Testing123");
+            var keyString = skh.GetKeyString();
+
+
+            SymmetricKeyHelper skh2 = new SymmetricKeyHelper("newKey");
+            skh2.LoadKey(keyString);
+            var decryptedText = skh2.DecryptData(encryptedText);
+
+
+
+            //SymmetricKeyHelper skh = new SymmetricKeyHelper("firstKey");
+            //skh.CreateKey();
+            //var data = skh.EncryptData("Yeet");
+            //var t = skh.GetKey();
+
+            //string keyString = Convert.ToBase64String(t.GetEncoded());
+            //byte[] convertedKey = Convert.FromBase64String(keyString);
+
+            //SymmetricKeyHelper skh2 = new SymmetricKeyHelper("newKey");
+            //skh2.LoadKey(convertedKey);
+            //var l = skh2.DecryptData(data);
+
+
+            //string encryptedStr = Convert.ToBase64String(data);
+            //byte[] test = Convert.FromBase64String(encryptedStr);
+
+            //var k = skh.DecryptData(test);
 
             // these are mutually exclusive
             //SetupPasswordBasedTesting();

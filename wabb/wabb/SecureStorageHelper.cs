@@ -11,6 +11,7 @@ namespace wabb
         {
             // Retrieve JsonConvert'ed object
             var jsonValue = SecureStorage.GetAsync(name).Result;
+            if (jsonValue == null) return default(T);
             return JsonConvert.DeserializeObject<T>(jsonValue);
         }
 
