@@ -57,7 +57,6 @@
     <Reference Include="System.Numerics.Vectors" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="KeyHelper.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="AsymmetricKeyHelper.cs" />
     <Compile Include="PasswordBasedKeyHelper.cs" />

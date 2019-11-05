@@ -32,7 +32,7 @@ namespace wabb
             _storageHelper.StoreItem<byte[]>(_keyAlias, secretKey.GetEncoded());
         }
 
-        // Normally should be private, may need to be public for our puroses
+        // Normally should be private, may need to be public for our purposes
         public IKey GetKey()
         {
             // Pull key and reform it into a key

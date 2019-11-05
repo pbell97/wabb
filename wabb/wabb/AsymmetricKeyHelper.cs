@@ -52,6 +52,14 @@ namespace wabb
             return true;
         }
 
+        // Publicly available certificate
+        public Java.Security.Cert.Certificate GetCertificate()
+        {
+            if (!_androidKeyStore.ContainsAlias(_keyAlias))
+                return null;
+            return _androidKeyStore.GetCertificate(_keyAlias);
+        }
+
         private IKey GetPublicKey()
         {
             if (!_androidKeyStore.ContainsAlias(_keyAlias))
