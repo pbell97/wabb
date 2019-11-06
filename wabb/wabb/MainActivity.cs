@@ -6,6 +6,12 @@ using Android.Support.Design.Widget;
 using Android.Support.V7.App;
 using Android.Views;
 using Android.Widget;
+<<<<<<< HEAD
+=======
+using Java.Security;
+// Used for SecureStorage
+using Xamarin.Essentials;
+>>>>>>> parent of da3a50e... Added storage support. Added string support for sym keys. Somehwat integrating sym keys.
 
 namespace wabb
 {
@@ -19,6 +25,7 @@ namespace wabb
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             SetContentView(Resource.Layout.activity_main);
 
+<<<<<<< HEAD
             Android.Support.V7.Widget.Toolbar toolbar = FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
             SetSupportActionBar(toolbar);
 
@@ -66,6 +73,8 @@ namespace wabb
 
             //var k = skh.DecryptData(test);
 
+=======
+>>>>>>> parent of da3a50e... Added storage support. Added string support for sym keys. Somehwat integrating sym keys.
             // these are mutually exclusive
             //SetupPasswordBasedTesting();
             //SetupKeyCreationTesting();

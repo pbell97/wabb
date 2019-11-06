@@ -18,11 +18,15 @@ namespace Chat_UI
     {
         TLSConnector serverConnection;
 <<<<<<< HEAD
+<<<<<<< HEAD
         string access_id = "ya29.ImCvB0FovhMdpX-A1VIzGQs4KpcJrC22GAvgEzc0UpeLYI576_Q6tUh5jV8DYkn5PoEKsUK3Y_2VoWdrplV1P_-8Y89KqUy0eFSH0mxoTKE-6PQ5zhzXdL1rrDCDOVovZRo";
 =======
         string access_id = "ya29.ImGvByFb54QNQpE_ZCAdslURd3l3i4AR7N9-2kDA-d8pbbjZf7XOUohyq4SUyYOL7NDrXJ2-aXWqR9YZMTADcgOq5CnXiwplf9HvjtFPHGNyWs_YGrLjuyjcD6zprAT4eS8Z";
         string myAsymKeyPairAlias = "myKeyPair";
 >>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
+=======
+        string access_id = "ya29.ImGvByVGA_sf8HdIXIAavvguV8WfXE5GE5NXrdK-NKKR2QkqpHDtVv0fmwQzVZwDuptDYUiYOS3ZUTWFLi_rrJykK_n_f7cL-_BDJkF-eLo7g76jAUgxe-0huoIlguXzQzPb";
+>>>>>>> parent of da3a50e... Added storage support. Added string support for sym keys. Somehwat integrating sym keys.
         string[] convoList = { "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat" };
         User mainUser;
         Dictionary<string, User> otherUsers = new Dictionary<string, User> { }; // username:user
@@ -470,6 +474,7 @@ namespace Chat_UI
                 Console.WriteLine("Length: " + length.ToString());
                 Chat aChat;
 <<<<<<< HEAD
+<<<<<<< HEAD
                 for (int i = 0; i < length; i++)
                 {
                     aChat = new Chat(message[type][i].ToString());
@@ -489,6 +494,13 @@ namespace Chat_UI
                         chatNameMatches[aChat.chatId] = aChat.chatName;
                     }
 >>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
+=======
+                for (int i = 0; i < length; i++)
+                {
+                    aChat = new Chat(message[type][i].ToString());
+                    myChats[aChat.chatName] = aChat;
+                    chatNameMatches[aChat.chatId] = aChat.chatName;
+>>>>>>> parent of da3a50e... Added storage support. Added string support for sym keys. Somehwat integrating sym keys.
                 }
 
                 // Get new message for all chats
@@ -628,12 +640,15 @@ namespace Chat_UI
         void createUser(string username, string pubKey)
         {
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
             AsymmetricKeyHelper akh = new AsymmetricKeyHelper(myAsymKeyPairAlias + username);
             akh.CreateKey();
             string pubKey = akh.GetPublicKeyString();
 
 >>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
+=======
+>>>>>>> parent of da3a50e... Added storage support. Added string support for sym keys. Somehwat integrating sym keys.
             string message = "{\"access_id\": \"" + this.access_id + "\", \"username\": \"" + username + "\", \"pubKey\": \"" + pubKey + "\"}";
             serverConnection.WriteMessage("createUser", message);
         }
@@ -652,6 +667,7 @@ namespace Chat_UI
             }
         }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 =======
         void saveChatsAndUsersToStorage()
@@ -677,6 +693,8 @@ namespace Chat_UI
 
 
 >>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
+=======
+>>>>>>> parent of da3a50e... Added storage support. Added string support for sym keys. Somehwat integrating sym keys.
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
