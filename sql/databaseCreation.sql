@@ -5,6 +5,7 @@ CREATE TABLE users (username varchar(25) NOT NULL, email varchar(35), id char(32
 CREATE TABLE messages (id char(32), chatId varchar(32), messageId int, messageContent varchar(2000));
 CREATE TABLE chats (chatId varchar(32), chatName varchar(100) NOT NULL, founderId varChar(32), users TEXT, UNIQUE (chatName));
 CREATE TABLE invitesBuffer (destinationUser varchar(32), messageToSend varchar(500));
+CREATE TABLE keysBackup (username varchar(25), backupData varchar(2000));
 
 CREATE USER 'testUser'@'%' IDENTIFIED WITH mysql_native_password BY 'newpassword';
 GRANT ALL PRIVILEGES ON infoSec.* to 'testUser'@'%';

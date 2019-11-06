@@ -63,6 +63,12 @@ function interpretMessage(socket, message){
         case "getMyChats":
             getMyChats(socket, message.content);
             break;
+        case "backupKeys":
+            backupKeys(socket, message.content);
+            break;
+        case "restoreKeys":
+            restoreKeys(socket, message.content);
+            break;
         default:
             socket.write(JSON.stringify({"response": "Invalid Request"}));
             break;
@@ -349,6 +355,55 @@ function getUsers(socket, message){
                 };
                 socket.write(JSON.stringify(response));
             })
+        } else {
+            socket.write(JSON.stringify({"error": "Invalid Token"}));
+        }
+    });
+}
+
+function backupKeys(socket, message){
+    var access_id = message.access_id;
+    verifyTokenManually(access_id, (accepted, data) => {
+        if (accepted){
+            var user_id = data.user_id;
+            var backupData = message['backupData']
+            var query = "SELECT username FROM users WHERE id = \"" + user_id + "\";";
+            executeSQLQuery(query, (error, results)=>{
+                if (error) throw error;
+                var username = results[0].username;
+                var query = "DELETE FROM keysBackup WHERE username = \"" + username + "\";";
+                executeSQLQuery(query, (error, results)=>{
+                    if (error) throw error;
+                    var query = "INSERT INTO keysBackup (username, backupData) VALUES (\"" + username + "\", \"" + backupData + "\");";
+                    executeSQLQuery(query, (error, results)=>{
+                        if (error) throw error;
+                        console.log("Backed up keys for " + username);
+                    });
+                });
+            });
+        } else {
+            socket.write(JSON.stringify({"error": "Invalid Token"}));
+        }
+    });
+}
+
+function restoreKeys(socket, message){
+    var access_id = message.access_id;
+    verifyTokenManually(access_id, (accepted, data) => {
+        if (accepted){
+            var user_id = data.user_id;
+            var query = "SELECT username FROM users WHERE id = \"" + user_id + "\";";
+            executeSQLQuery(query, (error, results)=>{
+                if (error) throw error;
+                var username = results[0].username;
+                var query = "SELECT backupData FROM keysBackup WHERE username = \"" + username + "\";";
+                executeSQLQuery(query, (error, results)=>{
+                    if (error) throw error;
+                    socket.write(JSON.stringify({"restoreKeys": results[0].backupData}));
+                    console.log("Returning keys to " + username);
+                });
+            });
+            
         } else {
             socket.write(JSON.stringify({"error": "Invalid Token"}));
         }
