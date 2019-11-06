@@ -8,9 +8,12 @@ using Android.Views;
 using Android.Widget;
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 =======
 >>>>>>> parent of 8dd232e... Minor testing with external public key use
+=======
+>>>>>>> parent of 1755f9a... Merged latest enc changes
 using Java.Security;
 // Used for SecureStorage
 using Xamarin.Essentials;
@@ -137,7 +140,7 @@ namespace wabb
 >>>>>>> parent of da3a50e... Added storage support. Added string support for sym keys. Somehwat integrating sym keys.
             // these are mutually exclusive
             //SetupPasswordBasedTesting();
-            //SetupKeyCreationTesting();
+            SetupKeyCreationTesting();
             //SetupStoredItemTesting();
 
             Print(DEBUGTEST());
@@ -145,20 +148,7 @@ namespace wabb
 
         public string DEBUGTEST()
         {
-            // Test the possibility of encrypting using a Public key in the SecureStorage
             var output = "DEBUGTEST\n";
-
-            // Make key pair
-            var asymmHelper = new AsymmetricKeyHelper("DEBUGTEST");
-            asymmHelper.CreateKey();
-            var serializedCertificate = asymmHelper.GetCertificate().GetEncoded();
-
-            var certificateEncrypter = new CertificateEncrypter("DEBUGTEST", serializedCertificate);
-            var encryptedData = certificateEncrypter.EncryptData("This is a quick little test here/n");
-
-            // Run the externally encrypted data through internal decrypter
-            output += asymmHelper.DecryptData(encryptedData);
-
             return output;
 >>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
         }
