@@ -56,12 +56,18 @@ namespace wabb
             //SetupStoredItemTesting();
 >>>>>>> parent of 8dd232e... Minor testing with external public key use
 
+<<<<<<< HEAD
+>>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
+=======
 >>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
             AsymmetricKeyHelper firstKey = new AsymmetricKeyHelper("firstKey");
             firstKey.CreateKey();
             byte[] encodedKey1 = firstKey.GetPublicKeyBytes();
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
             AsymmetricKeyHelper secondKey = new AsymmetricKeyHelper("secondKey");
             //byte[] encryptedText = firstKey.EncryptDataWithAnotherPublicKey(encodedKey1, "TestValueGoesHere");
 
@@ -90,8 +96,15 @@ namespace wabb
                 return output;
             }
 
+<<<<<<< HEAD
             // Set up encryption machine
             cipher.Init(CipherMode.EncryptMode, certificate);
+=======
+            SymmetricKeyHelper skh = new SymmetricKeyHelper("firstKey");
+            skh.CreateKey();
+            var encryptedText = skh.EncryptDataToBytes("Testing123");
+            var keyString = skh.GetKeyString();
+>>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
 
             // Mostly just copied this, convert UTF8 to bytes?
             var encryptedData = cipher.DoFinal(Encoding.UTF8.GetBytes("Just a quick little test here\n"));
@@ -102,6 +115,7 @@ namespace wabb
             var encryptedText = skh.EncryptDataToBytes("Testing123");
             var keyString = skh.GetKeyString();
 
+<<<<<<< HEAD
 
             SymmetricKeyHelper skh2 = new SymmetricKeyHelper("newKey");
             skh2.LoadKey(keyString);
@@ -113,6 +127,11 @@ namespace wabb
             return output;
         }
 >>>>>>> parent of 8dd232e... Minor testing with external public key use
+=======
+            SymmetricKeyHelper skh2 = new SymmetricKeyHelper("newKey");
+            skh2.LoadKey(keyString);
+            var decryptedText = skh2.DecryptData(encryptedText);
+>>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
 
 
 

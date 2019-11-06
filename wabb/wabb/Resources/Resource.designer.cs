@@ -4343,6 +4343,7 @@ namespace wabb
 			// aapt resource value: 0x7F0800C9
 			public const int textView1 = 2131230921;
 			
+<<<<<<< HEAD
 			// aapt resource value: 0x7F0800CA
 			public const int text_input_password_toggle = 2131230922;
 			
@@ -4393,10 +4394,60 @@ namespace wabb
 			
 			// aapt resource value: 0x7F0800DD
 			public const int up = 2131230941;
+=======
+			// aapt resource value: 0x7F08003C
+			public const int checkbox = 2131230780;
+			
+			// aapt resource value: 0x7F08003D
+			public const int checkedTextView1 = 2131230781;
+			
+			// aapt resource value: 0x7F08003E
+			public const int chronometer = 2131230782;
+			
+			// aapt resource value: 0x7F08003F
+			public const int clip_horizontal = 2131230783;
+			
+			// aapt resource value: 0x7F080040
+			public const int clip_vertical = 2131230784;
+			
+			// aapt resource value: 0x7F080041
+			public const int collapseActionView = 2131230785;
+			
+			// aapt resource value: 0x7F080042
+			public const int container = 2131230786;
+			
+			// aapt resource value: 0x7F080043
+			public const int content = 2131230787;
+			
+			// aapt resource value: 0x7F080044
+			public const int contentPanel = 2131230788;
+			
+			// aapt resource value: 0x7F080045
+			public const int coordinator = 2131230789;
+			
+			// aapt resource value: 0x7F080046
+			public const int createAccountButton = 2131230790;
+			
+			// aapt resource value: 0x7F080047
+			public const int createButton = 2131230791;
+			
+			// aapt resource value: 0x7F080048
+			public const int createChatButton = 2131230792;
+			
+			// aapt resource value: 0x7F080049
+			public const int createChatTitle = 2131230793;
+			
+			// aapt resource value: 0x7F08004A
+			public const int createNewChatButton = 2131230794;
+			
+			// aapt resource value: 0x7F08004B
+			public const int createUserButton = 2131230795;
+>>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
 			
 			// aapt resource value: 0x7F0800DE
 			public const int useLogo = 2131230942;
 			
+<<<<<<< HEAD
 			// aapt resource value: 0x7F0800DF
 			public const int username = 2131230943;
 			
@@ -4489,8 +4540,103 @@ namespace wabb
 			
 			// aapt resource value: 0x7F080069
 			public const int info = 2131230825;
+=======
+			// aapt resource value: 0x7F08004C
+			public const int custom = 2131230796;
+			
+			// aapt resource value: 0x7F08004D
+			public const int customPanel = 2131230797;
+			
+			// aapt resource value: 0x7F08004E
+			public const int decor_content_parent = 2131230798;
+			
+			// aapt resource value: 0x7F08004F
+			public const int decrypted = 2131230799;
+			
+			// aapt resource value: 0x7F080050
+			public const int decryptedTitle = 2131230800;
+			
+			// aapt resource value: 0x7F080051
+			public const int default_activity_button = 2131230801;
+			
+			// aapt resource value: 0x7F080052
+			public const int deleteAllButton = 2131230802;
+			
+			// aapt resource value: 0x7F080053
+			public const int deleteButton = 2131230803;
+			
+			// aapt resource value: 0x7F080054
+			public const int design_bottom_sheet = 2131230804;
+			
+			// aapt resource value: 0x7F080055
+			public const int design_menu_item_action_area = 2131230805;
+			
+			// aapt resource value: 0x7F080056
+			public const int design_menu_item_action_area_stub = 2131230806;
+			
+			// aapt resource value: 0x7F080057
+			public const int design_menu_item_text = 2131230807;
+			
+			// aapt resource value: 0x7F080058
+			public const int design_navigation_view = 2131230808;
+			
+			// aapt resource value: 0x7F080059
+			public const int disableHome = 2131230809;
+			
+			// aapt resource value: 0x7F08005A
+			public const int edit_query = 2131230810;
+			
+			// aapt resource value: 0x7F08005B
+			public const int encrypted = 2131230811;
+			
+			// aapt resource value: 0x7F08005C
+			public const int encryptedTitle = 2131230812;
+			
+			// aapt resource value: 0x7F08005D
+			public const int end = 2131230813;
+			
+			// aapt resource value: 0x7F08005E
+			public const int enterAlways = 2131230814;
+			
+			// aapt resource value: 0x7F08005F
+			public const int enterAlwaysCollapsed = 2131230815;
+			
+			// aapt resource value: 0x7F080060
+			public const int exitUntilCollapsed = 2131230816;
+			
+			// aapt resource value: 0x7F080062
+			public const int expanded_menu = 2131230818;
+			
+			// aapt resource value: 0x7F080061
+			public const int expand_activities_button = 2131230817;
+			
+			// aapt resource value: 0x7F080063
+			public const int fill = 2131230819;
+			
+			// aapt resource value: 0x7F080066
+			public const int filled = 2131230822;
+			
+			// aapt resource value: 0x7F080064
+			public const int fill_horizontal = 2131230820;
+			
+			// aapt resource value: 0x7F080065
+			public const int fill_vertical = 2131230821;
+			
+			// aapt resource value: 0x7F080067
+			public const int @fixed = 2131230823;
+			
+			// aapt resource value: 0x7F080068
+			public const int forever = 2131230824;
+			
+			// aapt resource value: 0x7F080003
+			public const int FUNCTION = 2131230723;
+>>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
+			
+			// aapt resource value: 0x7F080069
+			public const int getButton = 2131230825;
 			
 			// aapt resource value: 0x7F08006A
+<<<<<<< HEAD
 			public const int inviteUsers = 2131230826;
 			
 			// aapt resource value: 0x7F08006B
@@ -4586,6 +4732,102 @@ namespace wabb
 			
 			// aapt resource value: 0x7F080088
 			public const int notification_main_column = 2131230856;
+=======
+			public const int ghost_view = 2131230826;
+			
+			// aapt resource value: 0x7F08006B
+			public const int group_divider = 2131230827;
+			
+			// aapt resource value: 0x7F08006C
+			public const int home = 2131230828;
+			
+			// aapt resource value: 0x7F08006D
+			public const int homeAsUp = 2131230829;
+			
+			// aapt resource value: 0x7F08006E
+			public const int icon = 2131230830;
+			
+			// aapt resource value: 0x7F08006F
+			public const int icon_group = 2131230831;
+			
+			// aapt resource value: 0x7F080070
+			public const int ifRoom = 2131230832;
+			
+			// aapt resource value: 0x7F080071
+			public const int image = 2131230833;
+			
+			// aapt resource value: 0x7F080072
+			public const int info = 2131230834;
+			
+			// aapt resource value: 0x7F080073
+			public const int inputText = 2131230835;
+			
+			// aapt resource value: 0x7F080074
+			public const int inviteUsers = 2131230836;
+			
+			// aapt resource value: 0x7F080075
+			public const int inviteUsersTitle = 2131230837;
+			
+			// aapt resource value: 0x7F080076
+			public const int italic = 2131230838;
+			
+			// aapt resource value: 0x7F080077
+			public const int item_touch_helper_previous_elevation = 2131230839;
+			
+			// aapt resource value: 0x7F080078
+			public const int keyAlias = 2131230840;
+			
+			// aapt resource value: 0x7F080079
+			public const int keysText = 2131230841;
+			
+			// aapt resource value: 0x7F08007A
+			public const int labeled = 2131230842;
+			
+			// aapt resource value: 0x7F08007B
+			public const int largeLabel = 2131230843;
+			
+			// aapt resource value: 0x7F08007C
+			public const int left = 2131230844;
+			
+			// aapt resource value: 0x7F08007D
+			public const int line1 = 2131230845;
+			
+			// aapt resource value: 0x7F08007E
+			public const int line3 = 2131230846;
+			
+			// aapt resource value: 0x7F08007F
+			public const int linearLayout1 = 2131230847;
+			
+			// aapt resource value: 0x7F080080
+			public const int linearLayout2 = 2131230848;
+			
+			// aapt resource value: 0x7F080081
+			public const int listMode = 2131230849;
+			
+			// aapt resource value: 0x7F080082
+			public const int list_item = 2131230850;
+			
+			// aapt resource value: 0x7F080083
+			public const int loginButton = 2131230851;
+			
+			// aapt resource value: 0x7F080084
+			public const int loginButtonOnStartScreen = 2131230852;
+			
+			// aapt resource value: 0x7F080085
+			public const int masked = 2131230853;
+			
+			// aapt resource value: 0x7F080086
+			public const int message = 2131230854;
+			
+			// aapt resource value: 0x7F080087
+			public const int messageDisplay = 2131230855;
+			
+			// aapt resource value: 0x7F080088
+			public const int messageRecvr = 2131230856;
+			
+			// aapt resource value: 0x7F080004
+			public const int META = 2131230724;
+>>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
 			
 			// aapt resource value: 0x7F080089
 			public const int notification_main_column_container = 2131230857;

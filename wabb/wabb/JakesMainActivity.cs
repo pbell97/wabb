@@ -21,8 +21,11 @@ namespace Chat_UI
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         string access_id = "ya29.ImCvB0FovhMdpX-A1VIzGQs4KpcJrC22GAvgEzc0UpeLYI576_Q6tUh5jV8DYkn5PoEKsUK3Y_2VoWdrplV1P_-8Y89KqUy0eFSH0mxoTKE-6PQ5zhzXdL1rrDCDOVovZRo";
 =======
+=======
+>>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
 =======
 >>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
         string access_id = "ya29.ImGvByFb54QNQpE_ZCAdslURd3l3i4AR7N9-2kDA-d8pbbjZf7XOUohyq4SUyYOL7NDrXJ2-aXWqR9YZMTADcgOq5CnXiwplf9HvjtFPHGNyWs_YGrLjuyjcD6zprAT4eS8Z";
@@ -56,6 +59,9 @@ namespace Chat_UI
             }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
+=======
 >>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
 =======
 >>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
@@ -379,7 +385,11 @@ namespace Chat_UI
                 // TODO: Remove when get login working
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
                 access_id = "ya29.ImCvB0FovhMdpX-A1VIzGQs4KpcJrC22GAvgEzc0UpeLYI576_Q6tUh5jV8DYkn5PoEKsUK3Y_2VoWdrplV1P_-8Y89KqUy0eFSH0mxoTKE-6PQ5zhzXdL1rrDCDOVovZRo";
+=======
+                access_id = "ya29.ImCvB6VbczgIvH8uP3FVXS7fPuzGyf9M3LLzbDfF2yUBVcy2hKLMkvNumUZNyRVnKSqm-E4kAPNND1zTkWZKvoCY-ew8FsBj0ywd0APSWrv4KscyeScTp9xLLGUvabVThS0";
+>>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
 =======
                 access_id = "ya29.ImCvB6VbczgIvH8uP3FVXS7fPuzGyf9M3LLzbDfF2yUBVcy2hKLMkvNumUZNyRVnKSqm-E4kAPNND1zTkWZKvoCY-ew8FsBj0ywd0APSWrv4KscyeScTp9xLLGUvabVThS0";
 >>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
@@ -393,7 +403,11 @@ namespace Chat_UI
                 // TODO: generate pubkey
                 string pubKey = "testPubKey";
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+
+>>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
 
 >>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
 
@@ -650,6 +664,7 @@ namespace Chat_UI
             myChats[chatName].symKey = "testSymKey";        // TODO: REMOVE THIS AFTER SYMKEY CREATION IS INSTALLED
             string joinerId = otherUsers[username].user_id;
             string joinerPubKey = otherUsers[username].pubKey;
+<<<<<<< HEAD
             string symKeyEncrypted = myChats[chatName].symKey;
 
 <<<<<<< HEAD
@@ -659,6 +674,11 @@ namespace Chat_UI
             // TODO: Encrypt symkey with invited users' pub key
 >>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
 =======
+            // TODO: Encrypt symkey with invited users' pub key
+>>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
+=======
+            string symKeyEncrypted = myChats[chatName].getSharableKey();
+
             // TODO: Encrypt symkey with invited users' pub key
 >>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
 
