@@ -4,6 +4,7 @@ var fs = require('fs');
 var express = require('express');
 var TLSConnection = require('./tlsTesting/nodeTLSClass.js');
 const googleAudienceID = '154600092899-9tdri4c4k80lg38ak4bd9s6aro95s9nt.apps.googleusercontent.com';
+// const googleAudienceID = '194187796125-1tk73jfb7ors490aj61ehh9kaos1ie5d.apps.googleusercontent.com'; // Kohler's
 var tokenCache = {};
 
 var serverConnection = new TLSConnection();
@@ -322,6 +323,10 @@ function signIn(socket, message){
                     var messageToSend = results[i].messageToSend;
                     socket.write(messageToSend);
                     // TODO: DELETE MESSAGE FROM BUFFER
+                    var query = "DELETE FROM invitesBuffer WHERE destinationUser = \"" + userId + "\";";
+                    executeSQLQuery(query, (error, results)=>{
+                        if (error) throw error; 
+                    });
                 }
             });
 
@@ -449,8 +454,12 @@ function userIsInChat(chatId, user_id, callback){
     var query = "SELECT users FROM chats WHERE chatId = \"" + chatId + "\";"; 
     executeSQLQuery(query, (error, results)=>{
         if (error) throw error;
-        var users = results[0]["users"].split(',');
-        callback(users.includes(user_id));
+        if (results[0] != undefined) {
+            var users = results[0]["users"].split(',');
+            callback(users.includes(user_id));
+            return;
+        }
+        console.log("Had a problem checking if user was in chat");
     });
 }
 
