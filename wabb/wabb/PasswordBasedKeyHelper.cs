@@ -2,6 +2,7 @@
 using Javax.Crypto;
 using Javax.Crypto.Spec;
 using System.Text;
+using System;
 
 namespace wabb
 {
@@ -64,6 +65,11 @@ namespace wabb
             return cipher.DoFinal(Encoding.UTF8.GetBytes(plaintext));
         }
 
+        public string EncryptDataToString(string plaintext)
+        {
+            return Convert.ToBase64String(EncryptData(plaintext));
+        }
+
         public string DecryptData(byte[] encryptedData)
         {
             var cipher = Cipher.GetInstance(TRANSFORMATION);
@@ -81,6 +87,11 @@ namespace wabb
             var decryptedBytes = cipher.DoFinal(encryptedData);
             var decryptedMessage = Encoding.UTF8.GetString(decryptedBytes);
             return decryptedMessage;
+        }
+
+        public string DecryptDataFromString(string encryptedData)
+        {
+            return DecryptData(Convert.FromBase64String(encryptedData));
         }
     }
 }

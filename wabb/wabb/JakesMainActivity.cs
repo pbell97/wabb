@@ -10,6 +10,7 @@ using Newtonsoft.Json.Linq;
 using System.Threading;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace Chat_UI
 {
@@ -18,7 +19,7 @@ namespace Chat_UI
     public class MainActivity : AppCompatActivity
     {
         TLSConnector serverConnection;
-        string access_id = "ya29.ImCvB9pe6Qe6SEaH6VhqFVNMBmHvrEh64LmwORZsIt2VOVHmR3zIPTDjALo4JjNELypF2MK_1XpUgEPisnBPsE1Nzyh0OkTZFkYUubXxn4oli2AkQXj0MsYIAvyYVTHEkt4";
+        string access_id = "ya29.ImGwB1qC4kg0kRzEdhyfPT3GyEc60wYi0HpLjYk_MZNlryzyWIums11M20ZR2tfb56AcOeEVm9fXyox0ib0blZejZVSvpCx2NYwJt4V-VwIZjCCET8krr_FB23JWQSI6TFDv";
         string myAsymKeyPairAlias = "myKeyPair";   // ALWAYS PUT "+ mainUser.username" to the key
         string[] convoList = { "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat" };
         User mainUser;
@@ -30,6 +31,8 @@ namespace Chat_UI
         string activeChatName = "";
         string activeChatId = "";
         string currentView = "";
+        string suppliedRestorePassword = "";
+        bool restoreKeysNow = false;
 
         // MESSAGE SCREEN
         void messageScreen(string chatName)
@@ -126,6 +129,10 @@ namespace Chat_UI
         void convoScreen(string username = null)
         {
             if (username == null) username = this.mainUser.username;
+            if (restoreKeysNow)
+            {
+                restoreKeysRequest();
+            }
 
             SetContentView(Resource.Layout.conversations);
             currentView = "convoScreen";
@@ -140,8 +147,14 @@ namespace Chat_UI
                 createChatScreen();
             };
 
-            // POPULATE CONVERSATION BUTTONS
-            var button0 = FindViewById<Button>(Resource.Id.button0);
+            var backupDataButton = FindViewById<Button>(Resource.Id.backupDataButton);
+            backupDataButton.Click += (sender, e) =>
+            {
+                backupAccountScreen();
+            }; 
+
+             // POPULATE CONVERSATION BUTTONS
+             var button0 = FindViewById<Button>(Resource.Id.button0);
             var button1 = FindViewById<Button>(Resource.Id.button1);
             var button2 = FindViewById<Button>(Resource.Id.button2);
             var button3 = FindViewById<Button>(Resource.Id.button3);
@@ -340,8 +353,43 @@ namespace Chat_UI
             createAccountButton.Click += (sender, e) =>
             {
                 createAccountScreen();
+            }; 
+
+            var restoreButton = FindViewById<Button>(Resource.Id.restoreAccountStartButton);
+            restoreButton.Click += (sender, e) =>
+            {
+                //TODO: Sign in first
+                restoreAccountScreen();
+            }; 
+        }
+
+        void restoreAccountScreen()
+        {
+            SetContentView(Resource.Layout.restoreAccount);
+            currentView = "restoreAccount";
+            var retstoreButton = FindViewById<Button>(Resource.Id.restoreButton);
+            retstoreButton.Click += (sender, e) =>
+            {
+                restoreKeysNow = true;
+                suppliedRestorePassword = FindViewById<EditText>(Resource.Id.restorePassword).Text;
+                signInToServer();
             };
         }
+
+        void backupAccountScreen()
+        {
+            SetContentView(Resource.Layout.backupKeys);
+            currentView = "backupKeys";
+
+            var backupKeysButton = FindViewById<Button>(Resource.Id.backupKeysButton);
+            backupKeysButton.Click += (sender, e) =>
+            {
+                suppliedRestorePassword = FindViewById<EditText>(Resource.Id.backupPasswordField).Text;
+                backupKeysToServer();
+                convoScreen();
+            };
+        }
+
 
         void createAccountScreen()
         {
@@ -667,6 +715,73 @@ namespace Chat_UI
             mainUser = storageHelper.GetItem<User>("mainUser");
         }
 
+        void backupKeysToServer()
+        {
+            // Creates key and encrypts w/ password
+            PasswordBasedKeyHelper passHelper = new PasswordBasedKeyHelper("restoration" + mainUser.user_id);
+            passHelper.CreateKey(suppliedRestorePassword, mainUser.email);
+            suppliedRestorePassword = "";
+
+            // Creates dict of chatname:symkey
+            Dictionary<string, string> keysBackup = new Dictionary<string, string>();
+            var chatKeyValue = myChats.Keys.ToArray<string>();
+            for (int i = 0; i < chatKeyValue.Length; i++)
+            {
+                keysBackup[chatKeyValue[i]] = myChats[chatKeyValue[i]].getSharableKey();
+            }
+
+            // Serializes the keys and encrypts them
+            var serializedKeyPairs = JsonConvert.SerializeObject(keysBackup);
+            var encryptedSerializedKeyPairs = passHelper.EncryptDataToString(serializedKeyPairs);
+
+            string message = "{\"access_id\": \"" + this.access_id + "\", \"username\": \"" + mainUser.username + "\", \"backupData\": \"" + encryptedSerializedKeyPairs + "\"}";
+            serverConnection.WriteMessage("backupKeys", message);
+
+        }
+
+        void restoreKeysRequest()
+        {
+            string message = "{\"access_id\": \"" + this.access_id + "\"}";
+            serverConnection.WriteMessage("restoreKeys", message);
+            restoreKeysNow = false;
+        }
+
+        void restoreKeysResponse(object sender, EventArgs e)
+        {
+            int messageIndex = serverConnection.unreadMessages.Count - 1;
+            if (messageIndex < 0) return;
+            JObject message = JObject.Parse(serverConnection.unreadMessages[messageIndex]);
+            string type = serverConnection.interpretMessageType(message);
+
+            if (type == "restoreKeys")
+            {
+                // Gets data
+                string encryptedSerializedKeys = message[type].ToString();
+
+                // Creates password helper. suppliedRestorePassword must be supplied
+                PasswordBasedKeyHelper passHelper = new PasswordBasedKeyHelper("restoration" + mainUser.user_id);
+                passHelper.CreateKey(suppliedRestorePassword, mainUser.email);
+
+                // Deletes from memory
+                suppliedRestorePassword = "";
+
+                // Deserialies and decryptes the keys
+                string decryptedSerializedKeys = passHelper.DecryptDataFromString(encryptedSerializedKeys);
+                Dictionary<string, string> chatsKeysPair = JsonConvert.DeserializeObject<Dictionary<string, string>>(decryptedSerializedKeys);
+
+                // Puts keys into chat objects
+                var chatNames = chatsKeysPair.Keys.ToArray<string>();
+                for (int i = 0; i < chatNames.Length; i++)
+                {
+                    var name = chatNames[i];
+                    var symKey = chatsKeysPair[name];
+                    myChats[name].loadChatKey(symKey);
+                }
+
+                // Saves to storage
+                saveChatsAndUsersToStorage();
+            }
+        }
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -685,6 +800,7 @@ namespace Chat_UI
             serverConnection.OnMessageReceived += new EventHandler(proccessNewMessages); 
             serverConnection.OnMessageReceived += new EventHandler(proccessNewChat); 
             serverConnection.OnMessageReceived += new EventHandler(proccessCreatedUser); 
+            serverConnection.OnMessageReceived += new EventHandler(restoreKeysResponse); 
 
             // Starts connection to server on new thread
             ThreadStart connectionThreadRef = new ThreadStart(serverConnection.Connect);
