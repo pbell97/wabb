@@ -57,7 +57,10 @@
     <Reference Include="System.Numerics.Vectors" />
   </ItemGroup>
   <ItemGroup>
+<<<<<<< HEAD
     <Compile Include="KeyHelper.cs" />
+=======
+>>>>>>> parent of 8f0ea2d... Added external cert handler
     <Compile Include="MainActivity.cs" />
 <<<<<<< HEAD
 =======

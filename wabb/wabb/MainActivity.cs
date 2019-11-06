@@ -62,8 +62,37 @@ namespace wabb
             AsymmetricKeyHelper secondKey = new AsymmetricKeyHelper("secondKey");
             //byte[] encryptedText = firstKey.EncryptDataWithAnotherPublicKey(encodedKey1, "TestValueGoesHere");
 
+<<<<<<< HEAD
             //string decryptedText = firstKey.DecryptData(encryptedText);
 
+=======
+            // Make key pair
+            var asymmHelper = new AsymmetricKeyHelper("DEBUGTEST");
+            asymmHelper.CreateKey();
+            var storageHelper = new SecureStorageHelper();
+
+            // Store cert in SecureStorage
+            storageHelper.StoreItem<byte[]>("DEBUGTEST", asymmHelper.GetCertificate().GetEncoded());
+            // Pull cert from storage
+            var serializedCert = storageHelper.GetItem<byte[]>("DEBUGTEST");
+            // Convert to stream in order to recreate cert
+            var stream = new System.IO.MemoryStream(serializedCert, 0, serializedCert.Length);
+            var certificate = Java.Security.Cert.CertificateFactory.GetInstance("X509").GenerateCertificate(stream);
+
+            // 
+            var cipher = Cipher.GetInstance("RSA/ECB/PKCS1Padding");
+            if (certificate == null)
+            {
+                output += "Certificate is null\n";
+                return output;
+            }
+
+            // Set up encryption machine
+            cipher.Init(CipherMode.EncryptMode, certificate);
+
+            // Mostly just copied this, convert UTF8 to bytes?
+            var encryptedData = cipher.DoFinal(Encoding.UTF8.GetBytes("Just a quick little test here\n"));
+>>>>>>> parent of 8f0ea2d... Added external cert handler
 
             SymmetricKeyHelper skh = new SymmetricKeyHelper("firstKey");
             skh.CreateKey();
