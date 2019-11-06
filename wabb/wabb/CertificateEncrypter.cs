@@ -11,6 +11,7 @@ using Android.Views;
 using Android.Widget;
 using Java.Security.Cert;
 using Javax.Crypto;
+using System;
 
 namespace wabb
 {
@@ -22,13 +23,13 @@ namespace wabb
         // !! Must match the transformation applied to the Asymm key, @AsymmetricKeyHelper
         private const string TRANSFORMATION = "RSA/ECB/PKCS1Padding";
 
-        public CertificateEncrypter(string certificateAlias)
-        {
-            var certificate = _storageHelper.GetItem<byte[]>(certificateAlias);
+        //public CertificateEncrypter(string certificateAlias)
+        //{
+        //    var certificate = _storageHelper.GetItem<byte[]>(certificateAlias);
 
-            var stream = new System.IO.MemoryStream(certificate, 0, certificate.Length);
-            _cert = CertificateFactory.GetInstance("X509").GenerateCertificate(stream);
-        }
+        //    var stream = new System.IO.MemoryStream(certificate, 0, certificate.Length);
+        //    _cert = CertificateFactory.GetInstance("X509").GenerateCertificate(stream);
+        //}
 
         public CertificateEncrypter(string certificateAlias, byte[] serializedCertificate)
         {
@@ -37,6 +38,13 @@ namespace wabb
             var stream = new System.IO.MemoryStream(serializedCertificate, 0, serializedCertificate.Length);
             var certificate = CertificateFactory.GetInstance("X509").GenerateCertificate(stream);
             _cert = certificate;
+        }
+
+        public CertificateEncrypter(string certificate)
+        {
+            byte[] cert = Convert.FromBase64String(certificate);
+            var stream = new System.IO.MemoryStream(cert, 0, cert.Length);
+            _cert = CertificateFactory.GetInstance("X509").GenerateCertificate(stream);
         }
 
         public byte[] GetEncodedCertificate()
@@ -57,6 +65,11 @@ namespace wabb
             // Mostly just copied this, convert UTF8 to bytes?
             var encryptedData = cipher.DoFinal(Encoding.UTF8.GetBytes(plaintext));
             return encryptedData;
+        }
+
+        public string EncryptDataToString(string plaintext)
+        {
+            return Convert.ToBase64String(EncryptData(plaintext));
         }
     }
 }

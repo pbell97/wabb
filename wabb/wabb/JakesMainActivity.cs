@@ -14,35 +14,19 @@ using System.Linq;
 namespace Chat_UI
 {
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
+    //[Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar")]
     public class MainActivity : AppCompatActivity
     {
         TLSConnector serverConnection;
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-        string access_id = "ya29.ImCvB0FovhMdpX-A1VIzGQs4KpcJrC22GAvgEzc0UpeLYI576_Q6tUh5jV8DYkn5PoEKsUK3Y_2VoWdrplV1P_-8Y89KqUy0eFSH0mxoTKE-6PQ5zhzXdL1rrDCDOVovZRo";
-=======
-=======
->>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
-=======
->>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
-        string access_id = "ya29.ImGvByFb54QNQpE_ZCAdslURd3l3i4AR7N9-2kDA-d8pbbjZf7XOUohyq4SUyYOL7NDrXJ2-aXWqR9YZMTADcgOq5CnXiwplf9HvjtFPHGNyWs_YGrLjuyjcD6zprAT4eS8Z";
+        string access_id = "ya29.ImCvB0gCyvs5I_Zz10lZVXUcz5Q8UPHH8bm9s-bLrqM1Wpg7rr7cAF2PZwH5hfjEOeW0JLVidn94_MVttFvknNpV_TQk83Rx-70V0He_muIMK7co2mPDVHIw6rp5EWzUPLU";
         string myAsymKeyPairAlias = "myKeyPair";
->>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
-=======
-        string access_id = "ya29.ImGvByVGA_sf8HdIXIAavvguV8WfXE5GE5NXrdK-NKKR2QkqpHDtVv0fmwQzVZwDuptDYUiYOS3ZUTWFLi_rrJykK_n_f7cL-_BDJkF-eLo7g76jAUgxe-0huoIlguXzQzPb";
->>>>>>> parent of da3a50e... Added storage support. Added string support for sym keys. Somehwat integrating sym keys.
-=======
-        string access_id = "ya29.ImGvByVGA_sf8HdIXIAavvguV8WfXE5GE5NXrdK-NKKR2QkqpHDtVv0fmwQzVZwDuptDYUiYOS3ZUTWFLi_rrJykK_n_f7cL-_BDJkF-eLo7g76jAUgxe-0huoIlguXzQzPb";
->>>>>>> parent of da3a50e... Added storage support. Added string support for sym keys. Somehwat integrating sym keys.
         string[] convoList = { "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat" };
         User mainUser;
         Dictionary<string, User> otherUsers = new Dictionary<string, User> { }; // username:user
         Dictionary<string, string> usernameIdMatches = new Dictionary<string, string> { };  //user_id:username
         Dictionary<string, Chat> myChats = new Dictionary<string, Chat> { };    // chatname:chat
         Dictionary<string, string> chatNameMatches = new Dictionary<string, string> { };    // chat_id:chatname
+
         string activeChatName = "";
         string activeChatId = "";
         string currentView = "";
@@ -50,23 +34,14 @@ namespace Chat_UI
         // MESSAGE SCREEN
         void messageScreen(string chatName)
         {
-<<<<<<< HEAD
-=======
             // If "Empty Chat", dont do anything
             if (!myChats.Keys.Contains<string>(chatName))
             {
                 return;
             }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
-=======
->>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
-=======
->>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
-            string Sender = "SENDER";
-            string Recvr = "RECVR";
+            //FindViewById<TextView>(Resource.Id.chatNameTitle).Text = chatName;
+            
             SetContentView(Resource.Layout.messages);
             currentView = "messageScreen";
 
@@ -75,32 +50,16 @@ namespace Chat_UI
             activeChatId = myChats[chatName].chatId;
 
             // INSERTION OF MESSAGE CONTENTS
-            string[] Conversation = new string[]{ Sender, "Kill me please lol", Recvr, "Nah fam sorry I am busy" };
             string messages = "";
-            int messageListLen = Conversation.Length;
 
             int numOfMessages = myChats[chatName].messages.Count;
             for (int i = 0; i < numOfMessages; i++)
             {
                 string username = usernameIdMatches[myChats[chatName].messages[i].user_id];
-                string messageToAdd = username + "\n\t" + myChats[chatName].messages[i].messageContent + "\n";
+                string decryptedContents = myChats[chatNameMatches[myChats[chatName].messages[i].chatId]].decryptMessage(myChats[chatName].messages[i].messageContent);
+                string messageToAdd = username + "\n\t" + decryptedContents + "\n";
                 messages += messageToAdd;
             }
-            
-
-
-            //// Build conversation string from message senders/receivers and their conversation
-            //for (int i = 0; i < (messageListLen); i++)
-            //{
-            //    if (i % 2 == 0)
-            //    {
-            //        messages = messages + Conversation[i] + "\n\t";
-            //    }
-            //    else
-            //    {
-            //        messages = messages + Conversation[i] + "\n";
-            //    }
-            //}
 
             // Display built string
             FindViewById<TextView>(Resource.Id.messageDisplay).Text = messages;
@@ -128,7 +87,7 @@ namespace Chat_UI
             var BackButton = FindViewById<Button>(Resource.Id.backButton);
             BackButton.Click += (sender, e) =>
             {
-                convoScreen(Sender);
+                convoScreen();
             };
             // Invite more users
             var inviteUsersButton = FindViewById<Button>(Resource.Id.inviteUsers);
@@ -163,7 +122,6 @@ namespace Chat_UI
 
         }
 
-
         // Conversation Screen
         void convoScreen(string username = null)
         {
@@ -171,6 +129,10 @@ namespace Chat_UI
 
             SetContentView(Resource.Layout.conversations);
             currentView = "convoScreen";
+
+            // Saves new 
+            saveChatsAndUsersToStorage();
+
 
             var createChatButton = FindViewById<Button>(Resource.Id.createNewChatButton);
             createChatButton.Click += (sender, e) =>
@@ -245,54 +207,63 @@ namespace Chat_UI
             button0.Click += (sender, e) =>
             {
                 // Send to messages screen
+                if (myChatkeys.Length < 1) return;
                 messageScreen(myChats[myChatkeys[0]].chatName);
             };
             // Button1 Click Event
             button1.Click += (sender, e) =>
             {
                 // Send to messages screen
+                if (myChatkeys.Length < 2) return;
                 messageScreen(myChats[myChatkeys[1]].chatName);
             };
             // Button2 Click Event
             button2.Click += (sender, e) =>
             {
                 // Send to messages screen
+                if (myChatkeys.Length < 3) return;
                 messageScreen(myChats[myChatkeys[2]].chatName);
             };
             // Button3 Click Event
             button3.Click += (sender, e) =>
             {
                 // Send to messages screen
+                if (myChatkeys.Length < 4) return;
                 messageScreen(myChats[myChatkeys[3]].chatName);
             };
             // Button4 Click Event
             button4.Click += (sender, e) =>
             {
                 // Send to messages screen
+                if (myChatkeys.Length < 5) return;
                 messageScreen(myChats[myChatkeys[4]].chatName);
             };
             // Button5 Click Event
             button5.Click += (sender, e) =>
             {
                 // Send to messages screen
+                if (myChatkeys.Length < 6) return;
                 messageScreen(myChats[myChatkeys[5]].chatName);
             };
             // Button6 Click Event
             button6.Click += (sender, e) =>
             {
                 // Send to messages screen
+                if (myChatkeys.Length < 7) return;
                 messageScreen(myChats[myChatkeys[6]].chatName);
             };
             // Button7 Click Event
             button7.Click += (sender, e) =>
             {
                 // Send to messages screen
+                if (myChatkeys.Length < 8) return;
                 messageScreen(myChats[myChatkeys[7]].chatName);
             };
             // Button8 Click Event
             button8.Click += (sender, e) =>
             {
                 // Send to messages screen
+                if (myChatkeys.Length < 9) return;
                 messageScreen(myChats[myChatkeys[8]].chatName);
             };
         }
@@ -359,7 +330,7 @@ namespace Chat_UI
             SetContentView(Resource.Layout.startScreen);
             currentView = "startScreen";
 
-            var loginButton = FindViewById<Button>(Resource.Id.loginButton);
+            var loginButton = FindViewById<Button>(Resource.Id.loginButtonOnStartScreen);
             loginButton.Click += (sender, e) =>
             {
                 loginScreen();
@@ -383,36 +354,14 @@ namespace Chat_UI
                 // GOOGLE SIGN IN CODE
                 // TODO: Get access code
                 // TODO: Remove when get login working
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-                access_id = "ya29.ImCvB0FovhMdpX-A1VIzGQs4KpcJrC22GAvgEzc0UpeLYI576_Q6tUh5jV8DYkn5PoEKsUK3Y_2VoWdrplV1P_-8Y89KqUy0eFSH0mxoTKE-6PQ5zhzXdL1rrDCDOVovZRo";
-=======
-                access_id = "ya29.ImCvB6VbczgIvH8uP3FVXS7fPuzGyf9M3LLzbDfF2yUBVcy2hKLMkvNumUZNyRVnKSqm-E4kAPNND1zTkWZKvoCY-ew8FsBj0ywd0APSWrv4KscyeScTp9xLLGUvabVThS0";
->>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
-=======
-                access_id = "ya29.ImCvB6VbczgIvH8uP3FVXS7fPuzGyf9M3LLzbDfF2yUBVcy2hKLMkvNumUZNyRVnKSqm-E4kAPNND1zTkWZKvoCY-ew8FsBj0ywd0APSWrv4KscyeScTp9xLLGUvabVThS0";
->>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
-=======
-                access_id = "ya29.ImCvB6VbczgIvH8uP3FVXS7fPuzGyf9M3LLzbDfF2yUBVcy2hKLMkvNumUZNyRVnKSqm-E4kAPNND1zTkWZKvoCY-ew8FsBj0ywd0APSWrv4KscyeScTp9xLLGUvabVThS0";
->>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
+                access_id = "ya29.ImCvB0gCyvs5I_Zz10lZVXUcz5Q8UPHH8bm9s-bLrqM1Wpg7rr7cAF2PZwH5hfjEOeW0JLVidn94_MVttFvknNpV_TQk83Rx-70V0He_muIMK7co2mPDVHIw6rp5EWzUPLU";
 
                 string username = FindViewById<EditText>(Resource.Id.username).Text;
                 string restorationPassword = FindViewById<EditText>(Resource.Id.restorationPassword).Text;
 
-                // TODO: generate pubkey
-                string pubKey = "testPubKey";
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
+                // Todo: Something with restoration password
 
->>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
-
->>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
-
-
-                createUser(username, pubKey);
+                createUser(username);
             };
 
             var backButton = FindViewById<Button>(Resource.Id.backButton);
@@ -443,11 +392,23 @@ namespace Chat_UI
 
             if (type == "signedIn")
             {
-                this.mainUser = new User();
-                mainUser.username = message[type]["username"].ToString();
-                mainUser.email = message[type]["email"].ToString();
-                mainUser.user_id = message[type]["id"].ToString();
-                mainUser.pubKey = message[type]["pubKey"].ToString();
+                User newUser = new User();
+                newUser.username = message[type]["username"].ToString();
+                newUser.email = message[type]["email"].ToString();
+                newUser.user_id = message[type]["id"].ToString();
+                newUser.pubKey = message[type]["pubKey"].ToString();
+
+                // Load storage. If not same user, reset
+                loadChatsAndUsersFromStorage();
+                if (mainUser == null || newUser.user_id != mainUser.user_id)
+                {
+                    mainUser = newUser;
+                    otherUsers = new Dictionary<string, User> { }; // username:user
+                    usernameIdMatches = new Dictionary<string, string> { };  //user_id:username
+                    myChats = new Dictionary<string, Chat> { };    // chatname:chat
+                    chatNameMatches = new Dictionary<string, string> { };    // chat_id:chatname
+                }
+
 
                 // Post sign-in activities
                 getAllUsers();
@@ -471,6 +432,9 @@ namespace Chat_UI
             string type = serverConnection.interpretMessageType(message);
 
             if (type == "usersList"){
+
+                // Needs to compare with current list saved in memory
+
                 JArray usersArray = (JArray)message[type];
                 int length = usersArray.Count;
                 Console.WriteLine("Length: " + length.ToString());
@@ -501,46 +465,25 @@ namespace Chat_UI
 
             if (type == "myChatsList")
             {
+
+                // Needs to compare with current list im memory?
+
                 JArray chatsArray = (JArray)message[type];
                 int length = chatsArray.Count;
                 Console.WriteLine("Length: " + length.ToString());
                 Chat aChat;
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-                for (int i = 0; i < length; i++)
-                {
-                    aChat = new Chat(message[type][i].ToString());
-                    myChats[aChat.chatName] = aChat;
-                    chatNameMatches[aChat.chatId] = aChat.chatName;
-=======
 
                 var existingChatNames = myChats.Keys;
 
+                // Parses chat. If not already saved, adds it
                 for (int i = 0; i < length; i++)
                 {
                     aChat = new Chat(message[type][i].ToString());
-
                     if (!existingChatNames.Contains<string>(aChat.chatName))
                     {
                         myChats[aChat.chatName] = aChat;
                         chatNameMatches[aChat.chatId] = aChat.chatName;
                     }
->>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
-=======
-                for (int i = 0; i < length; i++)
-                {
-                    aChat = new Chat(message[type][i].ToString());
-                    myChats[aChat.chatName] = aChat;
-                    chatNameMatches[aChat.chatId] = aChat.chatName;
->>>>>>> parent of da3a50e... Added storage support. Added string support for sym keys. Somehwat integrating sym keys.
-=======
-                for (int i = 0; i < length; i++)
-                {
-                    aChat = new Chat(message[type][i].ToString());
-                    myChats[aChat.chatName] = aChat;
-                    chatNameMatches[aChat.chatId] = aChat.chatName;
->>>>>>> parent of da3a50e... Added storage support. Added string support for sym keys. Somehwat integrating sym keys.
                 }
 
                 // Get new message for all chats
@@ -591,8 +534,9 @@ namespace Chat_UI
                     // If message is received while viewing the chat
                     if (activeChatId == newMessage.chatId && currentView == "messageScreen")
                     {
-                        string username = usernameIdMatches[myChats[chatName].messages[i].user_id];
-                        string messageToAdd = username + "\n\t" + newMessage.messageContent + "\n";
+                        string username = usernameIdMatches[newMessage.user_id];
+                        string decryptedContents = myChats[chatNameMatches[newMessage.chatId]].decryptMessage(newMessage.messageContent);
+                        string messageToAdd = username + "\n\t" + decryptedContents + "\n";
                         FindViewById<TextView>(Resource.Id.messageDisplay).Text = FindViewById<TextView>(Resource.Id.messageDisplay).Text + messageToAdd;
                         // TODO: Scroll textbox down
                     }
@@ -603,6 +547,8 @@ namespace Chat_UI
         // Sends a message to the server to post in the chat
         void sendChatMessage(string chatId, string messageContent)
         {
+            // Encrypts message with chat's sym key
+            messageContent = myChats[chatNameMatches[chatId]].encryptMessage(messageContent);
             string message = "{\"access_id\": \"" + this.access_id + "\", \"chatId\": \"" + chatId + "\", \"messageContent\": \"" + messageContent + "\"}";
             serverConnection.WriteMessage("messagePost", message);
         }
@@ -611,7 +557,6 @@ namespace Chat_UI
         {
             string message = "{\"access_id\": \"" + this.access_id + "\", \"chatName\": \"" + chatName + "\"}";
             serverConnection.WriteMessage("createChat", message);
-
         }
 
         // Adds newly created chat to our list
@@ -626,6 +571,10 @@ namespace Chat_UI
             {
                 // Add new chat to our list
                 Chat aChat = new Chat(message[type].ToString());
+
+                // Creates sym key
+                aChat.createSymKey();
+
                 myChats[aChat.chatName] = aChat;
                 chatNameMatches[aChat.chatId] = aChat.chatName;
 
@@ -633,75 +582,54 @@ namespace Chat_UI
                 string[] usersToInvite = FindViewById<EditText>(Resource.Id.chatInvites).Text.Split(',');
                 for (int i = 0; i < usersToInvite.Length; i++)
                 {
+                    if (usersToInvite[i] == "") continue;
                     inviteUsersToChat(aChat.chatName, usersToInvite[i]);
                 }
 
-                // TODO: CREATE SYMKEY
 
                 RunOnUiThread(() =>
                 {
                     convoScreen();
                 });
             }
-<<<<<<< HEAD
-=======
 
             if (type == "acceptedToChat")
             {
                 Chat aChat = new Chat(message[type].ToString());
-                string symKey = message[type]["symKey"].ToString();
-                // TODO: Decrypt symKey with my private key
+                string givenSymKey = message[type]["symKey"].ToString();
+
+                // Decrypts encrypted symkey
+                AsymmetricKeyHelper asymKeyHelper = new AsymmetricKeyHelper(myAsymKeyPairAlias);
+                var symKey = asymKeyHelper.DecryptDataFromString(givenSymKey);
+
                 aChat.loadChatKey(symKey);
                 myChats[aChat.chatName] = aChat;
                 chatNameMatches[aChat.chatId] = aChat.chatName;
             }
->>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
         }
 
         void inviteUsersToChat(string chatName, string username)
         {
             string chatId = myChats[chatName].chatId;
-            myChats[chatName].symKey = "testSymKey";        // TODO: REMOVE THIS AFTER SYMKEY CREATION IS INSTALLED
             string joinerId = otherUsers[username].user_id;
             string joinerPubKey = otherUsers[username].pubKey;
-<<<<<<< HEAD
-            string symKeyEncrypted = myChats[chatName].symKey;
-
-<<<<<<< HEAD
-<<<<<<< HEAD
-            // TODO: Encrypt symkey with pub key
-=======
-            // TODO: Encrypt symkey with invited users' pub key
->>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
-=======
-            // TODO: Encrypt symkey with invited users' pub key
->>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
-=======
             string symKeyEncrypted = myChats[chatName].getSharableKey();
 
-            // TODO: Encrypt symkey with invited users' pub key
->>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
+            // User's pub key is used to encrypt symmetric key
+            AsymmetricKeyHelper asymKeyHelper = new AsymmetricKeyHelper("otherUserKey");
+            symKeyEncrypted = asymKeyHelper.EncryptWithAnotherPublicKey(symKeyEncrypted, joinerPubKey);
 
             string message = "{\"access_id\": \"" + this.access_id + "\", \"chatId\": \"" + chatId + "\", \"symKey\": \"" + symKeyEncrypted + "\", \"joinerId\": \"" + joinerId + "\"}";
             serverConnection.WriteMessage("allowUserToJoinChat", message);
 
         }
 
-        void createUser(string username, string pubKey)
+        void createUser(string username)
         {
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
             AsymmetricKeyHelper akh = new AsymmetricKeyHelper(myAsymKeyPairAlias + username);
             akh.CreateKey();
-            string pubKey = akh.GetPublicKeyString();
+            string pubKey = akh.GetSharablePublicKey();
 
->>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
-=======
->>>>>>> parent of da3a50e... Added storage support. Added string support for sym keys. Somehwat integrating sym keys.
-=======
->>>>>>> parent of da3a50e... Added storage support. Added string support for sym keys. Somehwat integrating sym keys.
             string message = "{\"access_id\": \"" + this.access_id + "\", \"username\": \"" + username + "\", \"pubKey\": \"" + pubKey + "\"}";
             serverConnection.WriteMessage("createUser", message);
         }
@@ -720,43 +648,29 @@ namespace Chat_UI
             }
         }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
         void saveChatsAndUsersToStorage()
         {
             SecureStorageHelper storageHelper = new SecureStorageHelper();
-            storageHelper.StoreItem<Dictionary<string, User>>("otherUsers", otherUsers);
-            storageHelper.StoreItem<Dictionary<string, string>>("usernameIdMatches", usernameIdMatches);
             storageHelper.StoreItem<Dictionary<string, Chat>>("myChats", myChats);
             storageHelper.StoreItem<Dictionary<string, string>>("chatNameMatches", chatNameMatches);
             storageHelper.StoreItem<User>("mainUser", mainUser);
-
+            // Not saving users incase pubkey is updated.
         }
 
         void loadChatsAndUsersFromStorage()
         {
             SecureStorageHelper storageHelper = new SecureStorageHelper();
-            otherUsers = storageHelper.GetItem<Dictionary<string, User>>("otherUsers");
-            usernameIdMatches = storageHelper.GetItem<Dictionary<string, string>>("usernameIdMatches");
             myChats = storageHelper.GetItem<Dictionary<string, Chat>>("myChats");
             chatNameMatches = storageHelper.GetItem<Dictionary<string, string>>("chatNameMatches");
             mainUser = storageHelper.GetItem<User>("mainUser");
         }
 
 
->>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
-=======
->>>>>>> parent of da3a50e... Added storage support. Added string support for sym keys. Somehwat integrating sym keys.
-=======
->>>>>>> parent of da3a50e... Added storage support. Added string support for sym keys. Somehwat integrating sym keys.
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
 
-            //this.convoList 
             serverConnection = new TLSConnector();
             serverConnection.OnMessageReceived += new EventHandler(signInToServerResponse); 
             serverConnection.OnMessageReceived += new EventHandler(getAllUsersResponse);

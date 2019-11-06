@@ -2,6 +2,10 @@
 using Java.Security;
 using Javax.Crypto;
 using System.Text;
+using Javax.Crypto.Spec;
+using Java.Security.Spec;
+using PCLCrypto;
+using System;
 
 namespace wabb
 {
@@ -11,7 +15,7 @@ namespace wabb
     {
         private const string KEYSTORE_NAME = "AndroidKeyStore";
         private const int KEY_SIZE = 2048;
-        private const string TRANSFORMATION = "RSA/ECB/PKCS1Padding";
+        private const string TRANSFORMATION = "RSA/ECB/PKCS1PADDING";
 
 
         private readonly string _keyAlias;
@@ -50,6 +54,14 @@ namespace wabb
                 return false;
             _androidKeyStore.DeleteEntry(_keyAlias);
             return true;
+        }
+
+        // Publicly available certificate
+        public Java.Security.Cert.Certificate GetCertificate()
+        {
+            if (!_androidKeyStore.ContainsAlias(_keyAlias))
+                return null;
+            return _androidKeyStore.GetCertificate(_keyAlias);
         }
 
         private IKey GetPublicKey()
@@ -99,48 +111,23 @@ namespace wabb
             var decryptedMessage = Encoding.UTF8.GetString(decryptedBytes);
             return decryptedMessage;
         }
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
 
-        [System.Obsolete]
-        public byte[] EncryptDataWithAnotherPublicKey(byte[] pubKey, string plaintext)
+        public string DecryptDataFromString(string data)
         {
-            IKey publicKey = new SecretKeySpec(pubKey, 0, pubKey.Length, TRANSFORMATION);
-            IKey actualPublicKey = GetPublicKey();
-            //X509EncodedKeySpec spec = new X509EncodedKeySpec(pubKey);
-            //KeyFactory keyFactory = KeyFactory.GetInstance("RSA");
-            //PublicKey publicKey = (Java.Security.PublicKey)keyFactory.GeneratePublic(spec);
-
-            var cipher = Cipher.GetInstance(TRANSFORMATION);
-            // Set up encryption machine
-            cipher.Init(CipherMode.EncryptMode, publicKey);
-
-            // Mostly just copied this, convert UTF8 to bytes?
-            return cipher.DoFinal(Encoding.UTF8.GetBytes(plaintext));
+            return DecryptData(Convert.FromBase64String(data));
         }
 
-        public byte[] GetPublicKeyBytes()
+
+        public string GetSharablePublicKey()
         {
-            return GetPublicKey().GetEncoded();
+            var cert = Convert.ToBase64String(GetCertificate().GetEncoded());
+            return cert;
         }
 
-        public string GetPublicKeyString()
+        public string EncryptWithAnotherPublicKey(string messagePlaintext, string sharablePublicKey)
         {
-            return Convert.ToBase64String(GetPublicKeyBytes());
+            CertificateEncrypter ce = new CertificateEncrypter(sharablePublicKey);
+            return ce.EncryptDataToString(messagePlaintext);
         }
-
-        public void EncryptWithPubKeyString(string pubKey)
-        {
-            byte[] bytesString = Convert.FromBase64String(pubKey);
-            // Do something here
-        }
-
-<<<<<<< HEAD
->>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
-=======
->>>>>>> parent of da3a50e... Added storage support. Added string support for sym keys. Somehwat integrating sym keys.
-=======
->>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
     }
 }

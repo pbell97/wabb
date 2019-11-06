@@ -57,22 +57,10 @@
     <Reference Include="System.Numerics.Vectors" />
   </ItemGroup>
   <ItemGroup>
-<<<<<<< HEAD
-    <Compile Include="KeyHelper.cs" />
-=======
->>>>>>> parent of 8f0ea2d... Added external cert handler
     <Compile Include="MainActivity.cs" />
-<<<<<<< HEAD
-=======
     <Compile Include="AsymmetricKeyHelper.cs" />
     <Compile Include="PasswordBasedKeyHelper.cs" />
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
-=======
->>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
-=======
->>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
+    <Compile Include="CertificateEncrypter.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="JakesMainActivity.cs" />
@@ -80,18 +68,21 @@
     <Compile Include="Resources\Utilities\User.cs" />
     <Compile Include="Resources\Utilities\Chat.cs" />
     <Compile Include="Resources\Utilities\TLSConnector.cs" />
+    <Compile Include="SecureStorageHelper.cs" />
+    <Compile Include="SymmetricKeyHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />
     <None Include="Properties\AndroidManifest.xml" />
     <None Include="Assets\AboutAssets.txt" />
+    <None Include="TODO.txt" />
   </ItemGroup>
   <ItemGroup>
-    <AndroidResource Include="Resources\layout\activity_main.axml">
+    <AndroidResource Include="Resources\layout\StoredItems.axml">
       <SubType>Designer</SubType>
     </AndroidResource>
     <AndroidResource Include="Resources\layout\content_main.axml">
-          <SubType>Designer</SubType>
+      <SubType>Designer</SubType>
     </AndroidResource>
     <AndroidResource Include="Resources\values\colors.xml" />
     <AndroidResource Include="Resources\values\dimens.xml" />
@@ -146,6 +137,9 @@
     </AndroidResource>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json">
+      <Version>12.0.2</Version>
+    </PackageReference>
     <PackageReference Include="Xamarin.Android.Support.Design" Version="28.0.0.1" />
     <PackageReference Include="Xamarin.Android.Support.Core.Utils" Version="28.0.0.1" />
     <PackageReference Include="Xamarin.Android.Support.CustomTabs" Version="28.0.0.1" />
@@ -153,17 +147,14 @@
     <PackageReference Include="Newtonsoft.Json">
       <Version>12.0.2</Version>
     </PackageReference>
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> parent of da3a50e... Added storage support. Added string support for sym keys. Somehwat integrating sym keys.
+    <PackageReference Include="PCLCrypto">
+      <Version>2.0.147</Version>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\layout\list_item.xml">
       <SubType>Designer</SubType>
     </AndroidResource>
->>>>>>> parent of da3a50e... Added storage support. Added string support for sym keys. Somehwat integrating sym keys.
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

@@ -1,6 +1,7 @@
 ﻿using Java.Security;
 using Javax.Crypto;
 using Javax.Crypto.Spec;
+using System;
 using System.Text;
 
 namespace wabb
@@ -11,12 +12,13 @@ namespace wabb
         private const string TRANSFORMATION = "AES";
 
         private readonly string _keyAlias;
-        private SecureStorageHelper _storageHelper = new SecureStorageHelper();
+        private readonly SecureStorageHelper _storageHelper = new SecureStorageHelper();
 
         public SymmetricKeyHelper(string keyName)
         {
             // May think about adding a prefix to indicate Symm key
             _keyAlias = keyName.ToLowerInvariant();
+
         }
 
         public void CreateKey()
@@ -32,7 +34,7 @@ namespace wabb
             _storageHelper.StoreItem<byte[]>(_keyAlias, secretKey.GetEncoded());
         }
 
-        // Normally should be private, may need to be public for our puroses
+        // Normally should be private, may need to be public for our purposes
         public IKey GetKey()
         {
             // Pull key and reform it into a key
@@ -41,12 +43,33 @@ namespace wabb
             return key;
         }
 
+        // Gets base64encoded string of the key
+        public string GetKeyString()
+        {
+            byte[] key = GetKey().GetEncoded();
+            return Convert.ToBase64String(key);
+        }
+
+        // Loads a byte[] key 
+        public void LoadKey(byte[] symKey)
+        {
+            var loadedKey = new SecretKeySpec(symKey, 0, symKey.Length, TRANSFORMATION);
+            _storageHelper.StoreItem<byte[]>(_keyAlias, loadedKey.GetEncoded());
+        }
+
+        // Loads string of a key
+        public void LoadKey(string symKey)
+        {
+            byte[] convertedKey = Convert.FromBase64String(symKey);
+            LoadKey(convertedKey);
+        }
+
         public bool DeleteKey()
         {
             return _storageHelper.RemoveItem(_keyAlias);
         }
 
-        public byte[] EncryptData(string plaintext)
+        public byte[] EncryptDataToBytes(string plaintext)
         {
             // Get encryption cipher
             var cipher = Cipher.GetInstance(TRANSFORMATION);
@@ -61,6 +84,12 @@ namespace wabb
 
             // Cipher on the bytes
             return cipher.DoFinal(Encoding.UTF8.GetBytes(plaintext));
+        }
+
+        public string EncryptDataToSring(string plaintext)
+        {
+            byte[] data = EncryptDataToBytes(plaintext);
+            return Convert.ToBase64String(data);
         }
 
         public string DecryptData(byte[] encryptedData)
@@ -79,6 +108,12 @@ namespace wabb
             var decryptedBytes = cipher.DoFinal(encryptedData);
             var decryptedMessage = Encoding.UTF8.GetString(decryptedBytes);
             return decryptedMessage;
+        }
+
+        public string DecryptData(string encryptedData)
+        {
+            byte[] data = Convert.FromBase64String(encryptedData);
+            return DecryptData(data);
         }
     }
 }

@@ -43,36 +43,12 @@ namespace wabb.Utilities
             string receivedMessage = "";
             ASCIIEncoding encoder;
 
-            //User myUser = new User();
-            //myUser.username = "PatricksMSU";
-            // MsState email
-            //myUser.access_id = "ya29.ImGpByjBgXYDMlO9sdT4AZqRsVh2XSHqwT39Hd6xWOtajP9t3dTD0QRLlXQIl1izveE1rBI2o8gopgFtdG83ttubgfBUN0HZ24UEJ2zD4uSYwbI4kT6ZLaUlmN-J3gt0hLD2";
-            // Gmail below
-            // myUser.access_id = "ya29.Il-bB3YQJzIemDXlWBtnXg2MRlrs0inhqcXr1e0XlhFnhvCn2ClPQh_1eefAEY4wY3bOaeRXxbjriLvTNq38ZBADs0UDsNp5r0Vg1D0GD_wPaklYs7jUI6V9ZBErkjSqzg";
-            
-            //Message myMessage = new Message();
-            //myMessage.access_id = myUser.access_id;
-            //myMessage.chatId = "-1060544732";
-            //myMessage.messageContent = "This is a message sent from the first client";
-            //this.WriteMessage("signIn", "{\"access_id\": \"" + myMessage.access_id + "\"}");
-            //Thread.Sleep(500);
-            //this.WriteMessage("getUsers", "{\"access_id\": \"" + myMessage.access_id + "\"}");
-            //this.WriteMessage("getChats", "{\"access_id\": \"" + myMessage.access_id + "\"}");
-            // this.WriteMessage("createUser", "{\"access_id\": \"" + myMessage.access_id + "\", \"username\": \"" + "PatricksGmail" + "\"}");
-            // this.WriteMessage("messageGet", "{\"access_id\": \"" + myMessage.access_id + "\", \"chatId\": \"" + "-1060544732" + "\", \"messageId\": \"" + "10" + "\"}");
-            // this.WriteMessage("createChat", "{\"access_id\": \"" + myMessage.access_id + "\", \"chatName\": \"" + "myChat" + "\"}");
-            // this.WriteMessage("joinChat", "{\"access_id\": \"" + myMessage.access_id + "\", \"chatId\": \"" + "2136482312" + "\", \"pubKey\": \"" + "pubKeyGoesHere" + "\"}");
-            // this.WriteMessage("allowUserToJoinChat", "{\"access_id\": \"" + myMessage.access_id + "\", \"chatId\": \"" + "2136482312" + "\", \"symKey\": \"" + "symKeyGoesHere" + "\", \"joinerId\": \"" + "113467843674295288430" + "\"}");
-            // this.WriteMessage("messagePost", myMessage.createJSONString());
-
-
-
             while (true)
             {
                 try
                 {
                     // Read up to 4096 bytes
-                    Console.WriteLine("Getting bytesRead");
+                    Console.WriteLine("\nGetting bytesRead\n");
                     bytesRead = this.sslStream.Read(messageBytes, 0, 4096);
                     encoder = new ASCIIEncoding();
                     receivedMessage = encoder.GetString(messageBytes, 0, bytesRead).Replace("\\", "").Replace("\"{", "{").Replace("}\"", "}");

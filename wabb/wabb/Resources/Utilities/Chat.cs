@@ -18,7 +18,7 @@ namespace wabb.Utilities
     {
         public string chatId;
         public string chatName;
-        public string symKey;
+        private string symKeyAlias;
         public string[] users;
         public List<WabbMessage> messages;
 
@@ -28,16 +28,46 @@ namespace wabb.Utilities
 
         public Chat(string JSON){
             JObject newChat = JObject.Parse(JSON);
-            if (this.symKey != null) this.symKey = newChat["symKey"].ToString();
+            if (this.symKeyAlias != null) this.symKeyAlias = newChat["symKey"].ToString();
             this.chatId = newChat["chatId"].ToString();
             this.chatName = newChat["chatName"].ToString();
             this.users = newChat["users"].ToString().Split(',');
-
+            this.symKeyAlias = this.chatName + "chat";
             this.messages = new List<WabbMessage>();
         }
 
         public string createJSONString(){
             return "{" + $"\"chatId\": \"{this.chatId}\", \"chatName\": \"{this.chatName}\"" + "}";
+        }
+
+        public void createSymKey()
+        {
+            SymmetricKeyHelper symHelper = new SymmetricKeyHelper(chatName + "chat");
+            symHelper.CreateKey();
+        }
+
+        public string getSharableKey()
+        {
+            SymmetricKeyHelper symHelper = new SymmetricKeyHelper(chatName + "chat");
+            return symHelper.GetKeyString();
+        }
+
+        public void loadChatKey(string chatSymKey)
+        {
+            SymmetricKeyHelper symHelper = new SymmetricKeyHelper(chatName + "chat");
+            symHelper.LoadKey(chatSymKey);
+        }
+
+        public string encryptMessage(string messagePlaintext)
+        {
+            SymmetricKeyHelper symHelper = new SymmetricKeyHelper(chatName + "chat");
+            return symHelper.EncryptDataToSring(messagePlaintext);
+        }
+
+        public string decryptMessage(string messageEncrypted)
+        {
+            SymmetricKeyHelper symHelper = new SymmetricKeyHelper(chatName + "chat");
+            return symHelper.DecryptData(messageEncrypted);
         }
 
     }
