@@ -11,6 +11,9 @@ using Android.Widget;
 using Java.Security;
 // Used for SecureStorage
 using Xamarin.Essentials;
+<<<<<<< HEAD
+>>>>>>> parent of da3a50e... Added storage support. Added string support for sym keys. Somehwat integrating sym keys.
+=======
 >>>>>>> parent of da3a50e... Added storage support. Added string support for sym keys. Somehwat integrating sym keys.
 
 namespace wabb
@@ -38,6 +41,7 @@ namespace wabb
             Platform.Init(this, savedInstanceState);
             SetContentView(Resource.Layout.StoredItems);
 
+<<<<<<< HEAD
 
 >>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
             AsymmetricKeyHelper firstKey = new AsymmetricKeyHelper("firstKey");
@@ -80,6 +84,8 @@ namespace wabb
 
             //var k = skh.DecryptData(test);
 
+=======
+>>>>>>> parent of da3a50e... Added storage support. Added string support for sym keys. Somehwat integrating sym keys.
 =======
 >>>>>>> parent of da3a50e... Added storage support. Added string support for sym keys. Somehwat integrating sym keys.
             // these are mutually exclusive
