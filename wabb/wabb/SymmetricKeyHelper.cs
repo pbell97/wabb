@@ -12,7 +12,7 @@ namespace wabb
         private const string TRANSFORMATION = "AES";
 
         private readonly string _keyAlias;
-        private SecureStorageHelper _storageHelper = new SecureStorageHelper();
+        private readonly SecureStorageHelper _storageHelper = new SecureStorageHelper();
 
         public SymmetricKeyHelper(string keyName)
         {
@@ -34,7 +34,7 @@ namespace wabb
             _storageHelper.StoreItem<byte[]>(_keyAlias, secretKey.GetEncoded());
         }
 
-        // Normally should be private, may need to be public for our puroses
+        // Normally should be private, may need to be public for our purposes
         public IKey GetKey()
         {
             // Pull key and reform it into a key

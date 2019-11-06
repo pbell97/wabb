@@ -3,7 +3,10 @@ using Android.OS;
 using Android.Runtime;
 using Android.Support.V7.App;
 using Android.Widget;
+using Java.IO;
 using Java.Security;
+using Javax.Crypto;
+using System.Text;
 // Used for SecureStorage
 using Xamarin.Essentials;
 using Javax.Crypto;
@@ -70,7 +73,7 @@ namespace wabb
 
             // these are mutually exclusive
             //SetupPasswordBasedTesting();
-            SetupKeyCreationTesting();
+            //SetupKeyCreationTesting();
             //SetupStoredItemTesting();
 
             Print(DEBUGTEST());
@@ -78,7 +81,20 @@ namespace wabb
 
         public string DEBUGTEST()
         {
+            // Test the possibility of encrypting using a Public key in the SecureStorage
             var output = "DEBUGTEST\n";
+
+            // Make key pair
+            var asymmHelper = new AsymmetricKeyHelper("DEBUGTEST");
+            asymmHelper.CreateKey();
+            var serializedCertificate = asymmHelper.GetCertificate().GetEncoded();
+
+            var certificateEncrypter = new CertificateEncrypter("DEBUGTEST", serializedCertificate);
+            var encryptedData = certificateEncrypter.EncryptData("This is a quick little test here/n");
+
+            // Run the externally encrypted data through internal decrypter
+            output += asymmHelper.DecryptData(encryptedData);
+
             return output;
         }
 
