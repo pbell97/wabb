@@ -22,6 +22,7 @@ namespace wabb
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
+<<<<<<< HEAD
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             SetContentView(Resource.Layout.activity_main);
 
@@ -33,6 +34,12 @@ namespace wabb
             FloatingActionButton fab = FindViewById<FloatingActionButton>(Resource.Id.fab);
             fab.Click += FabOnClick;
 =======
+=======
+            Platform.Init(this, savedInstanceState);
+            SetContentView(Resource.Layout.StoredItems);
+
+
+>>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
             AsymmetricKeyHelper firstKey = new AsymmetricKeyHelper("firstKey");
             firstKey.CreateKey();
             byte[] encodedKey1 = firstKey.GetPublicKeyBytes();

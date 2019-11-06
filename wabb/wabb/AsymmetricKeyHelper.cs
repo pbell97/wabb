@@ -107,5 +107,42 @@ namespace wabb
             var decryptedMessage = Encoding.UTF8.GetString(decryptedBytes);
             return decryptedMessage;
         }
+<<<<<<< HEAD
+=======
+
+        [System.Obsolete]
+        public byte[] EncryptDataWithAnotherPublicKey(byte[] pubKey, string plaintext)
+        {
+            IKey publicKey = new SecretKeySpec(pubKey, 0, pubKey.Length, TRANSFORMATION);
+            IKey actualPublicKey = GetPublicKey();
+            //X509EncodedKeySpec spec = new X509EncodedKeySpec(pubKey);
+            //KeyFactory keyFactory = KeyFactory.GetInstance("RSA");
+            //PublicKey publicKey = (Java.Security.PublicKey)keyFactory.GeneratePublic(spec);
+
+            var cipher = Cipher.GetInstance(TRANSFORMATION);
+            // Set up encryption machine
+            cipher.Init(CipherMode.EncryptMode, publicKey);
+
+            // Mostly just copied this, convert UTF8 to bytes?
+            return cipher.DoFinal(Encoding.UTF8.GetBytes(plaintext));
+        }
+
+        public byte[] GetPublicKeyBytes()
+        {
+            return GetPublicKey().GetEncoded();
+        }
+
+        public string GetPublicKeyString()
+        {
+            return Convert.ToBase64String(GetPublicKeyBytes());
+        }
+
+        public void EncryptWithPubKeyString(string pubKey)
+        {
+            byte[] bytesString = Convert.FromBase64String(pubKey);
+            // Do something here
+        }
+
+>>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
     }
 }
