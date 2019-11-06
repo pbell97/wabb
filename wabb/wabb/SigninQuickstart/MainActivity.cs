@@ -20,7 +20,6 @@ namespace SigninQuickstart
 		const string TAG = "MainActivity";
 
 		const int RC_SIGN_IN = 9001;
-
 		GoogleApiClient mGoogleApiClient;
 		TextView mStatusTextView;
 		ProgressDialog mProgressDialog;
@@ -39,7 +38,8 @@ namespace SigninQuickstart
 			// Configure sign-in to request the user's ID, email address, and basic
 			// profile. ID and basic profile are included in DEFAULT_SIGN_IN.
 			GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DefaultSignIn)
-					.RequestEmail()
+					.RequestIdToken("194187796125-1tk73jfb7ors490aj61ehh9kaos1ie5d.apps.googleusercontent.com")
+                    .RequestEmail()
 					.Build();
 			// [END configure_signin]
 
