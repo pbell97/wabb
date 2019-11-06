@@ -18,8 +18,8 @@ namespace Chat_UI
     public class MainActivity : AppCompatActivity
     {
         TLSConnector serverConnection;
-        string access_id = "ya29.ImCvB0gCyvs5I_Zz10lZVXUcz5Q8UPHH8bm9s-bLrqM1Wpg7rr7cAF2PZwH5hfjEOeW0JLVidn94_MVttFvknNpV_TQk83Rx-70V0He_muIMK7co2mPDVHIw6rp5EWzUPLU";
-        string myAsymKeyPairAlias = "myKeyPair";
+        string access_id = "ya29.ImCvB9pe6Qe6SEaH6VhqFVNMBmHvrEh64LmwORZsIt2VOVHmR3zIPTDjALo4JjNELypF2MK_1XpUgEPisnBPsE1Nzyh0OkTZFkYUubXxn4oli2AkQXj0MsYIAvyYVTHEkt4";
+        string myAsymKeyPairAlias = "myKeyPair";   // ALWAYS PUT "+ mainUser.username" to the key
         string[] convoList = { "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat" };
         User mainUser;
         Dictionary<string, User> otherUsers = new Dictionary<string, User> { }; // username:user
@@ -354,7 +354,7 @@ namespace Chat_UI
                 // GOOGLE SIGN IN CODE
                 // TODO: Get access code
                 // TODO: Remove when get login working
-                access_id = "ya29.ImCvB0gCyvs5I_Zz10lZVXUcz5Q8UPHH8bm9s-bLrqM1Wpg7rr7cAF2PZwH5hfjEOeW0JLVidn94_MVttFvknNpV_TQk83Rx-70V0He_muIMK7co2mPDVHIw6rp5EWzUPLU";
+                access_id = "ya29.ImCvB9pe6Qe6SEaH6VhqFVNMBmHvrEh64LmwORZsIt2VOVHmR3zIPTDjALo4JjNELypF2MK_1XpUgEPisnBPsE1Nzyh0OkTZFkYUubXxn4oli2AkQXj0MsYIAvyYVTHEkt4";
 
                 string username = FindViewById<EditText>(Resource.Id.username).Text;
                 string restorationPassword = FindViewById<EditText>(Resource.Id.restorationPassword).Text;
@@ -547,6 +547,7 @@ namespace Chat_UI
         // Sends a message to the server to post in the chat
         void sendChatMessage(string chatId, string messageContent)
         {
+            if (messageContent == "") return;
             // Encrypts message with chat's sym key
             messageContent = myChats[chatNameMatches[chatId]].encryptMessage(messageContent);
             string message = "{\"access_id\": \"" + this.access_id + "\", \"chatId\": \"" + chatId + "\", \"messageContent\": \"" + messageContent + "\"}";
@@ -599,12 +600,13 @@ namespace Chat_UI
                 string givenSymKey = message[type]["symKey"].ToString();
 
                 // Decrypts encrypted symkey
-                AsymmetricKeyHelper asymKeyHelper = new AsymmetricKeyHelper(myAsymKeyPairAlias);
+                AsymmetricKeyHelper asymKeyHelper = new AsymmetricKeyHelper(myAsymKeyPairAlias + mainUser.username);
                 var symKey = asymKeyHelper.DecryptDataFromString(givenSymKey);
 
                 aChat.loadChatKey(symKey);
                 myChats[aChat.chatName] = aChat;
                 chatNameMatches[aChat.chatId] = aChat.chatName;
+                getNewMessages(aChat);
             }
         }
 
@@ -668,6 +670,11 @@ namespace Chat_UI
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
+            //SecureStorageHelper secStor = new SecureStorageHelper();
+            //secStor.RemoveAllItems();
+            //AsymmetricKeyHelper akh = new AsymmetricKeyHelper(myAsymKeyPairAlias + mainUser.username);
+            //akh.DeleteKey();
+
             base.OnCreate(savedInstanceState);
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
 
