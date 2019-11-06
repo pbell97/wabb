@@ -7,7 +7,10 @@ using Android.Support.V7.App;
 using Android.Views;
 using Android.Widget;
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> parent of 8dd232e... Minor testing with external public key use
 using Java.Security;
 // Used for SecureStorage
 using Xamarin.Essentials;
@@ -42,12 +45,20 @@ namespace wabb
             SetContentView(Resource.Layout.StoredItems);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+            // these are mutually exclusive
+            //SetupPasswordBasedTesting();
+            SetupKeyCreationTesting();
+            //SetupStoredItemTesting();
+>>>>>>> parent of 8dd232e... Minor testing with external public key use
 
 >>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
             AsymmetricKeyHelper firstKey = new AsymmetricKeyHelper("firstKey");
             firstKey.CreateKey();
             byte[] encodedKey1 = firstKey.GetPublicKeyBytes();
 
+<<<<<<< HEAD
             AsymmetricKeyHelper secondKey = new AsymmetricKeyHelper("secondKey");
             //byte[] encryptedText = firstKey.EncryptDataWithAnotherPublicKey(encodedKey1, "TestValueGoesHere");
 
@@ -63,6 +74,13 @@ namespace wabb
             SymmetricKeyHelper skh2 = new SymmetricKeyHelper("newKey");
             skh2.LoadKey(keyString);
             var decryptedText = skh2.DecryptData(encryptedText);
+=======
+        public string DEBUGTEST()
+        {
+            var output = "DEBUGTEST\n";
+            return output;
+        }
+>>>>>>> parent of 8dd232e... Minor testing with external public key use
 
 
 
