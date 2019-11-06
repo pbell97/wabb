@@ -31,25 +31,31 @@ namespace wabb
             SetContentView(Resource.Layout.StoredItems);
 
 
-            AsymmetricKeyHelper firstKey = new AsymmetricKeyHelper("firstKey");
-            firstKey.CreateKey();
-            byte[] encodedKey1 = firstKey.GetPublicKeyBytes();
+            AsymmetricKeyHelper ask1 = new AsymmetricKeyHelper("key1");
+            ask1.CreateKey();
+            string sharableKey = ask1.GetSharablePublicKey();
 
-            AsymmetricKeyHelper secondKey = new AsymmetricKeyHelper("secondKey");
+            AsymmetricKeyHelper ask2 = new AsymmetricKeyHelper("key2");
+            string encryptedData = ask2.EncryptWithAnotherPublicKey("This is a sym key", sharableKey);
+
+            string decryptedData = ask1.DecryptDataFromString(encryptedData);
+
+
+
             //byte[] encryptedText = firstKey.EncryptDataWithAnotherPublicKey(encodedKey1, "TestValueGoesHere");
 
             //string decryptedText = firstKey.DecryptData(encryptedText);
 
 
-            SymmetricKeyHelper skh = new SymmetricKeyHelper("firstKey");
-            skh.CreateKey();
-            var encryptedText = skh.EncryptDataToBytes("Testing123");
-            var keyString = skh.GetKeyString();
+            //SymmetricKeyHelper skh = new SymmetricKeyHelper("firstKey");
+            //skh.CreateKey();
+            //var encryptedText = skh.EncryptDataToBytes("Testing123");
+            //var keyString = skh.GetKeyString();
 
 
-            SymmetricKeyHelper skh2 = new SymmetricKeyHelper("newKey");
-            skh2.LoadKey(keyString);
-            var decryptedText = skh2.DecryptData(encryptedText);
+            //SymmetricKeyHelper skh2 = new SymmetricKeyHelper("newKey");
+            //skh2.LoadKey(keyString);
+            //var decryptedText = skh2.DecryptData(encryptedText);
 
 
 

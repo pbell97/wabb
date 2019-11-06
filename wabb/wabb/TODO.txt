@@ -10,3 +10,10 @@ Need to do:
         - Delete storage/keys if new user is logged in!!!
 
    - Add ability to process chat I was added to and sym key *******
+
+   - Maybe have keys (in secureStorage) have value that includes user's username so another account cant get it...
+        - But would they even be trying to access it if the chat isn't on their list of chats?
+
+   - Check if new chat name already exists...
+
+   - Maybe not save users, what if they update their pub key?

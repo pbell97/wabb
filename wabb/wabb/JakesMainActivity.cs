@@ -18,7 +18,7 @@ namespace Chat_UI
     public class MainActivity : AppCompatActivity
     {
         TLSConnector serverConnection;
-        string access_id = "ya29.ImGvByFb54QNQpE_ZCAdslURd3l3i4AR7N9-2kDA-d8pbbjZf7XOUohyq4SUyYOL7NDrXJ2-aXWqR9YZMTADcgOq5CnXiwplf9HvjtFPHGNyWs_YGrLjuyjcD6zprAT4eS8Z";
+        string access_id = "ya29.ImCvB0gCyvs5I_Zz10lZVXUcz5Q8UPHH8bm9s-bLrqM1Wpg7rr7cAF2PZwH5hfjEOeW0JLVidn94_MVttFvknNpV_TQk83Rx-70V0He_muIMK7co2mPDVHIw6rp5EWzUPLU";
         string myAsymKeyPairAlias = "myKeyPair";
         string[] convoList = { "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat" };
         User mainUser;
@@ -40,8 +40,8 @@ namespace Chat_UI
                 return;
             }
 
-            string Sender = "SENDER";
-            string Recvr = "RECVR";
+            //FindViewById<TextView>(Resource.Id.chatNameTitle).Text = chatName;
+            
             SetContentView(Resource.Layout.messages);
             currentView = "messageScreen";
 
@@ -87,7 +87,7 @@ namespace Chat_UI
             var BackButton = FindViewById<Button>(Resource.Id.backButton);
             BackButton.Click += (sender, e) =>
             {
-                convoScreen(Sender);
+                convoScreen();
             };
             // Invite more users
             var inviteUsersButton = FindViewById<Button>(Resource.Id.inviteUsers);
@@ -354,14 +354,12 @@ namespace Chat_UI
                 // GOOGLE SIGN IN CODE
                 // TODO: Get access code
                 // TODO: Remove when get login working
-                access_id = "ya29.ImCvB6VbczgIvH8uP3FVXS7fPuzGyf9M3LLzbDfF2yUBVcy2hKLMkvNumUZNyRVnKSqm-E4kAPNND1zTkWZKvoCY-ew8FsBj0ywd0APSWrv4KscyeScTp9xLLGUvabVThS0";
+                access_id = "ya29.ImCvB0gCyvs5I_Zz10lZVXUcz5Q8UPHH8bm9s-bLrqM1Wpg7rr7cAF2PZwH5hfjEOeW0JLVidn94_MVttFvknNpV_TQk83Rx-70V0He_muIMK7co2mPDVHIw6rp5EWzUPLU";
 
                 string username = FindViewById<EditText>(Resource.Id.username).Text;
                 string restorationPassword = FindViewById<EditText>(Resource.Id.restorationPassword).Text;
 
-                // TODO: generate pubkey
-                string pubKey = "testPubKey";
-
+                // Todo: Something with restoration password
 
                 createUser(username);
             };
@@ -477,10 +475,10 @@ namespace Chat_UI
 
                 var existingChatNames = myChats.Keys;
 
+                // Parses chat. If not already saved, adds it
                 for (int i = 0; i < length; i++)
                 {
                     aChat = new Chat(message[type][i].ToString());
-
                     if (!existingChatNames.Contains<string>(aChat.chatName))
                     {
                         myChats[aChat.chatName] = aChat;
@@ -584,6 +582,7 @@ namespace Chat_UI
                 string[] usersToInvite = FindViewById<EditText>(Resource.Id.chatInvites).Text.Split(',');
                 for (int i = 0; i < usersToInvite.Length; i++)
                 {
+                    if (usersToInvite[i] == "") continue;
                     inviteUsersToChat(aChat.chatName, usersToInvite[i]);
                 }
 
@@ -597,8 +596,12 @@ namespace Chat_UI
             if (type == "acceptedToChat")
             {
                 Chat aChat = new Chat(message[type].ToString());
-                string symKey = message[type]["symKey"].ToString();
-                // TODO: Decrypt symKey with my private key
+                string givenSymKey = message[type]["symKey"].ToString();
+
+                // Decrypts encrypted symkey
+                AsymmetricKeyHelper asymKeyHelper = new AsymmetricKeyHelper(myAsymKeyPairAlias);
+                var symKey = asymKeyHelper.DecryptDataFromString(givenSymKey);
+
                 aChat.loadChatKey(symKey);
                 myChats[aChat.chatName] = aChat;
                 chatNameMatches[aChat.chatId] = aChat.chatName;
@@ -612,7 +615,9 @@ namespace Chat_UI
             string joinerPubKey = otherUsers[username].pubKey;
             string symKeyEncrypted = myChats[chatName].getSharableKey();
 
-            // TODO: Encrypt symkey with invited users' pub key
+            // User's pub key is used to encrypt symmetric key
+            AsymmetricKeyHelper asymKeyHelper = new AsymmetricKeyHelper("otherUserKey");
+            symKeyEncrypted = asymKeyHelper.EncryptWithAnotherPublicKey(symKeyEncrypted, joinerPubKey);
 
             string message = "{\"access_id\": \"" + this.access_id + "\", \"chatId\": \"" + chatId + "\", \"symKey\": \"" + symKeyEncrypted + "\", \"joinerId\": \"" + joinerId + "\"}";
             serverConnection.WriteMessage("allowUserToJoinChat", message);
@@ -623,7 +628,7 @@ namespace Chat_UI
         {
             AsymmetricKeyHelper akh = new AsymmetricKeyHelper(myAsymKeyPairAlias + username);
             akh.CreateKey();
-            string pubKey = akh.GetPublicKeyString();
+            string pubKey = akh.GetSharablePublicKey();
 
             string message = "{\"access_id\": \"" + this.access_id + "\", \"username\": \"" + username + "\", \"pubKey\": \"" + pubKey + "\"}";
             serverConnection.WriteMessage("createUser", message);
@@ -646,19 +651,15 @@ namespace Chat_UI
         void saveChatsAndUsersToStorage()
         {
             SecureStorageHelper storageHelper = new SecureStorageHelper();
-            storageHelper.StoreItem<Dictionary<string, User>>("otherUsers", otherUsers);
-            storageHelper.StoreItem<Dictionary<string, string>>("usernameIdMatches", usernameIdMatches);
             storageHelper.StoreItem<Dictionary<string, Chat>>("myChats", myChats);
             storageHelper.StoreItem<Dictionary<string, string>>("chatNameMatches", chatNameMatches);
             storageHelper.StoreItem<User>("mainUser", mainUser);
-
+            // Not saving users incase pubkey is updated.
         }
 
         void loadChatsAndUsersFromStorage()
         {
             SecureStorageHelper storageHelper = new SecureStorageHelper();
-            otherUsers = storageHelper.GetItem<Dictionary<string, User>>("otherUsers");
-            usernameIdMatches = storageHelper.GetItem<Dictionary<string, string>>("usernameIdMatches");
             myChats = storageHelper.GetItem<Dictionary<string, Chat>>("myChats");
             chatNameMatches = storageHelper.GetItem<Dictionary<string, string>>("chatNameMatches");
             mainUser = storageHelper.GetItem<User>("mainUser");

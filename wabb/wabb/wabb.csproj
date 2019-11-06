@@ -60,6 +60,7 @@
     <Compile Include="MainActivity.cs" />
     <Compile Include="AsymmetricKeyHelper.cs" />
     <Compile Include="PasswordBasedKeyHelper.cs" />
+    <Compile Include="CertificateEncrypter.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="JakesMainActivity.cs" />

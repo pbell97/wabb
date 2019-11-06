@@ -15,11 +15,11 @@
 		android:layout_height="wrap_content"
 		android:id="@+id/linearLayout2">
 		<TextView
-			android:text="Message Recipient"
+			android:text="Chat Name"
 			android:textAppearance="?android:attr/textAppearanceMedium"
 			android:layout_width="wrap_content"
 			android:layout_height="match_parent"
-			android:id="@+id/messageRecvr"
+			android:id="@+id/chatNameTitle"
 			android:textStyle="bold" />
 		<Button
 			android:text="+"

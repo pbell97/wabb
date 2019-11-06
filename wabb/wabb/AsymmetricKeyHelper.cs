@@ -112,38 +112,22 @@ namespace wabb
             return decryptedMessage;
         }
 
-        [System.Obsolete]
-        public byte[] EncryptDataWithAnotherPublicKey(byte[] pubKey, string plaintext)
+        public string DecryptDataFromString(string data)
         {
-            IKey publicKey = new SecretKeySpec(pubKey, 0, pubKey.Length, TRANSFORMATION);
-            IKey actualPublicKey = GetPublicKey();
-            //X509EncodedKeySpec spec = new X509EncodedKeySpec(pubKey);
-            //KeyFactory keyFactory = KeyFactory.GetInstance("RSA");
-            //PublicKey publicKey = (Java.Security.PublicKey)keyFactory.GeneratePublic(spec);
-
-            var cipher = Cipher.GetInstance(TRANSFORMATION);
-            // Set up encryption machine
-            cipher.Init(CipherMode.EncryptMode, publicKey);
-
-            // Mostly just copied this, convert UTF8 to bytes?
-            return cipher.DoFinal(Encoding.UTF8.GetBytes(plaintext));
+            return DecryptData(Convert.FromBase64String(data));
         }
 
-        public byte[] GetPublicKeyBytes()
+
+        public string GetSharablePublicKey()
         {
-            return GetPublicKey().GetEncoded();
+            var cert = Convert.ToBase64String(GetCertificate().GetEncoded());
+            return cert;
         }
 
-        public string GetPublicKeyString()
+        public string EncryptWithAnotherPublicKey(string messagePlaintext, string sharablePublicKey)
         {
-            return Convert.ToBase64String(GetPublicKeyBytes());
+            CertificateEncrypter ce = new CertificateEncrypter(sharablePublicKey);
+            return ce.EncryptDataToString(messagePlaintext);
         }
-
-        public void EncryptWithPubKeyString(string pubKey)
-        {
-            byte[] bytesString = Convert.FromBase64String(pubKey);
-            // Do something here
-        }
-
     }
 }
