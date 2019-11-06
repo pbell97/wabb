@@ -1,0 +1,12 @@
+﻿Just finished:
+    - Chat now creates its own key, loads key, gets sharable string key, enc/decrypt messages from string.
+    - When inviting users, it sends sym key BUT NOT ENCRYPTED with their pub key (cuz it doesn't exist yet)
+
+Need to do:
+    - Be able to create a IKey from bytes.
+    - Use base64 to create sharable public key
+        - Put key in create user message
+        - Create update public key call for restoring account...
+        - Delete storage/keys if new user is logged in!!!
+
+   - Add ability to process chat I was added to and sym key *******

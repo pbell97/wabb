@@ -17,7 +17,12 @@ namespace Chat_UI
     public class MainActivity : AppCompatActivity
     {
         TLSConnector serverConnection;
+<<<<<<< HEAD
         string access_id = "ya29.ImCvB0FovhMdpX-A1VIzGQs4KpcJrC22GAvgEzc0UpeLYI576_Q6tUh5jV8DYkn5PoEKsUK3Y_2VoWdrplV1P_-8Y89KqUy0eFSH0mxoTKE-6PQ5zhzXdL1rrDCDOVovZRo";
+=======
+        string access_id = "ya29.ImGvByFb54QNQpE_ZCAdslURd3l3i4AR7N9-2kDA-d8pbbjZf7XOUohyq4SUyYOL7NDrXJ2-aXWqR9YZMTADcgOq5CnXiwplf9HvjtFPHGNyWs_YGrLjuyjcD6zprAT4eS8Z";
+        string myAsymKeyPairAlias = "myKeyPair";
+>>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
         string[] convoList = { "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat" };
         User mainUser;
         Dictionary<string, User> otherUsers = new Dictionary<string, User> { }; // username:user
@@ -31,6 +36,15 @@ namespace Chat_UI
         // MESSAGE SCREEN
         void messageScreen(string chatName)
         {
+<<<<<<< HEAD
+=======
+            // If "Empty Chat", dont do anything
+            if (!myChats.Keys.Contains<string>(chatName))
+            {
+                return;
+            }
+
+>>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
             string Sender = "SENDER";
             string Recvr = "RECVR";
             SetContentView(Resource.Layout.messages);
@@ -349,7 +363,11 @@ namespace Chat_UI
                 // GOOGLE SIGN IN CODE
                 // TODO: Get access code
                 // TODO: Remove when get login working
+<<<<<<< HEAD
                 access_id = "ya29.ImCvB0FovhMdpX-A1VIzGQs4KpcJrC22GAvgEzc0UpeLYI576_Q6tUh5jV8DYkn5PoEKsUK3Y_2VoWdrplV1P_-8Y89KqUy0eFSH0mxoTKE-6PQ5zhzXdL1rrDCDOVovZRo";
+=======
+                access_id = "ya29.ImCvB6VbczgIvH8uP3FVXS7fPuzGyf9M3LLzbDfF2yUBVcy2hKLMkvNumUZNyRVnKSqm-E4kAPNND1zTkWZKvoCY-ew8FsBj0ywd0APSWrv4KscyeScTp9xLLGUvabVThS0";
+>>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
 
                 string username = FindViewById<EditText>(Resource.Id.username).Text;
                 string restorationPassword = FindViewById<EditText>(Resource.Id.restorationPassword).Text;
@@ -451,11 +469,26 @@ namespace Chat_UI
                 int length = chatsArray.Count;
                 Console.WriteLine("Length: " + length.ToString());
                 Chat aChat;
+<<<<<<< HEAD
                 for (int i = 0; i < length; i++)
                 {
                     aChat = new Chat(message[type][i].ToString());
                     myChats[aChat.chatName] = aChat;
                     chatNameMatches[aChat.chatId] = aChat.chatName;
+=======
+
+                var existingChatNames = myChats.Keys;
+
+                for (int i = 0; i < length; i++)
+                {
+                    aChat = new Chat(message[type][i].ToString());
+
+                    if (!existingChatNames.Contains<string>(aChat.chatName))
+                    {
+                        myChats[aChat.chatName] = aChat;
+                        chatNameMatches[aChat.chatId] = aChat.chatName;
+                    }
+>>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
                 }
 
                 // Get new message for all chats
@@ -558,6 +591,19 @@ namespace Chat_UI
                     convoScreen();
                 });
             }
+<<<<<<< HEAD
+=======
+
+            if (type == "acceptedToChat")
+            {
+                Chat aChat = new Chat(message[type].ToString());
+                string symKey = message[type]["symKey"].ToString();
+                // TODO: Decrypt symKey with my private key
+                aChat.loadChatKey(symKey);
+                myChats[aChat.chatName] = aChat;
+                chatNameMatches[aChat.chatId] = aChat.chatName;
+            }
+>>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
         }
 
         void inviteUsersToChat(string chatName, string username)
@@ -568,7 +614,11 @@ namespace Chat_UI
             string joinerPubKey = otherUsers[username].pubKey;
             string symKeyEncrypted = myChats[chatName].symKey;
 
+<<<<<<< HEAD
             // TODO: Encrypt symkey with pub key
+=======
+            // TODO: Encrypt symkey with invited users' pub key
+>>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
 
             string message = "{\"access_id\": \"" + this.access_id + "\", \"chatId\": \"" + chatId + "\", \"symKey\": \"" + symKeyEncrypted + "\", \"joinerId\": \"" + joinerId + "\"}";
             serverConnection.WriteMessage("allowUserToJoinChat", message);
@@ -577,6 +627,13 @@ namespace Chat_UI
 
         void createUser(string username, string pubKey)
         {
+<<<<<<< HEAD
+=======
+            AsymmetricKeyHelper akh = new AsymmetricKeyHelper(myAsymKeyPairAlias + username);
+            akh.CreateKey();
+            string pubKey = akh.GetPublicKeyString();
+
+>>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
             string message = "{\"access_id\": \"" + this.access_id + "\", \"username\": \"" + username + "\", \"pubKey\": \"" + pubKey + "\"}";
             serverConnection.WriteMessage("createUser", message);
         }
@@ -595,6 +652,31 @@ namespace Chat_UI
             }
         }
 
+<<<<<<< HEAD
+=======
+        void saveChatsAndUsersToStorage()
+        {
+            SecureStorageHelper storageHelper = new SecureStorageHelper();
+            storageHelper.StoreItem<Dictionary<string, User>>("otherUsers", otherUsers);
+            storageHelper.StoreItem<Dictionary<string, string>>("usernameIdMatches", usernameIdMatches);
+            storageHelper.StoreItem<Dictionary<string, Chat>>("myChats", myChats);
+            storageHelper.StoreItem<Dictionary<string, string>>("chatNameMatches", chatNameMatches);
+            storageHelper.StoreItem<User>("mainUser", mainUser);
+
+        }
+
+        void loadChatsAndUsersFromStorage()
+        {
+            SecureStorageHelper storageHelper = new SecureStorageHelper();
+            otherUsers = storageHelper.GetItem<Dictionary<string, User>>("otherUsers");
+            usernameIdMatches = storageHelper.GetItem<Dictionary<string, string>>("usernameIdMatches");
+            myChats = storageHelper.GetItem<Dictionary<string, Chat>>("myChats");
+            chatNameMatches = storageHelper.GetItem<Dictionary<string, string>>("chatNameMatches");
+            mainUser = storageHelper.GetItem<User>("mainUser");
+        }
+
+
+>>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);

@@ -22,8 +22,76 @@ namespace wabb
             Android.Support.V7.Widget.Toolbar toolbar = FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
             SetSupportActionBar(toolbar);
 
+<<<<<<< HEAD
             FloatingActionButton fab = FindViewById<FloatingActionButton>(Resource.Id.fab);
             fab.Click += FabOnClick;
+=======
+            AsymmetricKeyHelper firstKey = new AsymmetricKeyHelper("firstKey");
+            firstKey.CreateKey();
+            byte[] encodedKey1 = firstKey.GetPublicKeyBytes();
+
+            AsymmetricKeyHelper secondKey = new AsymmetricKeyHelper("secondKey");
+            //byte[] encryptedText = firstKey.EncryptDataWithAnotherPublicKey(encodedKey1, "TestValueGoesHere");
+
+            //string decryptedText = firstKey.DecryptData(encryptedText);
+
+
+            SymmetricKeyHelper skh = new SymmetricKeyHelper("firstKey");
+            skh.CreateKey();
+            var encryptedText = skh.EncryptDataToBytes("Testing123");
+            var keyString = skh.GetKeyString();
+
+
+            SymmetricKeyHelper skh2 = new SymmetricKeyHelper("newKey");
+            skh2.LoadKey(keyString);
+            var decryptedText = skh2.DecryptData(encryptedText);
+
+
+
+            //SymmetricKeyHelper skh = new SymmetricKeyHelper("firstKey");
+            //skh.CreateKey();
+            //var data = skh.EncryptData("Yeet");
+            //var t = skh.GetKey();
+
+            //string keyString = Convert.ToBase64String(t.GetEncoded());
+            //byte[] convertedKey = Convert.FromBase64String(keyString);
+
+            //SymmetricKeyHelper skh2 = new SymmetricKeyHelper("newKey");
+            //skh2.LoadKey(convertedKey);
+            //var l = skh2.DecryptData(data);
+
+
+            //string encryptedStr = Convert.ToBase64String(data);
+            //byte[] test = Convert.FromBase64String(encryptedStr);
+
+            //var k = skh.DecryptData(test);
+
+            // these are mutually exclusive
+            //SetupPasswordBasedTesting();
+            //SetupKeyCreationTesting();
+            //SetupStoredItemTesting();
+
+            Print(DEBUGTEST());
+        }
+
+        public string DEBUGTEST()
+        {
+            // Test the possibility of encrypting using a Public key in the SecureStorage
+            var output = "DEBUGTEST\n";
+
+            // Make key pair
+            var asymmHelper = new AsymmetricKeyHelper("DEBUGTEST");
+            asymmHelper.CreateKey();
+            var serializedCertificate = asymmHelper.GetCertificate().GetEncoded();
+
+            var certificateEncrypter = new CertificateEncrypter("DEBUGTEST", serializedCertificate);
+            var encryptedData = certificateEncrypter.EncryptData("This is a quick little test here/n");
+
+            // Run the externally encrypted data through internal decrypter
+            output += asymmHelper.DecryptData(encryptedData);
+
+            return output;
+>>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
         }
 
         public override bool OnCreateOptionsMenu(IMenu menu)

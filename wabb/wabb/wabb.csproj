@@ -58,6 +58,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MainActivity.cs" />
+<<<<<<< HEAD
+=======
+    <Compile Include="AsymmetricKeyHelper.cs" />
+    <Compile Include="PasswordBasedKeyHelper.cs" />
+>>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="JakesMainActivity.cs" />

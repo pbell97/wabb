@@ -7,6 +7,7 @@
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
 	android:id="@+id/linearLayout1">
+<<<<<<< HEAD
     <LinearLayout
         android:orientation="vertical"
         android:minWidth="25px"
@@ -75,3 +76,60 @@
     </LinearLayout>
 </LinearLayout>
 	
+=======
+	<LinearLayout
+		android:orientation="horizontal"
+		android:minWidth="25px"
+		android:minHeight="25px"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:id="@+id/linearLayout2">
+		<TextView
+			android:text="Message Recipient"
+			android:textAppearance="?android:attr/textAppearanceMedium"
+			android:layout_width="wrap_content"
+			android:layout_height="match_parent"
+			android:id="@+id/messageRecvr"
+			android:textStyle="bold" />
+		<Button
+			android:text="+"
+			android:layout_width="49.0dp"
+			android:layout_height="37.0dp"
+			android:id="@+id/inviteUsers"
+			android:hint="Invite Users"
+			android:gravity="center"
+			android:layout_gravity="right"
+			android:layout_marginLeft="180dp" />
+	</LinearLayout>
+	<TextView
+		android:text="Message Author\n\tMessage"
+		android:layout_width="match_parent"
+		android:layout_height="320dp"
+		android:id="@+id/messageDisplay"
+		android:layout_margin="10dp"
+		android:scrollbars="vertical"
+		android:scrollbarAlwaysDrawVerticalTrack="true"
+		android:maxLines="20"/>
+	<EditText
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:id="@+id/newMessage"
+		android:layout_gravity="end"
+		android:layout_marginHorizontal="10dp" />
+	<Button
+		android:text="SEND"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:id="@+id/sendButton"
+		android:layout_marginHorizontal="10dp"
+		android:layout_gravity="end"
+		android:paddingBottom="20dp" />
+	<Button
+		android:text="Back"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:id="@+id/backButton"
+		android:layout_marginHorizontal="10dp"
+		android:layout_gravity="end" />
+</LinearLayout>
+>>>>>>> parent of f77d0ec... Added asym key stuff. Not entirely working but close...
