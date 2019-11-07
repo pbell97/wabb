@@ -22,7 +22,8 @@
         android:layout_height="wrap_content"
         android:id="@+id/nameEntry"
         android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"/>
+        android:layout_marginRight="10dp"
+        android:hint="Username" />
     <TextView
         android:text="Password"
         android:textAppearance="?android:attr/textAppearanceMedium"
@@ -38,7 +39,8 @@
         android:layout_height="wrap_content"
         android:id="@+id/passEntry"
         android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp" />
+        android:layout_marginRight="10dp"
+        android:hint="Password" />
     <Button
         android:text="Log In"
         android:layout_width="match_parent"
