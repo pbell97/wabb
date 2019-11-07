@@ -19,7 +19,7 @@ namespace Chat_UI
     public class MainActivity : AppCompatActivity
     {
         TLSConnector serverConnection;
-        string access_id = "ya29.ImGwB1qC4kg0kRzEdhyfPT3GyEc60wYi0HpLjYk_MZNlryzyWIums11M20ZR2tfb56AcOeEVm9fXyox0ib0blZejZVSvpCx2NYwJt4V-VwIZjCCET8krr_FB23JWQSI6TFDv";
+        string access_id = "ya29.ImGwB1AesvaP-NiSdAWpoR_XIuf2-LTih0zGe_-gTfF2tjtScpiFSCH_kPZbZBuK5x1hBCUXmS3ILzaMEgc726UqPaU6cS36nk1IZTzAu0lq6M2tujDOqX2S7ijBQ3MymScs";
         string myAsymKeyPairAlias = "myKeyPair";   // ALWAYS PUT "+ mainUser.username" to the key
         string[] convoList = { "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat" };
         User mainUser;
@@ -42,6 +42,16 @@ namespace Chat_UI
             {
                 return;
             }
+
+            if (!myChats[chatName].hasKey())
+            {
+                // TODO: Provide on screen error message
+                Console.WriteLine("\nTried to go to chat without a sym key. Please restore...\n");
+                restoreAccountScreen();
+                return;
+            }
+
+            getNewMessages(myChats[chatName]);
 
             //FindViewById<TextView>(Resource.Id.chatNameTitle).Text = chatName;
             
@@ -390,7 +400,6 @@ namespace Chat_UI
             };
         }
 
-
         void createAccountScreen()
         {
             SetContentView(Resource.Layout.createAccount);
@@ -405,9 +414,6 @@ namespace Chat_UI
                 access_id = "ya29.ImCvB9pe6Qe6SEaH6VhqFVNMBmHvrEh64LmwORZsIt2VOVHmR3zIPTDjALo4JjNELypF2MK_1XpUgEPisnBPsE1Nzyh0OkTZFkYUubXxn4oli2AkQXj0MsYIAvyYVTHEkt4";
 
                 string username = FindViewById<EditText>(Resource.Id.username).Text;
-                string restorationPassword = FindViewById<EditText>(Resource.Id.restorationPassword).Text;
-
-                // Todo: Something with restoration password
 
                 createUser(username);
             };
@@ -450,11 +456,22 @@ namespace Chat_UI
                 loadChatsAndUsersFromStorage();
                 if (mainUser == null || newUser.user_id != mainUser.user_id)
                 {
+                    // Deletes all storage
+                    SecureStorageHelper ssHelper = new SecureStorageHelper();
+                    ssHelper.RemoveAllItems();
+
+                    // Loads new users and resets memory of users&chats
                     mainUser = newUser;
                     otherUsers = new Dictionary<string, User> { }; // username:user
                     usernameIdMatches = new Dictionary<string, string> { };  //user_id:username
                     myChats = new Dictionary<string, Chat> { };    // chatname:chat
                     chatNameMatches = new Dictionary<string, string> { };    // chat_id:chatname
+
+                    // Creates a new public key and updates server
+                    AsymmetricKeyHelper akh = new AsymmetricKeyHelper(myAsymKeyPairAlias + mainUser.username);
+                    akh.CreateKey();
+                    string pubKey = akh.GetSharablePublicKey();
+                    updatePubKey(pubKey);
                 }
 
 
@@ -481,7 +498,10 @@ namespace Chat_UI
 
             if (type == "usersList"){
 
-                // Needs to compare with current list saved in memory
+                // Resets lists
+                otherUsers = new Dictionary<string, User> { }; // username:user
+                usernameIdMatches = new Dictionary<string, string> { };  //user_id:username
+
 
                 JArray usersArray = (JArray)message[type];
                 int length = usersArray.Count;
@@ -582,7 +602,19 @@ namespace Chat_UI
                     // If message is received while viewing the chat
                     if (activeChatId == newMessage.chatId && currentView == "messageScreen")
                     {
-                        string username = usernameIdMatches[newMessage.user_id];
+                        // Gets username unless its a new user since you logged on, then
+                        // goes back to convo screen and gets new users.
+                        string username = "";
+                        try
+                        {
+                            username = usernameIdMatches[newMessage.user_id];
+                        } catch (Exception)
+                        {
+                            Console.WriteLine("User did not exist...getting new list of users now");
+                            getAllUsers();
+                            convoScreen();
+                            return;
+                        }
                         string decryptedContents = myChats[chatNameMatches[newMessage.chatId]].decryptMessage(newMessage.messageContent);
                         string messageToAdd = username + "\n\t" + decryptedContents + "\n";
                         FindViewById<TextView>(Resource.Id.messageDisplay).Text = FindViewById<TextView>(Resource.Id.messageDisplay).Text + messageToAdd;
@@ -655,6 +687,14 @@ namespace Chat_UI
                 myChats[aChat.chatName] = aChat;
                 chatNameMatches[aChat.chatId] = aChat.chatName;
                 getNewMessages(aChat);
+
+                if (currentView == "convoScreen")
+                {
+                    RunOnUiThread(() =>
+                    {
+                        convoScreen();
+                    });
+                }
             }
         }
 
@@ -727,6 +767,7 @@ namespace Chat_UI
             var chatKeyValue = myChats.Keys.ToArray<string>();
             for (int i = 0; i < chatKeyValue.Length; i++)
             {
+                if (!myChats[chatKeyValue[i]].hasKey()) continue;
                 keysBackup[chatKeyValue[i]] = myChats[chatKeyValue[i]].getSharableKey();
             }
 
@@ -781,6 +822,12 @@ namespace Chat_UI
                 // Saves to storage
                 saveChatsAndUsersToStorage();
             }
+        }
+
+        void updatePubKey(string publicKey)
+        {
+            string message = "{\"access_id\": \"" + this.access_id + "\", \"pubKey\": \"" + publicKey + "\"}";
+            serverConnection.WriteMessage("updateUserKey", message);
         }
 
         protected override void OnCreate(Bundle savedInstanceState)

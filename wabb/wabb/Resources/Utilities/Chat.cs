@@ -70,5 +70,11 @@ namespace wabb.Utilities
             return symHelper.DecryptData(messageEncrypted);
         }
 
+        public bool hasKey()
+        {
+            SymmetricKeyHelper symHelper = new SymmetricKeyHelper(chatName + "chat");
+            return symHelper.HasKey();
+        }
+
     }
 }

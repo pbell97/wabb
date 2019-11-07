@@ -43,6 +43,13 @@ namespace wabb
             return key;
         }
 
+        // If there is a key associated with the alias
+        public bool HasKey()
+        {
+            var jsonKey = _storageHelper.GetItem<byte[]>(_keyAlias);
+            return (jsonKey != null);
+        }
+
         // Gets base64encoded string of the key
         public string GetKeyString()
         {
