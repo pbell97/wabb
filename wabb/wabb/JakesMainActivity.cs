@@ -19,7 +19,7 @@ namespace Chat_UI
     public class MainActivity : AppCompatActivity
     {
         TLSConnector serverConnection;
-        string access_id = "ya29.ImGwB1AesvaP-NiSdAWpoR_XIuf2-LTih0zGe_-gTfF2tjtScpiFSCH_kPZbZBuK5x1hBCUXmS3ILzaMEgc726UqPaU6cS36nk1IZTzAu0lq6M2tujDOqX2S7ijBQ3MymScs";
+        string access_id = "ya29.ImGwB0pRxJ4TR3NDUZPKxatimRM5p35p3TaKvh5G-CWER0mLtWLQh6n4M72lBu2BNv6Z4nwJ-C0JvcqsP5SzBEJNenRmINplQqY1bB8f4lPerJSe9vNw7Q8AO62igzfwVm96";
         string myAsymKeyPairAlias = "myKeyPair";   // ALWAYS PUT "+ mainUser.username" to the key
         string[] convoList = { "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat" };
         User mainUser;
@@ -617,7 +617,13 @@ namespace Chat_UI
                         }
                         string decryptedContents = myChats[chatNameMatches[newMessage.chatId]].decryptMessage(newMessage.messageContent);
                         string messageToAdd = username + "\n\t" + decryptedContents + "\n";
-                        FindViewById<TextView>(Resource.Id.messageDisplay).Text = FindViewById<TextView>(Resource.Id.messageDisplay).Text + messageToAdd;
+
+
+                        RunOnUiThread(() =>
+                        {
+                            FindViewById<TextView>(Resource.Id.messageDisplay).Text = FindViewById<TextView>(Resource.Id.messageDisplay).Text + messageToAdd;
+                            var t = FindViewById<LinearLayout>(Resource.Id.linearLayout2);
+                        });
                         // TODO: Scroll textbox down
                     }
                 }                
