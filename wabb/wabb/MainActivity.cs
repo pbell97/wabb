@@ -46,7 +46,7 @@ namespace Chat_UI
 			// Configure sign-in to request the user's ID, email address, and basic
 			// profile. ID and basic profile are included in DEFAULT_SIGN_IN.
 			gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DefaultSignIn)
-					.RequestIdToken("194187796125-u9q5ngakpglh9cediskrel2pqtnn8ps4.apps.googleusercontent.com")
+					.RequestIdToken("194187796125-1tk73jfb7ors490aj61ehh9kaos1ie5d.apps.googleusercontent.com")
                     .RequestEmail()
 					.Build();
 			// [END configure_signin]
