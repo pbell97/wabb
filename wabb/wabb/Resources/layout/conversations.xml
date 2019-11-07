@@ -56,6 +56,19 @@
                 android:textStyle="bold"
                 android:textColor="#ff0097a7" />
             <Button
+                android:text="Kohler"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/button3"
+                android:layout_marginBottom="5dp"
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginTop="5dp"
+                android:onClick="btnThreeClick"
+                android:textSize="20dp"
+                android:textStyle="bold"
+                android:textColor="#ff0097a7"
+                android:background="#ff18ffff" />
+            <Button
                 android:text="Dylan"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -81,19 +94,6 @@
                 android:textColor="#ff0097a7"
                 android:textStyle="bold"
                 android:textSize="20dp" />
-            <Button
-                android:text="Kohler"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/button3"
-                android:layout_marginBottom="5dp"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginTop="5dp"
-                android:onClick="btnThreeClick"
-                android:textSize="20dp"
-                android:textStyle="bold"
-                android:textColor="#ff0097a7"
-                android:background="#ff18ffff" />
             <Button
                 android:text="jAKE"
                 android:layout_width="match_parent"
