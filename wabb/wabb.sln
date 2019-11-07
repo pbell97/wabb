@@ -15,6 +15,7 @@ Global
 		{CD2A991A-525E-470E-A113-64E8C83BA50D}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
 		{CD2A991A-525E-470E-A113-64E8C83BA50D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CD2A991A-525E-470E-A113-64E8C83BA50D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CD2A991A-525E-470E-A113-64E8C83BA50D}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

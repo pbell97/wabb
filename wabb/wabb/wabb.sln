@@ -1,6 +1,7 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29424.173
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "wabb", "wabb.csproj", "{CD2A991A-525E-470E-A113-64E8C83BA50D}"
 EndProject
 Global
@@ -11,7 +12,14 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{CD2A991A-525E-470E-A113-64E8C83BA50D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{CD2A991A-525E-470E-A113-64E8C83BA50D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD2A991A-525E-470E-A113-64E8C83BA50D}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
 		{CD2A991A-525E-470E-A113-64E8C83BA50D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CD2A991A-525E-470E-A113-64E8C83BA50D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0F07B331-701E-45C7-85F7-F0F754437A8E}
 	EndGlobalSection
 EndGlobal
