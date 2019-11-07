@@ -1,64 +1,100 @@
 
 <LinearLayout
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:orientation="vertical"
-	android:minWidth="25px"
-	android:minHeight="25px"
-	android:layout_width="match_parent"
-	android:layout_height="match_parent"
-	android:id="@+id/linearLayout1">
-	<LinearLayout
-		android:orientation="horizontal"
-		android:minWidth="25px"
-		android:minHeight="25px"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:id="@+id/linearLayout2">
-		<TextView
-			android:text="Chat Name"
-			android:textAppearance="?android:attr/textAppearanceMedium"
-			android:layout_width="wrap_content"
-			android:layout_height="match_parent"
-			android:id="@+id/chatNameTitle"
-			android:textStyle="bold" />
-		<Button
-			android:text="+"
-			android:layout_width="49.0dp"
-			android:layout_height="37.0dp"
-			android:id="@+id/inviteUsers"
-			android:hint="Invite Users"
-			android:gravity="center"
-			android:layout_gravity="right"
-			android:layout_marginLeft="180dp" />
-	</LinearLayout>
-	<TextView
-		android:text="Message Author\n\tMessage"
-		android:layout_width="match_parent"
-		android:layout_height="320dp"
-		android:id="@+id/messageDisplay"
-		android:layout_margin="10dp"
-		android:scrollbars="vertical"
-		android:scrollbarAlwaysDrawVerticalTrack="true"
-		android:maxLines="20"/>
-	<EditText
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:id="@+id/newMessage"
-		android:layout_gravity="end"
-		android:layout_marginHorizontal="10dp" />
-	<Button
-		android:text="SEND"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:id="@+id/sendButton"
-		android:layout_marginHorizontal="10dp"
-		android:layout_gravity="end"
-		android:paddingBottom="20dp" />
-	<Button
-		android:text="Back"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:id="@+id/backButton"
-		android:layout_marginHorizontal="10dp"
-		android:layout_gravity="end" />
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:minWidth="25px"
+    android:minHeight="25px"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/linearLayout1"
+    android:background="#ff000000">
+    <LinearLayout
+        android:orientation="horizontal"
+        android:minWidth="25px"
+        android:minHeight="25px"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/linearLayout2">
+        <TextView
+            android:text="Chat Name"
+            android:layout_width="303.5dp"
+            android:layout_height="match_parent"
+            android:id="@+id/chatNameTitle"
+            android:textStyle="bold"
+            android:textSize="35dp"
+            android:textColor="#ffffffff"
+            android:layout_marginLeft="9.5dp"
+            android:gravity="left|bottom" />
+        <Button
+            android:text="+"
+            android:layout_width="76.5dp"
+            android:layout_height="49.5dp"
+            android:id="@+id/inviteUsers"
+            android:hint="Invite Users"
+            android:gravity="center"
+            android:layout_gravity="right"
+            android:layout_marginLeft="0.5dp"
+            android:background="#ff448aff"
+            android:textSize="25dp"
+            android:textColor="#ff1565c0" />
+    </LinearLayout>
+    <ScrollView
+        android:minWidth="25px"
+        android:minHeight="25px"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/scrollView1">
+        <LinearLayout
+            android:orientation="vertical"
+            android:minWidth="25px"
+            android:minHeight="25px"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/linearLayout3">
+            <TextView
+                android:text="Message Author\n\tMessage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/messageDisplay"
+                android:layout_margin="10dp"
+                android:scrollbars="vertical"
+                android:scrollbarAlwaysDrawVerticalTrack="true"
+                android:maxLines="20"
+                android:textStyle="bold"
+                android:textColor="#ff000000"
+                android:background="#fffafafa"
+                android:fadingEdge="horizontal|vertical"
+                android:fadingEdgeLength="5dp"
+                android:padding="10dp" />
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/newMessage"
+                android:layout_gravity="end"
+                android:layout_marginHorizontal="10dp" />
+            <Button
+                android:text="SEND"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/sendButton"
+                android:layout_gravity="end|top"
+                android:background="#ff448aff"
+                android:textStyle="bold"
+                android:textSize="20dp"
+                android:textColor="#ff1565c0"
+                android:layout_marginHorizontal="10dp"/>
+            <Button
+                android:text="Back"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/backButton"
+                android:layout_gravity="end|center|top"
+                android:textStyle="bold"
+                android:background="#ff40c4ff"
+                android:textSize="20dp"
+                android:textColor="#ff0288d1"
+                android:layout_marginHorizontal="10dp" />
+        </LinearLayout>
+    </ScrollView>
 </LinearLayout>
