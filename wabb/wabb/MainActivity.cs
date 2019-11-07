@@ -11,14 +11,15 @@ using Android.Util;
 using Android.Gms.Auth.Api.SignIn;
 using Android.Gms.Auth.Api;
 using System;
-using Android;
+//using Android;
 using SigninQuickstart;
 using wabb;
 using Chat_UI;
 
-namespace wabb
+namespace Chat_UI
 {
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
+    //[Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar")]
     public class MainActivity : AppCompatActivity, View.IOnClickListener, GoogleApiClient.IOnConnectionFailedListener
 	{
 		const string TAG = "MainActivity";
