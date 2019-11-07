@@ -1,405 +1,230 @@
 ﻿using Android.App;
-using Android.OS;
+using Android.Content;
 using Android.Runtime;
-using Android.Support.V7.App;
+using Android.Views;
 using Android.Widget;
-using Java.IO;
-using Java.Security;
-using Javax.Crypto;
-using System.Text;
-// Used for SecureStorage
-using Xamarin.Essentials;
-using Javax.Crypto;
-using Javax.Crypto.Spec;
-using System.Text;
-using Java.Security.Spec;
-using wabb.Utilities;
+using Android.OS;
+using Android.Gms.Common.Apis;
+using Android.Support.V7.App;
+using Android.Gms.Common;
+using Android.Util;
+using Android.Gms.Auth.Api.SignIn;
+using Android.Gms.Auth.Api;
 using System;
+using Android;
+using SigninQuickstart;
+using wabb;
+using Chat_UI;
 
 namespace wabb
 {
-    //[Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
-    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar")]
-    public class MainActivity : AppCompatActivity
-    {
-        private string keyStyle = "symmetric";
-
-        protected override void OnCreate(Bundle savedInstanceState)
-        {
-            base.OnCreate(savedInstanceState);
-            Platform.Init(this, savedInstanceState);
-            SetContentView(Resource.Layout.StoredItems);
-
-
-            AsymmetricKeyHelper ask1 = new AsymmetricKeyHelper("key1");
-            ask1.CreateKey();
-            string sharableKey = ask1.GetSharablePublicKey();
-
-            AsymmetricKeyHelper ask2 = new AsymmetricKeyHelper("key2");
-            string encryptedData = ask2.EncryptWithAnotherPublicKey("This is a sym key", sharableKey);
-
-            string decryptedData = ask1.DecryptDataFromString(encryptedData);
-
-
-
-            //byte[] encryptedText = firstKey.EncryptDataWithAnotherPublicKey(encodedKey1, "TestValueGoesHere");
-
-            //string decryptedText = firstKey.DecryptData(encryptedText);
-
-
-            //SymmetricKeyHelper skh = new SymmetricKeyHelper("firstKey");
-            //skh.CreateKey();
-            //var encryptedText = skh.EncryptDataToBytes("Testing123");
-            //var keyString = skh.GetKeyString();
-
-
-            //SymmetricKeyHelper skh2 = new SymmetricKeyHelper("newKey");
-            //skh2.LoadKey(keyString);
-            //var decryptedText = skh2.DecryptData(encryptedText);
-
-
-
-            //SymmetricKeyHelper skh = new SymmetricKeyHelper("firstKey");
-            //skh.CreateKey();
-            //var data = skh.EncryptData("Yeet");
-            //var t = skh.GetKey();
-
-            //string keyString = Convert.ToBase64String(t.GetEncoded());
-            //byte[] convertedKey = Convert.FromBase64String(keyString);
-
-            //SymmetricKeyHelper skh2 = new SymmetricKeyHelper("newKey");
-            //skh2.LoadKey(convertedKey);
-            //var l = skh2.DecryptData(data);
-
-
-            //string encryptedStr = Convert.ToBase64String(data);
-            //byte[] test = Convert.FromBase64String(encryptedStr);
-
-            //var k = skh.DecryptData(test);
-
-            // these are mutually exclusive
-            //SetupPasswordBasedTesting();
-            //SetupKeyCreationTesting();
-            //SetupStoredItemTesting();
-
-            Print(DEBUGTEST());
-        }
-
-        public string DEBUGTEST()
-        {
-            // Test the possibility of encrypting using a Public key in the SecureStorage
-            var output = "DEBUGTEST\n";
-
-            // Make key pair
-            var asymmHelper = new AsymmetricKeyHelper("DEBUGTEST");
-            asymmHelper.CreateKey();
-            var serializedCertificate = asymmHelper.GetCertificate().GetEncoded();
-
-            var certificateEncrypter = new CertificateEncrypter("DEBUGTEST", serializedCertificate);
-            var encryptedData = certificateEncrypter.EncryptData("This is a quick little test here/n");
-
-            // Run the externally encrypted data through internal decrypter
-            output += asymmHelper.DecryptData(encryptedData);
-
-            return output;
-        }
-
-        // Show how to use Password Based Helper
-        public void SetupPasswordBasedTesting()
-        {
-            // Grab the buttons
-            var saveButton = FindViewById<Button>(Resource.Id.saveButton);
-            var getButton = FindViewById<Button>(Resource.Id.getButton);
-            var deleteButton = FindViewById<Button>(Resource.Id.deleteButton);
-            var deleteAllButton = FindViewById<Button>(Resource.Id.deleteAllButton);
-
-            // Remove unused inputs
-            var radioGroup = FindViewById<RadioGroup>(Resource.Id.radioGroup1);
-            var parent = FindViewById<LinearLayout>(Resource.Id.linearLayout1);
-            parent.RemoveView(radioGroup);
-
-            // Janky add listeners to buttons
-            saveButton.Click += (o, e) =>
-            {
-                var key = FindViewById<EditText>(Resource.Id.storedKeyText).Text;
-                var password = FindViewById<EditText>(Resource.Id.storedMessageText).Text;
-                var helper = new PasswordBasedKeyHelper(key);
-
-                helper.CreateKey(password, "dummy@email.code");
-                var encryptedData = helper.EncryptData("Password based key creation success");
-                Print(helper.DecryptData(encryptedData));
-            };
-            getButton.Click += (o, e) =>
-            {
-                var key = FindViewById<EditText>(Resource.Id.storedKeyText).Text;
-                var helper = new PasswordBasedKeyHelper(key);
-
-                var encryptedData = helper.EncryptData("Password based key retrieved success");
-                Print(helper.DecryptData(encryptedData));
-            };
-
-            deleteButton.Click += (o, e) =>
-            {
-                var key = FindViewById<EditText>(Resource.Id.storedKeyText).Text;
-                var helper = new PasswordBasedKeyHelper(key);
-                Print(helper.DeleteKey().ToString());
-            };
-            deleteAllButton.Click += (o, e) =>
-            {
-                var storageHelper = new SecureStorageHelper();
-                storageHelper.RemoveAllItems();
-            };
-
-            // Grab the text inputs
-            var nameInput = FindViewById<EditText>(Resource.Id.storedKeyText);
-            var messageInput = FindViewById<EditText>(Resource.Id.storedMessageText);
-            // Set prompts
-            nameInput.Hint = "Password based key alias";
-            messageInput.Hint = "Password";
-        }
-
-        // Show how to use Symm and Asymm Helpers (no longer very similar)
-        //  Symm keys are in app-level SecureStorage now, Asymm keys are in os-level keystore
-        public void SetupKeyCreationTesting()
-        {
-            // Grab the buttons
-            var saveButton = FindViewById<Button>(Resource.Id.saveButton);
-            var getButton = FindViewById<Button>(Resource.Id.getButton);
-            var deleteButton = FindViewById<Button>(Resource.Id.deleteButton);
-            // Renamed, get all can feed into delete all if desired
-            var deleteAllButton = FindViewById<Button>(Resource.Id.deleteAllButton);
-            deleteAllButton.Text = "Get All";
-
-            // !!!
-            // Put private key in symm cipher => No output
-            // Put symm key in asymm cipher => Exception
-            var symmButton = FindViewById<RadioButton>(Resource.Id.SymmRadioButton);
-            var asymmButton = FindViewById<RadioButton>(Resource.Id.AsymmRadioButton);
-
-            // Janky add listeners to buttons
-            saveButton.Click += (o, e) =>
-            {
-                var key = FindViewById<EditText>(Resource.Id.storedKeyText).Text;
-                var data = FindViewById<EditText>(Resource.Id.storedMessageText).Text;
-                Print(CreateKey(key, data));
-            };
-            getButton.Click += (o, e) =>
-            {
-                var key = FindViewById<EditText>(Resource.Id.storedKeyText).Text;
-                var data = FindViewById<EditText>(Resource.Id.storedMessageText).Text;
-
-                if (keyStyle == "asymmetric")
-                {
-                    var helper = new AsymmetricKeyHelper(key);
-
-                    var encryptedData = helper.EncryptData(data);
-                    Print(helper.DecryptData(encryptedData));
-                }
-                else
-                {
-                    var helper = new SymmetricKeyHelper(key);
-
-                    var encryptedData = helper.EncryptDataToBytes(data);
-                    Print(helper.DecryptData(encryptedData));
-                }
-
-            };
-
-            deleteButton.Click += (o, e) =>
-            {
-                var key = FindViewById<EditText>(Resource.Id.storedKeyText).Text;
-                Print(DeleteKey(key).ToString());
-            };
-            deleteAllButton.Click += (o, e) =>
-            {
-                var keyAliases = GetAllKeys();
-                var output = "Key aliases: \n";
-                foreach (var alias in keyAliases)
-                {
-                    output += alias + "\n";
-                }
-                Print(output);
-            };
-
-            symmButton.Click += (o, e) =>
-            {
-                keyStyle = "symmetric";
-            };
-            asymmButton.Click += (o, e) =>
-            {
-                keyStyle = "asymmetric";
-            };
-
-            // Grab the text inputs
-            var nameInput = FindViewById<EditText>(Resource.Id.storedKeyText);
-            var messageInput = FindViewById<EditText>(Resource.Id.storedMessageText);
-            // Set prompts
-            nameInput.Hint = "Key alias";
-            messageInput.Hint = "Message to be encrypted";
-        }
-
-        public void SetupStoredItemTesting()
-        {
-            // Grab the buttons
-            var saveButton = FindViewById<Button>(Resource.Id.saveButton);
-            var getButton = FindViewById<Button>(Resource.Id.getButton);
-            var deleteButton = FindViewById<Button>(Resource.Id.deleteButton);
-            var deleteAllButton = FindViewById<Button>(Resource.Id.deleteAllButton);
-
-            // Remove unused inputs
-            var radioGroup = FindViewById<RadioGroup>(Resource.Id.radioGroup1);
-            var parent = FindViewById<LinearLayout>(Resource.Id.linearLayout1);
-            parent.RemoveView(radioGroup);
-
-            // Janky add listeners to buttons
-            saveButton.Click += (o, e) =>
-            {
-                var key = FindViewById<EditText>(Resource.Id.storedKeyText).Text;
-                var data = FindViewById<EditText>(Resource.Id.storedMessageText).Text;
-                CreateStoredItem(key, data);
-            };
-            getButton.Click += (o, e) =>
-            {
-                var key = FindViewById<EditText>(Resource.Id.storedKeyText).Text;
-                Print(GetStoredItem(key));
-            };
-
-            deleteButton.Click += (o, e) =>
-            {
-                var key = FindViewById<EditText>(Resource.Id.storedKeyText).Text;
-                Print(DeleteStoredItem(key).ToString());
-            };
-            deleteAllButton.Click += (o, e) =>
-            {
-                DeleteAllStoredItems();
-            };
-
-            // Grab the text inputs
-            var nameInput = FindViewById<EditText>(Resource.Id.storedKeyText);
-            var messageInput = FindViewById<EditText>(Resource.Id.storedMessageText);
-            // Set prompts
-            nameInput.Hint = "Stored item key name";
-            messageInput.Hint = "Stored item contents";
-        }
-
-        public void Print(string output)
-        {
-            var keysText = FindViewById<TextView>(Resource.Id.keysText);
-            keysText.Text = output;
-        }
-
-
-        // ----- SecureStorage Interactions -----
-        public void CreateStoredItem(string key, string data)
-        {
-            try
-            {
-                // This returns as Task<>, can bubble up async instead of lame .Wait()
-                // key and data must be strings
-                SecureStorage.SetAsync(key, data).Wait();
-            }
-            catch
-            {
-                Print("Failed to create");
-            }
-        }
-
-        public string GetStoredItem(string key)
-        {
-            try
-            {
-                // This returns a Task<string>, can bubble up async instead of lame .Result
-                return SecureStorage.GetAsync(key).Result;
-            }
-            catch
-            {
-                return "Failed to get";
-            }
-        }
-
-        public bool DeleteStoredItem(string key)
-        {
-            // My short testing returned false every time, whether the key existed or not
-            // it did succeed in deleting if the key did exist though
-            return SecureStorage.Remove(key);
-        }
-
-        public void DeleteAllStoredItems()
-        {
-            SecureStorage.RemoveAll();
-        }
-
-
-        // ----- KeyStore Interactions -----
-        public string CreateKey(string alias, string message)
-        {
-            if (keyStyle == "asymmetric")
-            {
-                var helper = new AsymmetricKeyHelper(alias); helper.CreateKey();
-
-                // If encrypted data is converted from byte[] to string, then back to byte[]
-                // it does not come back the same, will not decrypt
-                var encryptedData = helper.EncryptData(message);
-                return helper.DecryptData(encryptedData);
-            }
-            else
-            {
-                var helper = new SymmetricKeyHelper(alias); helper.CreateKey();
-
-                // If encrypted data is converted from byte[] to string, then back to byte[]
-                // it does not come back the same, will not decrypt
-                var encryptedData = helper.EncryptDataToBytes(message);
-                return helper.DecryptData(encryptedData);
-            }
-
-
-        }
-
-        public JavaList<string> GetAllKeys()
-        {
-            var keyStore = KeyStore.GetInstance("AndroidKeyStore");
-            keyStore.Load(null);
-
-            var keyAliasEnumerator = keyStore.Aliases();
-            var keyAliases = new JavaList<string>();
-
-            while (keyAliasEnumerator.HasMoreElements)
-            {
-                keyAliases.Add(keyAliasEnumerator.NextElement());
-            }
-            return keyAliases;
-        }
-
-        public bool DeleteAllKeys()
-        {
-            var output = true;
-            var keyAliases = GetAllKeys();
-
-            foreach (var alias in keyAliases)
-            {
-                // xamarin key is used to build SecureStorage
-                if (alias.Contains("xamarin"))
-                    continue;
-                output = output && DeleteKey(alias);
-            }
-            keyAliases.Dispose();
-            return output;
-        }
-
-        public bool DeleteKey(string keyAlias)
-        {
-            if (keyStyle == "asymmetric")
-            {
-                var helper = new AsymmetricKeyHelper(keyAlias);
-                return helper.DeleteKey();
-            }
-            else
-            {
-                var helper = new SymmetricKeyHelper(keyAlias);
-                return helper.DeleteKey();
-            }
-        }
-
-    }
+    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
+    public class MainActivity : AppCompatActivity, View.IOnClickListener, GoogleApiClient.IOnConnectionFailedListener
+	{
+		const string TAG = "MainActivity";
+
+		const int RC_SIGN_IN = 9001;
+		GoogleApiClient mGoogleApiClient;
+		TextView mStatusTextView;
+		ProgressDialog mProgressDialog;
+
+		GoogleSignInOptions gso;
+        string idToken;
+
+		protected override void OnCreate (Bundle savedInstanceState)
+		{
+			base.OnCreate (savedInstanceState);
+			SetContentView (Resource.Layout.googleSignIn);
+
+			mStatusTextView = FindViewById<TextView>(Resource.Id.status);
+			FindViewById(Resource.Id.sign_in_button).SetOnClickListener(this);
+			FindViewById(Resource.Id.sign_out_button).SetOnClickListener(this);
+			FindViewById(Resource.Id.disconnect_button).SetOnClickListener(this);
+
+			// [START configure_signin]
+			// Configure sign-in to request the user's ID, email address, and basic
+			// profile. ID and basic profile are included in DEFAULT_SIGN_IN.
+			gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DefaultSignIn)
+					.RequestIdToken("194187796125-1tk73jfb7ors490aj61ehh9kaos1ie5d.apps.googleusercontent.com")
+                    .RequestEmail()
+					.Build();
+			// [END configure_signin]
+
+			// [START build_client]
+			// Build a GoogleApiClient with access to the Google Sign-In API and the
+			// options specified by gso.
+			mGoogleApiClient = new GoogleApiClient.Builder(this)
+					.EnableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
+			        .AddApi(Auth.GOOGLE_SIGN_IN_API, gso)
+					.Build();
+			// [END build_client]
+
+			// [START customize_button]
+			// Set the dimensions of the sign-in button.
+			var signInButton = FindViewById<SignInButton>(Resource.Id.sign_in_button);
+			signInButton.SetSize(SignInButton.SizeStandard);
+			// [END customize_button]
+		}
+
+		string getIdToken(){
+            return "test";
+		}
+
+		protected override void OnStart()
+		{
+			base.OnStart();
+
+			var opr = Auth.GoogleSignInApi.SilentSignIn(mGoogleApiClient);
+			if (opr.IsDone)
+			{
+				// If the user's cached credentials are valid, the OptionalPendingResult will be "done"
+				// and the GoogleSignInResult will be available instantly.
+				Log.Debug(TAG, "Got cached sign-in");
+				var result = opr.Get() as GoogleSignInResult;
+				HandleSignInResult(result);
+			}
+			else
+			{
+				// If the user has not previously signed in on this device or the sign-in has expired,
+				// this asynchronous branch will attempt to sign in the user silently.  Cross-device
+				// single sign-on will occur in this branch.
+				ShowProgressDialog();
+				opr.SetResultCallback(new SignInResultCallback { Activity = this });
+			}
+		}
+
+		protected override void OnResume()
+		{
+			base.OnResume();
+			HideProgressDialog();
+		}
+
+		protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
+		{
+			base.OnActivityResult(requestCode, resultCode, data);
+			Log.Debug(TAG, "onActivityResult:" + requestCode + ":" + resultCode + ":" + data);
+
+			// Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
+			if (requestCode == RC_SIGN_IN)
+			{
+				var result = Auth.GoogleSignInApi.GetSignInResultFromIntent(data);
+                
+				HandleSignInResult(result);
+			}
+		}
+
+		public void HandleSignInResult(GoogleSignInResult result)
+		{
+
+			Log.Debug(TAG, "handleSignInResult:" + result.IsSuccess);
+            
+           
+            if (result.IsSuccess)
+			{
+                idToken = result.SignInAccount.IdToken;
+                Console.WriteLine("Token: " + idToken);
+
+                Intent nextActivity = new Intent(this, typeof(JakesMainActivity));
+                nextActivity.PutExtra("token", idToken);
+                StartActivity(nextActivity);
+
+
+                // TODO: change UI here
+
+                // Signed in successfully, show authenticated UI.
+                var acct = result.SignInAccount;
+                
+				mStatusTextView.Text = string.Format(GetString(Resource.String.signed_in_fmt), acct.DisplayName);
+				UpdateUI(true);
+			}
+			else
+			{
+                // Signed out, show unauthenticated UI.
+                UpdateUI(false);
+			}
+		}
+
+		void SignIn()
+		{
+			var signInIntent = Auth.GoogleSignInApi.GetSignInIntent(mGoogleApiClient);
+			StartActivityForResult(signInIntent, RC_SIGN_IN);
+		}
+
+		void SignOut()
+		{
+			Auth.GoogleSignInApi.SignOut(mGoogleApiClient).SetResultCallback(new SignOutResultCallback { Activity = this });
+		}
+
+		void RevokeAccess()
+		{
+			Auth.GoogleSignInApi.RevokeAccess(mGoogleApiClient).SetResultCallback(new SignOutResultCallback { Activity = this });
+		}
+
+		public void OnConnectionFailed(ConnectionResult result)
+		{
+			// An unresolvable error has occurred and Google APIs (including Sign-In) will not
+        	// be available.
+			Log.Debug(TAG, "onConnectionFailed:" + result);
+		}
+
+		protected override void OnStop()
+		{
+			base.OnStop();
+			mGoogleApiClient.Disconnect();
+		}
+
+		public void ShowProgressDialog()
+		{
+			if (mProgressDialog == null)
+			{
+				mProgressDialog = new ProgressDialog(this);
+				mProgressDialog.SetMessage(GetString(Resource.String.loading));
+				mProgressDialog.Indeterminate = true;
+			}
+
+			mProgressDialog.Show();
+		}
+
+		public void HideProgressDialog()
+		{
+			if (mProgressDialog != null && mProgressDialog.IsShowing)
+			{
+				mProgressDialog.Hide();
+			}
+		}
+
+		public void UpdateUI (bool isSignedIn)
+		{
+			if (isSignedIn)
+			{
+				FindViewById(Resource.Id.sign_in_button).Visibility = ViewStates.Gone;
+				FindViewById(Resource.Id.sign_out_and_disconnect).Visibility = ViewStates.Visible;
+			}
+			else
+			{
+				mStatusTextView.Text = GetString(Resource.String.signed_out);
+
+				FindViewById(Resource.Id.sign_in_button).Visibility = ViewStates.Visible;
+				FindViewById(Resource.Id.sign_out_and_disconnect).Visibility = ViewStates.Gone;
+			}
+		}
+
+		public void OnClick(View v)
+		{
+			switch (v.Id)
+			{
+				case Resource.Id.sign_in_button:
+					SignIn();
+					break;
+				case Resource.Id.sign_out_button:
+					SignOut();
+					break;
+				case Resource.Id.disconnect_button:
+					RevokeAccess();
+					break;
+			}
+		}
+	}
 }
+
 

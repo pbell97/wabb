@@ -12,11 +12,12 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 
+
 namespace Chat_UI
 {
-    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
-    //[Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar")]
-    public class MainActivity : AppCompatActivity
+    //[Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
+    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar")]
+    public class JakesMainActivity : AppCompatActivity
     {
         TLSConnector serverConnection;
         string access_id = "ya29.ImGwB0pRxJ4TR3NDUZPKxatimRM5p35p3TaKvh5G-CWER0mLtWLQh6n4M72lBu2BNv6Z4nwJ-C0JvcqsP5SzBEJNenRmINplQqY1bB8f4lPerJSe9vNw7Q8AO62igzfwVm96";
@@ -845,6 +846,9 @@ namespace Chat_UI
 
             base.OnCreate(savedInstanceState);
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
+
+            access_id = Intent.GetStringExtra("token");
+
 
             serverConnection = new TLSConnector();
             serverConnection.OnMessageReceived += new EventHandler(signInToServerResponse); 
