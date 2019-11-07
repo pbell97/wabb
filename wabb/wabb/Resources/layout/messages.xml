@@ -23,7 +23,7 @@
             android:id="@+id/chatNameTitle"
             android:textStyle="bold"
             android:textSize="35dp"
-            android:textColor="#ffffffff"
+            android:textColor="#ffbdbdbd"
             android:layout_marginLeft="9.5dp"
             android:gravity="left|bottom" />
         <Button
@@ -62,8 +62,8 @@
                 android:scrollbarAlwaysDrawVerticalTrack="true"
                 android:maxLines="20"
                 android:textStyle="bold"
-                android:textColor="#ff000000"
-                android:background="#fffafafa"
+                android:textColor="#ffbdbdbd"
+                android:background="#ff000000"
                 android:fadingEdge="horizontal|vertical"
                 android:fadingEdgeLength="5dp"
                 android:padding="10dp" />
