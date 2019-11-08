@@ -54,12 +54,11 @@ namespace Chat_UI
 
             getNewMessages(myChats[chatName]);
 
-            //FindViewById<TextView>(Resource.Id.chatNameTitle).Text = chatName;
-            
+
             SetContentView(Resource.Layout.messages);
             currentView = "messageScreen";
 
-
+            FindViewById<TextView>(Resource.Id.chatNameTitle).Text = chatName;
             activeChatName = chatName;
             activeChatId = myChats[chatName].chatId;
 
@@ -892,6 +891,10 @@ namespace Chat_UI
             else if (nextScreen == "createAccountScreen")
             {
                 createAccountScreen();
+                return;
+            } else if (nextScreen == "restoreAccountScreen")
+            {
+                restoreAccountScreen();
                 return;
             }
 

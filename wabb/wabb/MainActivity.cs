@@ -29,6 +29,8 @@ namespace Chat_UI
 		TextView mStatusTextView;
 		ProgressDialog mProgressDialog;
 
+
+        string signOut;
         string nextScreen;
 
         GoogleSignInOptions gso;
@@ -40,12 +42,12 @@ namespace Chat_UI
 			SetContentView (Resource.Layout.googleSignIn);
 
             nextScreen = Intent.GetStringExtra("next");
-            var signOut = Intent.GetStringExtra("signOut");
+            signOut = Intent.GetStringExtra("signOut");
             if (signOut == "true")
             {
                 try
                 {
-                    SignOut();
+                    RevokeAccess();
                 } catch (Exception)
                 {
                     Console.WriteLine("Tried to log user out but no user was logged in?");
@@ -141,6 +143,7 @@ namespace Chat_UI
 			{
                 idToken = result.SignInAccount.IdToken;
                 Console.WriteLine("Token: " + idToken);
+
 
                 Intent nextActivity = new Intent(this, typeof(JakesMainActivity));
                 nextActivity.PutExtra("token", idToken);
