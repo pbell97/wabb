@@ -209,3 +209,8 @@ getMyChats: returns list of all chats requesting user is in
             }, continued...
         ]
     }
+
+
+backupKeys
+restoreKeys
+updatePubKey

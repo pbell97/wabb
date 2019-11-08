@@ -3,8 +3,9 @@ const https = require('https');
 var fs = require('fs');
 var express = require('express');
 var TLSConnection = require('./tlsTesting/nodeTLSClass.js');
-const googleAudienceID = '154600092899-9tdri4c4k80lg38ak4bd9s6aro95s9nt.apps.googleusercontent.com';
-// const googleAudienceID = '194187796125-1tk73jfb7ors490aj61ehh9kaos1ie5d.apps.googleusercontent.com'; // Kohler's
+// const googleAudienceID = '154600092899-9tdri4c4k80lg38ak4bd9s6aro95s9nt.apps.googleusercontent.com';
+const googleAudienceID = '194187796125-1tk73jfb7ors490aj61ehh9kaos1ie5d.apps.googleusercontent.com'; // Kohler's
+// https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=
 var tokenCache = {};
 
 var serverConnection = new TLSConnection();
@@ -68,6 +69,9 @@ function interpretMessage(socket, message){
             break;
         case "restoreKeys":
             restoreKeys(socket, message.content);
+            break;
+        case "updateUserKey":
+            updateUserKey(socket, message.content);
             break;
         default:
             socket.write(JSON.stringify({"response": "Invalid Request"}));
@@ -141,6 +145,7 @@ function createUserPost(socket, message){
     var access_id = message.access_id;
     var username = (message.username) ? message.username : data.email;
     var pubKey = message.pubKey;
+    console.log("Creating user");
     verifyTokenManually(access_id, (accepted, data) => {
         if (accepted){
             // Check if user already exists
@@ -156,6 +161,7 @@ function createUserPost(socket, message){
                 console.log("Created User:" + username);
             });
         } else {
+            console.log("Invalid token on Creating user");
             socket.write(JSON.stringify({"error": "Invalid Token"}));
         }
     });
@@ -304,6 +310,10 @@ function signIn(socket, message){
             executeSQLQuery(query, (error, results)=>{
                 try {
                     if (results == undefined) return;
+                    if (results[0] == undefined){
+                        socket.write(JSON.stringify({"noAccount": "none"}));
+                        return;
+                    }
                     if (error) throw error;
                     var messageToSend = {
                         "signedIn" : {
@@ -399,7 +409,11 @@ function restoreKeys(socket, message){
                 var query = "SELECT backupData FROM keysBackup WHERE username = \"" + username + "\";";
                 executeSQLQuery(query, (error, results)=>{
                     if (error) throw error;
-                    socket.write(JSON.stringify({"restoreKeys": results[0].backupData}));
+                    try {
+                        socket.write(JSON.stringify({"restoreKeys": results[0].backupData}));
+                    } catch {
+                        console.log("Didn't have backup data for user " + username);
+                    }
                     console.log("Returning keys to " + username);
                 });
             });
@@ -448,10 +462,29 @@ function getMyChats(socket, message){
     });
 }
 
+function updateUserKey(socket, message){
+    var access_id = message.access_id;
+    var newPubKey = message.pubKey;
+    verifyTokenManually(access_id, (accepted, data) => {
+        if (accepted){
+            var user_id = data.user_id;
+            var query = "UPDATE users SET pubKey = \"" + newPubKey + "\" WHERE id = \"" + user_id + "\";";
+            executeSQLQuery(query, (error, results)=>{
+                if (error) throw error;
+            })
+        } else {
+            socket.write(JSON.stringify({"error": "Invalid Token"}));
+        }
+    });
+
+}
+
+
+
 function verifyTokenManually(access_id, callback){
     // Checks if token is cached instead of querying Google
     if (Object.keys(tokenCache).includes(access_id)){
-        if (tokenCache[access_id].expireTime > new Date().getTime()){
+        if (tokenCache[access_id].expireTime > Math.round((new Date()).getTime() / 1000)){
             callback(true, tokenCache[access_id]);
             return;
         } else {
@@ -462,7 +495,11 @@ function verifyTokenManually(access_id, callback){
     }
 
     // Queries Google to see if token is valid
-    var url = "https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=" + access_id;
+    // var url = "https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=" + access_id;
+    var url = "https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=" + access_id;
+    
+    // console.log(access_id);
+
     https.get(url, (response, otherPossibleParam) => {
         var data = '';
         response.on('data', (chunk) => {
@@ -470,16 +507,16 @@ function verifyTokenManually(access_id, callback){
         });
         response.on('end', () => {
             data = JSON.parse(data);
-
+            console.log(data);
             // Add check for if in cache or table (function that checks memory, if not in mem then in SQL) ***
-            if (data.audience == googleAudienceID && parseInt(data.expires_in) > 0){
-                data.expireTime = new Date().getTime() + data.expires_in*1000;
+            if (data.aud == googleAudienceID && parseInt(data.exp) > 0){
+                data.expireTime = data.exp //new Date().getTime() + data.expires_in*1000;
+                data.user_id = data.sub;
                 tokenCache[access_id] = data;
                 callback(true, data);
             } else {
                 callback(false, data);
             }
-
         });
     });
 }
@@ -511,6 +548,7 @@ function userIsInChat(chatId, user_id, callback){
         if (error) throw error;
         if (results[0] != undefined) {
             var users = results[0]["users"].split(',');
+
             callback(users.includes(user_id));
             return;
         }
