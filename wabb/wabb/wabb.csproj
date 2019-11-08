@@ -23,7 +23,7 @@
     <MonoAndroidAssetsPrefix>Assets</MonoAndroidAssetsPrefix>
     <AndroidEnableSGenConcurrent>true</AndroidEnableSGenConcurrent>
     <AndroidKeyStore>true</AndroidKeyStore>
-    <AndroidSigningKeyStore>C:\Users\wsmallwood\Documents\GitHub\wabb\wabb\wabb\Keystore\Google_Auth\Google_Auth.keystore</AndroidSigningKeyStore>
+    <AndroidSigningKeyStore>/Users/patrickbell/Desktop/classes/infoAndCompSecurity/wabb/wabb/wabb/Keystore/Google_Auth/Google_Auth.keystore</AndroidSigningKeyStore>
     <AndroidSigningStorePass>Warrior12!</AndroidSigningStorePass>
     <AndroidSigningKeyAlias>Google_Auth</AndroidSigningKeyAlias>
     <AndroidSigningKeyPass>Warrior12!</AndroidSigningKeyPass>

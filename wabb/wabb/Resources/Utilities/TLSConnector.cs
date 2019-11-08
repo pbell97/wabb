@@ -32,7 +32,7 @@ namespace wabb.Utilities
         public void Connect() 
         {
             this.tcpClient.Connect("www.patricksproj.codes", 443);
-            Console.WriteLine("Connected...");
+            Console.WriteLine("\nConnected...\n");
             this.sslStream = new SslStream(this.tcpClient.GetStream(), false, null);
             sslStream.AuthenticateAsClient("www.patricksproj.codes");
             

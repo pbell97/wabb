@@ -871,6 +871,7 @@ namespace Chat_UI
 
             if (nextScreen != null)
             {
+                Console.WriteLine("\nABOUT TO CONNECT\n");
                 serverConnection = new TLSConnector();
                 serverConnection.OnMessageReceived += new EventHandler(signInToServerResponse);
                 serverConnection.OnMessageReceived += new EventHandler(getAllUsersResponse);
