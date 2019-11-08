@@ -58,7 +58,7 @@
                 android:minWidth="25px"
                 android:minHeight="25px"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="318.0dp"
                 android:id="@+id/scrollView2">
                 <LinearLayout
                     android:orientation="vertical"
@@ -70,7 +70,7 @@
                     <TextView
                         android:text="Message Author\n\tMessage"
                         android:layout_width="match_parent"
-                        android:layout_height="296.5dp"
+                        android:layout_height="wrap_content"
                         android:id="@+id/messageDisplay"
                         android:layout_margin="10dp"
                         android:scrollbars="vertical"
