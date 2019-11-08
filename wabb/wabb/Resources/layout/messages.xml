@@ -58,7 +58,7 @@
                 android:minWidth="25px"
                 android:minHeight="25px"
                 android:layout_width="match_parent"
-                android:layout_height="318.0dp"
+                android:layout_height="wrap_content"
                 android:id="@+id/scrollView2">
                 <LinearLayout
                     android:orientation="vertical"
@@ -75,7 +75,6 @@
                         android:layout_margin="10dp"
                         android:scrollbars="vertical"
                         android:scrollbarAlwaysDrawVerticalTrack="true"
-                        android:maxLines="20"
                         android:textStyle="bold"
                         android:textColor="#ffbdbdbd"
                         android:background="#ffffffff"

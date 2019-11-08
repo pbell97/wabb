@@ -492,6 +492,14 @@ namespace Chat_UI
                 getAllUsers();
                 getMyChats();
             }
+
+            if (type == "noAccount")
+            {
+                RunOnUiThread(() =>
+                {
+                    createAccountScreen();
+                });
+            }
         }
 
         // Sends getUsers request to server

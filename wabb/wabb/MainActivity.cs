@@ -152,8 +152,6 @@ namespace Chat_UI
                 StartActivity(nextActivity);
 
                 
-
-
                 // TODO: change UI here
 
                 // Signed in successfully, show authenticated UI.
