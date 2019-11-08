@@ -24,13 +24,13 @@
             android:layout_height="match_parent"
             android:id="@+id/linearLayout3">
             <LinearLayout
-            android:orientation="horizontal"
-            android:minWidth="25px"
-            android:minHeight="25px"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/linearLayout2"
-            android:background="#ffffffff">
+                android:orientation="horizontal"
+                android:minWidth="25px"
+                android:minHeight="25px"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/linearLayout2"
+                android:background="#ffffffff">
                 <TextView
                     android:text="Chat Name"
                     android:layout_width="303.5dp"
@@ -54,21 +54,36 @@
                     android:textSize="25dp"
                     android:textColor="#ff1565c0" />
             </LinearLayout>
-            <TextView
-                android:text="Message Author\n\tMessage"
+            <ScrollView
+                android:minWidth="25px"
+                android:minHeight="25px"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/messageDisplay"
-                android:layout_margin="10dp"
-                android:scrollbars="vertical"
-                android:scrollbarAlwaysDrawVerticalTrack="true"
-                android:maxLines="20"
-                android:textStyle="bold"
-                android:textColor="#ffbdbdbd"
-                android:background="#ffffffff"
-                android:fadingEdge="horizontal|vertical"
-                android:fadingEdgeLength="5dp"
-                android:padding="10dp" />
+                android:id="@+id/scrollView2">
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:minWidth="25px"
+                    android:minHeight="25px"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:id="@+id/linearLayout4">
+                    <TextView
+                        android:text="Message Author\n\tMessage"
+                        android:layout_width="match_parent"
+                        android:layout_height="296.5dp"
+                        android:id="@+id/messageDisplay"
+                        android:layout_margin="10dp"
+                        android:scrollbars="vertical"
+                        android:scrollbarAlwaysDrawVerticalTrack="true"
+                        android:maxLines="20"
+                        android:textStyle="bold"
+                        android:textColor="#ffbdbdbd"
+                        android:background="#ffffffff"
+                        android:fadingEdge="horizontal|vertical"
+                        android:fadingEdgeLength="5dp"
+                        android:padding="10dp" />
+                </LinearLayout>
+            </ScrollView>
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
