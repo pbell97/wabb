@@ -18,8 +18,8 @@ using Chat_UI;
 
 namespace Chat_UI
 {
-    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
-    //[Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar")]
+    //[Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
+    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar")]
     public class MainActivity : AppCompatActivity, View.IOnClickListener, GoogleApiClient.IOnConnectionFailedListener
 	{
 		const string TAG = "MainActivity";
@@ -29,7 +29,9 @@ namespace Chat_UI
 		TextView mStatusTextView;
 		ProgressDialog mProgressDialog;
 
-		GoogleSignInOptions gso;
+        string nextScreen;
+
+        GoogleSignInOptions gso;
         string idToken;
 
 		protected override void OnCreate (Bundle savedInstanceState)
@@ -37,7 +39,22 @@ namespace Chat_UI
 			base.OnCreate (savedInstanceState);
 			SetContentView (Resource.Layout.googleSignIn);
 
-			mStatusTextView = FindViewById<TextView>(Resource.Id.status);
+            nextScreen = Intent.GetStringExtra("next");
+            var signOut = Intent.GetStringExtra("signOut");
+            if (signOut == "true")
+            {
+                try
+                {
+                    SignOut();
+                } catch (Exception)
+                {
+                    Console.WriteLine("Tried to log user out but no user was logged in?");
+                }
+            }
+
+
+
+            mStatusTextView = FindViewById<TextView>(Resource.Id.status);
 			FindViewById(Resource.Id.sign_in_button).SetOnClickListener(this);
 			FindViewById(Resource.Id.sign_out_button).SetOnClickListener(this);
 			FindViewById(Resource.Id.disconnect_button).SetOnClickListener(this);
@@ -127,7 +144,11 @@ namespace Chat_UI
 
                 Intent nextActivity = new Intent(this, typeof(JakesMainActivity));
                 nextActivity.PutExtra("token", idToken);
+                nextActivity.PutExtra("next", nextScreen);
+                //nextActivity.SetFlags(ActivityFlags.ReorderToFront);
                 StartActivity(nextActivity);
+
+                
 
 
                 // TODO: change UI here

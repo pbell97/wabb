@@ -88,10 +88,10 @@ namespace wabb.Utilities
         }
 
         public void DisplayMessage(object sender, EventArgs e){
-            Console.WriteLine("Got message: " + this.unreadMessages[0]);
             int messageIndex = this.unreadMessages.Count - 1;
             if (messageIndex < 0) return;
             JObject message = JObject.Parse(this.unreadMessages[messageIndex]);
+            Console.WriteLine("Got message: " + this.unreadMessages[messageIndex]);
             string type = this.interpretMessageType(message);
             Console.WriteLine("Type: " + type);
 

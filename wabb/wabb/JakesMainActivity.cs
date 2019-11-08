@@ -11,16 +11,16 @@ using System.Threading;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
-
+using Android.Content;
 
 namespace Chat_UI
 {
-    //[Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
-    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar")]
+    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme", MainLauncher = true)]
+    //[Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar")]
     public class JakesMainActivity : AppCompatActivity
     {
         TLSConnector serverConnection;
-        string access_id = "ya29.ImGwB0pRxJ4TR3NDUZPKxatimRM5p35p3TaKvh5G-CWER0mLtWLQh6n4M72lBu2BNv6Z4nwJ-C0JvcqsP5SzBEJNenRmINplQqY1bB8f4lPerJSe9vNw7Q8AO62igzfwVm96";
+        string access_id = "NoToken";
         string myAsymKeyPairAlias = "myKeyPair";   // ALWAYS PUT "+ mainUser.username" to the key
         string[] convoList = { "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat", "Empty Chat" };
         User mainUser;
@@ -357,20 +357,35 @@ namespace Chat_UI
             var loginButton = FindViewById<Button>(Resource.Id.loginButtonOnStartScreen);
             loginButton.Click += (sender, e) =>
             {
-                loginScreen();
+                Intent nextActivity = new Intent(this, typeof(MainActivity));
+                nextActivity.PutExtra("next", "convoScreen");
+                //nextActivity.PutExtra("signOut", "true");
+                StartActivity(nextActivity);
+
+                //loginScreen();
             };
 
             var createAccountButton = FindViewById<Button>(Resource.Id.createAccountButton);
             createAccountButton.Click += (sender, e) =>
             {
-                createAccountScreen();
+                Intent nextActivity = new Intent(this, typeof(MainActivity));
+                nextActivity.PutExtra("next", "createAccountScreen");
+                nextActivity.PutExtra("signOut", "true");
+                StartActivity(nextActivity);
+
+                //createAccountScreen();
             }; 
 
             var restoreButton = FindViewById<Button>(Resource.Id.restoreAccountStartButton);
             restoreButton.Click += (sender, e) =>
             {
                 //TODO: Sign in first
-                restoreAccountScreen();
+                Intent nextActivity = new Intent(this, typeof(MainActivity));
+                nextActivity.PutExtra("next", "restoreAccountScreen");
+                nextActivity.PutExtra("signOut", "true");
+                StartActivity(nextActivity);
+
+                //restoreAccountScreen();
             }; 
         }
 
@@ -412,8 +427,6 @@ namespace Chat_UI
                 // GOOGLE SIGN IN CODE
                 // TODO: Get access code
                 // TODO: Remove when get login working
-                access_id = "ya29.ImCvB9pe6Qe6SEaH6VhqFVNMBmHvrEh64LmwORZsIt2VOVHmR3zIPTDjALo4JjNELypF2MK_1XpUgEPisnBPsE1Nzyh0OkTZFkYUubXxn4oli2AkQXj0MsYIAvyYVTHEkt4";
-
                 string username = FindViewById<EditText>(Resource.Id.username).Text;
 
                 createUser(username);
@@ -846,26 +859,44 @@ namespace Chat_UI
 
             base.OnCreate(savedInstanceState);
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
+            var nextScreen = Intent.GetStringExtra("next");
 
-            access_id = Intent.GetStringExtra("token");
 
+            if (nextScreen != null)
+            {
+                serverConnection = new TLSConnector();
+                serverConnection.OnMessageReceived += new EventHandler(signInToServerResponse);
+                serverConnection.OnMessageReceived += new EventHandler(getAllUsersResponse);
+                serverConnection.OnMessageReceived += new EventHandler(getMyChatsResponse);
+                serverConnection.OnMessageReceived += new EventHandler(proccessNewMessages);
+                serverConnection.OnMessageReceived += new EventHandler(proccessNewChat);
+                serverConnection.OnMessageReceived += new EventHandler(proccessCreatedUser);
+                serverConnection.OnMessageReceived += new EventHandler(restoreKeysResponse);
 
-            serverConnection = new TLSConnector();
-            serverConnection.OnMessageReceived += new EventHandler(signInToServerResponse); 
-            serverConnection.OnMessageReceived += new EventHandler(getAllUsersResponse);
-            serverConnection.OnMessageReceived += new EventHandler(getMyChatsResponse);
-            serverConnection.OnMessageReceived += new EventHandler(proccessNewMessages); 
-            serverConnection.OnMessageReceived += new EventHandler(proccessNewChat); 
-            serverConnection.OnMessageReceived += new EventHandler(proccessCreatedUser); 
-            serverConnection.OnMessageReceived += new EventHandler(restoreKeysResponse); 
-
-            // Starts connection to server on new thread
-            ThreadStart connectionThreadRef = new ThreadStart(serverConnection.Connect);
-            Thread connectionThread = new Thread(connectionThreadRef);
-            connectionThread.Start();
+                // Starts connection to server on new thread
+                ThreadStart connectionThreadRef = new ThreadStart(serverConnection.Connect);
+                Thread connectionThread = new Thread(connectionThreadRef);
+                connectionThread.Start();
+            }
 
             // Starts the login screen
             //loginScreen();
+
+            access_id = Intent.GetStringExtra("token");
+            if (nextScreen == "convoScreen")
+            {
+                Thread.Sleep(5000);
+                signInToServer();
+                return;
+            }
+            else if (nextScreen == "createAccountScreen")
+            {
+                createAccountScreen();
+                return;
+            }
+
+
+
             startupScreen();
         }
 
