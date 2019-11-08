@@ -5,7 +5,14 @@ signIn: User needs to send a sign in message to register their connection
             "access_id": "access_id Goes Here"
         }
     }
-    - No response
+    - Responds with user's info:
+    {
+    "signedIn" : {
+        "username": username,
+        "email": email,
+        "id": id,
+        "pubKey": pubKey
+    }
 
 
 createUser: used the for creating user after signing in to google
@@ -40,8 +47,10 @@ createChat: creates a chat with the given name
     - Reponse:
     {
         "chatCreated": {
-            "chatId": chatId, 
-            "chatName": chatName
+            "chatId": "chatId goes here"
+            "chatName": "chatName goes here"
+            "founderId": "founderId goes here"
+            "users": "users goes here"
         }
     }
 
@@ -111,12 +120,12 @@ messagePost: when a user sends a message to a chat
     }
     - Server sends the message to all connected users in the format:
     {
-        "receivedMessage": {
+        "receivedMessage": [{
             "user_id": senderId,
             "chatId": chatId,
             "messageId": messageId,
             "messageContent": message
-        }
+        }]
     }
 
 messageGet: gets messages for a chat from a specific point
@@ -130,12 +139,14 @@ messageGet: gets messages for a chat from a specific point
     }
     - Response:
     {
-        "receivedMessage": {
+        "receivedMessage": [ 
+            {
             "user_id": senderId,
             "chatId": chatId,
             "messageId": messageId,
             "messageContent": message
-        }
+        } .. continues ..
+        ]
     }
 
 getUsers: returns a list of all the data on the users
@@ -164,7 +175,7 @@ getUsers: returns a list of all the data on the users
 
 getChats: returns list of all chats
     {
-        "type": "getUsers",
+        "type": "getChats",
         "content": {
             "access_id": "access_id goes here"
         }
@@ -180,3 +191,26 @@ getChats: returns list of all chats
             }, continued...
         ]
     }
+getMyChats: returns list of all chats requesting user is in
+    {
+        "type": "getMyChats",
+        "content": {
+            "access_id": "access_id goes here"
+        }
+    }
+    - Response:
+    {
+        "myChatsList": [
+            {
+                "chatId": "chatId goes here"
+                "chatName": "chatName goes here"
+                "founderId": "founderId goes here"
+                "users": "users goes here"
+            }, continued...
+        ]
+    }
+
+
+backupKeys
+restoreKeys
+updatePubKey
