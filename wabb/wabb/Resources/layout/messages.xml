@@ -75,7 +75,6 @@
                         android:layout_margin="10dp"
                         android:scrollbars="vertical"
                         android:scrollbarAlwaysDrawVerticalTrack="true"
-                        android:maxLines="20"
                         android:textStyle="bold"
                         android:textColor="#ffbdbdbd"
                         android:background="#ffffffff"
