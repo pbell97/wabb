@@ -1,0 +1,216 @@
+signIn: User needs to send a sign in message to register their connection
+    {
+        "type": "signIn",
+        "content": {
+            "access_id": "access_id Goes Here"
+        }
+    }
+    - Responds with user's info:
+    {
+    "signedIn" : {
+        "username": username,
+        "email": email,
+        "id": id,
+        "pubKey": pubKey
+    }
+
+
+createUser: used the for creating user after signing in to google
+    {
+        "type": "createUser",
+        "content": {
+            "access_id": "access_id Goes Here",
+            "username": "username goes here",
+            "pubKey": "public key goes here"
+        }
+    }
+    - Reponse: 
+    {
+        "userCreated": {
+            "access_id": "access_id goes here", 
+            "username": "username goes here", 
+            "user_id": "user_id goes here",
+            "email": "email",
+            "pubKey": pubKey
+        }
+    }
+
+
+createChat: creates a chat with the given name
+    {
+        "type": "createChat",
+        "content": {
+            "access_id": "access_id Goes Here",
+            "chatName": "chatName goes here"
+        }
+    }
+    - Reponse:
+    {
+        "chatCreated": {
+            "chatId": "chatId goes here"
+            "chatName": "chatName goes here"
+            "founderId": "founderId goes here"
+            "users": "users goes here"
+        }
+    }
+
+listChats: lists all chats in the system
+    {
+        "type": "listChats",
+        "content": {
+            "access_id": "access_id Goes Here"
+        }
+    }
+    - Response:
+    {
+        "chats": [arrayOfChatDetails - Unknown format currently]
+    }
+
+
+joinChat: requests to join a specific chat
+    {
+        "type": "joinChat",
+        "content": {
+            "access_id": "access_id Goes Here",
+            "pubKey": "joining users's public key",
+            "chatId": "chatId of chat requesting to join"
+        }
+    }
+    - No response immediately, but after acceptance:
+    {
+        "acceptedToChat": {
+            "symKey": symKey, 
+            "chatId": chatId,
+            "chatName": chatName,
+            "users": users
+        }
+    }
+
+allowUserToJoinChat: server sends request to founder to allow a user to join their chat
+    {
+        "requestToJoinChat": {
+            "joinerId": joinerId, 
+            "pubKey": pubKey, 
+            "chatId": chatId
+        }
+    }
+    - Founder replies to server with:
+    {
+        "type": "allowUserToJoinChat",
+        "content": {
+            "access_id": "access_id Goes Here",
+            "symKey": "chat's symmetric key",
+            "chatId": "chatId of chat requesting to join",
+            "joinerId": "id of user joining chat"
+        }
+    }
+
+messagePost: when a user sends a message to a chat
+    {
+        "type": "messagePost",
+        "content": {
+            "access_id": "access_id Goes Here",
+            "chatId": "chatId",
+            "messageContent": "encrypted Message here"
+        }
+    }
+    - Response:
+    {
+        "response": "Message posted successfully"
+    }
+    - Server sends the message to all connected users in the format:
+    {
+        "receivedMessage": [{
+            "user_id": senderId,
+            "chatId": chatId,
+            "messageId": messageId,
+            "messageContent": message
+        }]
+    }
+
+messageGet: gets messages for a chat from a specific point
+    {
+        "type": "messageGet",
+        "content": {
+            "access_id": "access_id Goes Here",
+            "chatId": "chatId",
+            "messageId": "get messages after this one...optional"
+        }
+    }
+    - Response:
+    {
+        "receivedMessage": [ 
+            {
+            "user_id": senderId,
+            "chatId": chatId,
+            "messageId": messageId,
+            "messageContent": message
+        } .. continues ..
+        ]
+    }
+
+getUsers: returns a list of all the data on the users
+    {
+        "type": "getUsers",
+        "content": {
+            "access_id": "access_id goes here"
+        }
+    }
+    - Response:
+    {
+        "usersList": [
+            { 
+                username: 'username',
+                email: 'email',
+                id: 'id',
+                pubKey: 'pubKey'
+            }, {
+                username: 'username',
+                email: 'email',
+                id: 'id',
+                pubKey: 'pubKey'
+            }
+        ]
+    }
+
+getChats: returns list of all chats
+    {
+        "type": "getChats",
+        "content": {
+            "access_id": "access_id goes here"
+        }
+    }
+    - Response:
+    {
+        "chatsList": [
+            {
+                "chatId": "chatId goes here"
+                "chatName": "chatName goes here"
+                "founderId": "founderId goes here"
+                "users": "users goes here"
+            }, continued...
+        ]
+    }
+getMyChats: returns list of all chats requesting user is in
+    {
+        "type": "getMyChats",
+        "content": {
+            "access_id": "access_id goes here"
+        }
+    }
+    - Response:
+    {
+        "myChatsList": [
+            {
+                "chatId": "chatId goes here"
+                "chatName": "chatName goes here"
+                "founderId": "founderId goes here"
+                "users": "users goes here"
+            }, continued...
+        ]
+    }
+
+
+backupKeys
+restoreKeys
+updatePubKey

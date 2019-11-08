@@ -1,0 +1,67 @@
+{
+  "format": 1,
+  "restore": {
+    "/Users/patrickbell/Desktop/classes/infoAndCompSecurity/wabb/webserver/tlsTesting/tlsTesting.csproj": {}
+  },
+  "projects": {
+    "/Users/patrickbell/Desktop/classes/infoAndCompSecurity/wabb/webserver/tlsTesting/tlsTesting.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Users/patrickbell/Desktop/classes/infoAndCompSecurity/wabb/webserver/tlsTesting/tlsTesting.csproj",
+        "projectName": "tlsTesting",
+        "projectPath": "/Users/patrickbell/Desktop/classes/infoAndCompSecurity/wabb/webserver/tlsTesting/tlsTesting.csproj",
+        "packagesPath": "/Users/patrickbell/.nuget/packages/",
+        "outputPath": "/Users/patrickbell/Desktop/classes/infoAndCompSecurity/wabb/webserver/tlsTesting/obj/",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "/usr/local/share/dotnet/sdk/NuGetFallbackFolder"
+        ],
+        "configFilePaths": [
+          "/Users/patrickbell/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "netcoreapp3.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netcoreapp3.0": {
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "netcoreapp3.0": {
+          "dependencies": {
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[12.0.2, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/3.0.100/RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

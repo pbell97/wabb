@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <LinearLayout
+        android:orientation="vertical"
+        android:minWidth="25px"
+        android:minHeight="25px"
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent"
+        android:id="@+id/linearLayout1"
+        android:layout_gravity="bottom"
+        android:background="#ffffffff">
+        <LinearLayout
+            android:orientation="vertical"
+            android:minWidth="25px"
+            android:minHeight="25px"
+            android:layout_width="match_parent"
+            android:layout_height="199.0dp"
+            android:id="@+id/linearLayout2">
+            <TextView
+                android:text="Welcome to What's App (But Better)"
+                android:layout_width="fill_parent"
+                android:layout_height="124.0dp"
+                android:id="@+id/textView1"
+                android:textSize="30dp"
+                android:gravity="center"
+                android:layout_marginTop="77.5dp"
+                android:textStyle="bold"
+                android:textColor="#ffbdbdbd"/>
+        </LinearLayout>
+        <Button
+            android:text="Login"
+            android:layout_width="fill_parent"
+            android:layout_height="77.0dp"
+            android:id="@+id/loginButtonOnStartScreen"
+            android:background="#ff448aff"
+            android:textSize="30dp"
+            android:textStyle="bold"
+            android:textColor="#ff1976d2"
+            android:layout_gravity="center"
+            android:layout_marginHorizontal="10dp"
+            android:backgroundTint="#ff448aff"
+            android:layout_marginTop="10dp" />
+        <Button
+            android:text="Create Account"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/createAccountButton"
+            android:background="#ff40c4ff"
+            android:textSize="20dp"
+            android:textStyle="bold"
+            android:textColor="#ff0288d1"
+            android:layout_marginHorizontal="10dp" />
+        <Button
+            android:text="Restore Account"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/restoreAccountStartButton"
+            android:background="#ff18ffff"
+            android:textSize="20dp"
+            android:textStyle="bold"
+            android:textColor="#ff00bcd4"
+            android:layout_marginHorizontal="10dp"
+            android:layout_gravity="bottom"
+            android:foregroundTint="#ff000000"  />
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,120 @@
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:minWidth="25px"
+    android:minHeight="25px"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/linearLayout1"
+    android:background="#ffffffff">
+    <ScrollView
+        android:minWidth="25px"
+        android:minHeight="25px"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/scrollView1"
+        android:background="#ffffffff">
+        <LinearLayout
+            android:orientation="vertical"
+            android:minWidth="25px"
+            android:minHeight="25px"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/linearLayout3">
+            <LinearLayout
+                android:orientation="horizontal"
+                android:minWidth="25px"
+                android:minHeight="25px"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/linearLayout2"
+                android:background="#ffffffff">
+                <TextView
+                    android:text="Chat Name"
+                    android:layout_width="303.5dp"
+                    android:layout_height="fill_parent"
+                    android:id="@+id/chatNameTitle"
+                    android:textStyle="bold"
+                    android:textSize="35dp"
+                    android:textColor="#ffbdbdbd"
+                    android:layout_marginLeft="9.5dp"
+                    android:gravity="left|bottom" />
+                <Button
+                    android:text="+"
+                    android:layout_width="76.5dp"
+                    android:layout_height="49.5dp"
+                    android:id="@+id/inviteUsers"
+                    android:hint="Invite Users"
+                    android:gravity="center"
+                    android:layout_gravity="right"
+                    android:layout_marginLeft="0.5dp"
+                    android:background="#ff448aff"
+                    android:textSize="25dp"
+                    android:textColor="#ff1565c0" />
+            </LinearLayout>
+            <ScrollView
+                android:minWidth="25px"
+                android:minHeight="25px"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/scrollView2">
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:minWidth="25px"
+                    android:minHeight="25px"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/linearLayout4">
+                    <TextView
+                        android:text="Message Author\n\tMessage"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/messageDisplay"
+                        android:layout_margin="10dp"
+                        android:scrollbars="vertical"
+                        android:scrollbarAlwaysDrawVerticalTrack="true"
+                        android:textStyle="bold"
+                        android:textColor="#ffbdbdbd"
+                        android:background="#ffffffff"
+                        android:fadingEdge="horizontal|vertical"
+                        android:fadingEdgeLength="5dp"
+                        android:padding="10dp" />
+                </LinearLayout>
+            </ScrollView>
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/newMessage"
+                android:layout_gravity="end"
+                android:layout_marginHorizontal="10dp"
+                android:hint="New Message"
+                android:textStyle="bold"
+                android:textColor="#ffbdbdbd" />
+            <Button
+                android:text="SEND"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/sendButton"
+                android:layout_gravity="end|top"
+                android:background="#ff448aff"
+                android:textStyle="bold"
+                android:textSize="20dp"
+                android:textColor="#ff1565c0"
+                android:layout_marginHorizontal="10dp"
+                android:layout_marginTop="0.0dp" />
+            <Button
+                android:text="Back"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/backButton"
+                android:layout_gravity="end|center|top"
+                android:textStyle="bold"
+                android:background="#ff40c4ff"
+                android:textSize="20dp"
+                android:textColor="#ff0288d1"
+                android:layout_marginHorizontal="10dp" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>
